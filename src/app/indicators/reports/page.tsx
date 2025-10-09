@@ -1,11 +1,6 @@
 export default function IndicatorReportsPage() {
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Indicator Reports</h1>
-        <p className="text-gray-600">Generate and export detailed reports</p>
-      </div>
-
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Available Reports</h2>
         <div className="space-y-3">

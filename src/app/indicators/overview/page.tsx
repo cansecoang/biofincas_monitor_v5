@@ -1,11 +1,6 @@
 export default function IndicatorOverviewPage() {
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Indicators Overview</h1>
-        <p className="text-gray-600">Key performance indicators and metrics dashboard</p>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Total Indicators</h3>

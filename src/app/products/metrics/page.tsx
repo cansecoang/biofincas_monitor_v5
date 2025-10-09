@@ -8,11 +8,6 @@ export default function ProductMetricsPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Products Metrics</h1>
-        <p className="text-gray-600">Key performance indicators and analytics</p>
-      </div>
-
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {metrics.map((metric, index) => (

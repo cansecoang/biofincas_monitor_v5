@@ -10,11 +10,6 @@ export default function ProductListPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Products List</h1>
-        <p className="text-gray-600">Manage and view all your loan products</p>
-      </div>
-
       {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">

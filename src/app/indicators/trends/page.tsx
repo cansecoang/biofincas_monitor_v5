@@ -1,11 +1,6 @@
 export default function IndicatorTrendsPage() {
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Indicator Trends</h1>
-        <p className="text-gray-600">Historical trends and forecasting</p>
-      </div>
-
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Trend Analysis</h2>
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">

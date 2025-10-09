@@ -1,11 +1,6 @@
 export default function ProductGanttPage() {
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Products Gantt Chart</h1>
-        <p className="text-gray-600">Visualize product timelines and milestones</p>
-      </div>
-
       <div className="bg-white rounded-lg shadow p-8">
         {/* Gantt Chart Placeholder */}
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
