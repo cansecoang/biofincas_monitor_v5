@@ -26,9 +26,8 @@ export default function TopBar() {
             />
           </div>
           <h1 className="text-xl font-semibold text-gray-900">Biofincas</h1>
-        </div>
 
-        {/* Tabs Section - Rendered dynamically */}
+          {/* Tabs Section - Rendered dynamically */}
       {tabs.length > 0 && (
         <div className="border-t border-gray-100">
           <div className="flex items-center gap-1 px-6">
@@ -57,6 +56,10 @@ export default function TopBar() {
           </div>
         </div>
       )}
+
+        </div>
+
+      
 
         {/* Right Side: Search, Notifications, User */}
         <div className="flex items-center gap-4">
