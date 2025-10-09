@@ -11,8 +11,8 @@ export default function Home() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Total Products</h3>
             <span className="text-indigo-600 text-2xl">📦</span>
@@ -21,7 +21,7 @@ export default function Home() {
           <p className="text-sm text-green-600 mt-2">+12% from last month</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Active Loans</h3>
             <span className="text-green-600 text-2xl">✓</span>
@@ -30,7 +30,7 @@ export default function Home() {
           <p className="text-sm text-green-600 mt-2">+8% from last month</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Total Value</h3>
             <span className="text-yellow-600 text-2xl">💰</span>
@@ -39,7 +39,7 @@ export default function Home() {
           <p className="text-sm text-green-600 mt-2">+15% from last month</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-600">Pending</h3>
             <span className="text-orange-600 text-2xl">⏳</span>
@@ -50,12 +50,12 @@ export default function Home() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-4">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <a
             href="/products/list"
-            className="p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition-all group"
+            className="p-4 border-2 border-gray-200 rounded-2xl hover:border-indigo-600 hover:bg-indigo-50 transition-all group"
           >
             <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 mb-1">
               View Products
@@ -65,7 +65,7 @@ export default function Home() {
 
           <a
             href="/products/gantt"
-            className="p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition-all group"
+            className="p-4 border-2 border-gray-200 rounded-2xl hover:border-indigo-600 hover:bg-indigo-50 transition-all group"
           >
             <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 mb-1">
               View Timeline
@@ -75,7 +75,7 @@ export default function Home() {
 
           <a
             href="/products/metrics"
-            className="p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition-all group"
+            className="p-4 border-2 border-gray-200 rounded-2xl hover:border-indigo-600 hover:bg-indigo-50 transition-all group"
           >
             <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 mb-1">
               View Analytics
@@ -86,7 +86,7 @@ export default function Home() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
         <div className="space-y-4">
           <div className="flex items-start gap-4 pb-4 border-b border-gray-100">

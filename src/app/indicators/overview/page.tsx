@@ -1,30 +1,30 @@
 export default function IndicatorOverviewPage() {
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 mb-4 gap-4">
+        <div className="bg-white rounded-2xl shadow p-6">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Total Indicators</h3>
           <div className="text-3xl font-bold text-gray-900">24</div>
           <p className="text-sm text-green-600 mt-2">+4 this month</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-2xl shadow p-6">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Active Tracking</h3>
           <div className="text-3xl font-bold text-gray-900">18</div>
           <p className="text-sm text-blue-600 mt-2">In monitoring</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-2xl shadow p-6">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Target Achievement</h3>
           <div className="text-3xl font-bold text-gray-900">87%</div>
           <p className="text-sm text-green-600 mt-2">+5% this quarter</p>
         </div>
       </div>
 
-      <div className="mt-8 bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-2xl shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Key Indicators</h2>
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-2xl">
             <div>
               <h3 className="font-medium text-gray-900">Production Efficiency</h3>
               <p className="text-sm text-gray-500">Target: 85% | Current: 92%</p>
@@ -33,7 +33,7 @@ export default function IndicatorOverviewPage() {
               Above Target
             </span>
           </div>
-          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-2xl">
             <div>
               <h3 className="font-medium text-gray-900">Quality Score</h3>
               <p className="text-sm text-gray-500">Target: 90% | Current: 88%</p>
@@ -42,7 +42,7 @@ export default function IndicatorOverviewPage() {
               Near Target
             </span>
           </div>
-          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-2xl">
             <div>
               <h3 className="font-medium text-gray-900">Customer Satisfaction</h3>
               <p className="text-sm text-gray-500">Target: 95% | Current: 97%</p>

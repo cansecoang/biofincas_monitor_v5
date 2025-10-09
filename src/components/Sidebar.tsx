@@ -56,14 +56,14 @@ export default function Sidebar() {
             <Link
                 href="/"
                 className={`
-                w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
+                w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200
                 ${isActive('/') && pathname === '/' 
                     ? 'bg-slate-800 text-white shadow-md' 
                     : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
                 }
                 `}
             >
-                <LayoutGrid size={20} />
+                <LayoutGrid size={18} />
             </Link>
 
             {/* Navigation Items - Centered */}
@@ -72,7 +72,7 @@ export default function Sidebar() {
                 key={item.id}
                 href={item.href}
                 className={`
-                w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
+                w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200
                 ${isActive(item.href) 
                     ? 'bg-slate-800 text-white shadow-md' 
                     : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
@@ -89,10 +89,10 @@ export default function Sidebar() {
 
       {/* Add Button at Bottom */}
       <button
-        className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+        className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
         title="Add New"
       >
-        <Plus size={20} />
+        <Plus size={18} />
       </button>
     </aside>
   );

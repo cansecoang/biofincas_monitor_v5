@@ -9,9 +9,9 @@ export default function ProductMetricsPage() {
   return (
     <div>
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {metrics.map((metric, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
+          <div key={index} className="bg-white rounded-2xl shadow p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-600">{metric.label}</h3>
               <span className={`text-xs font-semibold ${
@@ -26,10 +26,10 @@ export default function ProductMetricsPage() {
       </div>
 
       {/* Charts Placeholder */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Products by Type</h3>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+          <div className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center">
             <div className="text-gray-400 mb-2">
               <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
@@ -40,9 +40,9 @@ export default function ProductMetricsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-2xl shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Trends</h3>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+          <div className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center">
             <div className="text-gray-400 mb-2">
               <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
