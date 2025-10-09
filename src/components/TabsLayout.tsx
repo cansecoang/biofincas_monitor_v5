@@ -29,7 +29,7 @@ export default function TabsLayout({ tabs, basePath, children }: TabsLayoutProps
   }, [tabs, basePath, setTabs]);
 
   return (
-    <div className="p-6">
+    <div className="px-3 py-6">
       {children}
     </div>
   );

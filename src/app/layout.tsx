@@ -23,14 +23,14 @@ export default function RootLayout({
         <TabsProvider>
           {/* Sidebar - Navigation Vertical Principal (NVP) */}
           <Sidebar />
-          
+
           {/* Main Content Area */}
-          <div className="ml-20">
+          <div className="ml-[60px]">
             {/* TopBar - Site ID and User Info */}
             <TopBar />
             
             {/* Content Area - padding top dinámico para TopBar + Tabs */}
-            <main className="pt-24 min-h-screen bg-gray-50">
+            <main className="pt-16 min-h-screen bg-gray-50">
               {children}
             </main>
           </div>

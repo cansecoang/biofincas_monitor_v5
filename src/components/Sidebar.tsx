@@ -46,40 +46,46 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-20 bg-gray-50 flex flex-col items-center py-6 z-40">
-      {/* Logo/Dashboard Button at Top */}
-      <Link
-        href="/"
-        className={`
-          w-10 h-10 rounded-full mb-8 flex items-center justify-center transition-all duration-200
-          ${isActive('/') && pathname === '/' 
-            ? 'bg-slate-800 text-white shadow-md' 
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }
-        `}
-      >
-        <LayoutGrid size={20} />
-      </Link>
+    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-[60px] bg-gray-50 flex flex-col items-center py-6 z-40">
+      
+      {/* Spacer to push navigation to center */}
+      <div className="flex-[0.7]"></div>
+        <nav className="flex flex-col gap-3 items-center">
+            
+            {/* Logo/Dashboard Button at Top */}
+            <Link
+                href="/"
+                className={`
+                w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
+                ${isActive('/') && pathname === '/' 
+                    ? 'bg-slate-800 text-white shadow-md' 
+                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
+                }
+                `}
+            >
+                <LayoutGrid size={20} />
+            </Link>
 
-      {/* Navigation Items */}
-      <nav className="flex-1 flex flex-col gap-3 w-full px-4">
-        {navItems.slice(1).map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            className={`
-              w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
-              ${isActive(item.href) 
-                ? 'bg-slate-800 text-white shadow-md' 
-                : 'bg-transparent text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-              }
-            `}
-            title={item.label}
-          >
-            {item.icon}
-          </Link>
-        ))}
-      </nav>
+            {/* Navigation Items - Centered */}
+            {navItems.slice(1).map((item) => (
+            <Link
+                key={item.id}
+                href={item.href}
+                className={`
+                w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
+                ${isActive(item.href) 
+                    ? 'bg-slate-800 text-white shadow-md' 
+                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
+                }
+                `}
+                title={item.label}
+            >
+                {item.icon}
+            </Link>
+            ))}
+        </nav>
+      {/* Spacer to push add button to bottom */}
+      <div className="flex-[1.3]"></div>
 
       {/* Add Button at Bottom */}
       <button
