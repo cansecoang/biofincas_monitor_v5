@@ -1,15 +1,30 @@
+'use client';
+
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+
 export default function Home() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmitProduct = (data: any) => {
+    console.log('Producto creado:', data);
+    // Aquí puedes agregar la lógica para enviar a la API
+    alert('¡Producto creado exitosamente!');
+  };
+
   return (
     <div className="px-3 py-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Welcome to Sharia
-        </h1>
-        <p className="text-gray-600">
-          Loan Management Dashboard
-        </p>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Welcome to Biofincas
+          </h1>
+          <p className="text-gray-600">
+            Loan Management Dashboard
+          </p>
+        </div>
       </div>
-
+      
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
