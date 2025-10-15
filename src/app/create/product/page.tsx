@@ -32,9 +32,11 @@ export default function CreateProductPage() {
   };
 
   return (
-    <ProductStepWizard 
-      onComplete={handleComplete}
-      onCancel={handleCancel}
-    />
+    <div className="pr-4">
+      <ProductStepWizard 
+        onComplete={handleComplete}
+        onCancel={handleCancel}
+      />
+    </div>
   );
 }

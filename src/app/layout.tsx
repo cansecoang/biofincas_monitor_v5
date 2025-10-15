@@ -28,7 +28,9 @@ export default function RootLayout({
             
             {/* Content Area - padding top dinámico para TopBar + Tabs */}
             <main className="pt-16 min-h-screen bg-gray-50">
-              {children}
+              <div className="max-w-[calc(100vw-60px)] overflow-x-hidden">
+                {children}
+              </div>
             </main>
           </div>
         </TabsProvider>

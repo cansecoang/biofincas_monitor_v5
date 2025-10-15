@@ -90,9 +90,8 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
   const handleNext = () => {
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1);
-    } else {
-      onComplete(formData);
     }
+    // No hacer nada en el último step (Create Product)
   };
 
   const handleBack = () => {
@@ -120,9 +119,9 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
   const progressPercentage = (currentStep / STEPS.length) * 100;
 
   return (
-    <div className="bg-white rounded-2xl shadow overflow-hidden p-6 flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
+    <div className="w-full max-w-full bg-white rounded-2xl shadow overflow-hidden p-6 flex flex-col" style={{ height: 'calc(100vh - 100px)' }}>
       {/* Header */}
-      <div className="mb-4 flex-shrink-0">
+      <div className="mb-4 flex-shrink-0">{/* Header */}
         <h2 className="text-2xl font-bold text-gray-900 mb-1">
           {STEPS[currentStep - 1].title}
           
@@ -146,7 +145,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
       <div className="flex-1 overflow-y-auto mb-2">
         {/* Step 1: Location and Context */}
         {currentStep === 1 && (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 px-1">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Output
@@ -216,7 +215,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
 
         {/* Step 2: General Information */}
         {currentStep === 2 && (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 px-1">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Product Name
@@ -272,7 +271,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
 
         {/* Step 3: Team */}
         {currentStep === 3 && (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 px-1">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Responsable
@@ -308,7 +307,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
         {/* Step 4: Indicators */}
         {currentStep === 4 && (
           <div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 px-1">
               {INDICATORS.map((indicator) => (
                   <div
                     key={indicator.id}
@@ -341,7 +340,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
 
         {/* Step 5: Resume */}
         {currentStep === 5 && (
-          <div className="space-y-6">
+          <div className="space-y-6 px-1">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Location and Context
@@ -349,19 +348,19 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <div className="space-y-3">
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Output</span>
-                  <span className="text-sm text-gray-900">{formData.output || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.output || '—'}</span>
                 </div>
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Workpackage</span>
-                  <span className="text-sm text-gray-900">{formData.workpackage || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.workpackage || '—'}</span>
                 </div>
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Country</span>
-                  <span className="text-sm text-gray-900">{formData.country || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.country || '—'}</span>
                 </div>
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Product Owner</span>
-                  <span className="text-sm text-gray-900">{formData.productOwner || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.productOwner || '—'}</span>
                 </div>
               </div>
             </div>
@@ -373,20 +372,21 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <div className="space-y-3">
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Product Name</span>
-                  <span className="text-sm text-gray-900">{formData.productName || '—'}</span>
-                </div>
-                <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Deliverable (s)</span>
-                  <span className="text-sm text-gray-900">{formData.deliverable || '—'}</span>
-                </div>
-                <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Delivery Date</span>
-                  <span className="text-sm text-gray-900">{formData.deliveryDate || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.productName || '—'}</span>
                 </div>
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Product Objective</span>
-                  <span className="text-sm text-gray-900">{formData.productObjective || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.productObjective || '—'}</span>
                 </div>
+                <div className="flex">
+                  <span className="w-40 text-sm font-medium text-gray-600">Deliverable (s)</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.deliverable || '—'}</span>
+                </div>
+                <div className="flex">
+                  <span className="w-40 text-sm font-medium text-gray-600">Delivery Date</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.deliveryDate || '—'}</span>
+                </div>
+                
               </div>
             </div>
 
@@ -397,11 +397,11 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <div className="space-y-3">
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Responsable</span>
-                  <span className="text-sm text-gray-900">{formData.responsable || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.responsable || '—'}</span>
                 </div>
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Other Organizations</span>
-                  <span className="text-sm text-gray-900">{formData.otherOrganizations || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">{formData.otherOrganizations || '—'}</span>
                 </div>
               </div>
             </div>
@@ -450,7 +450,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
           className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition-colors"
         >
           {currentStep === STEPS.length ? 'Create Product' : 'Next'}
-          {currentStep < STEPS.length && <ChevronRight size={20} />}
+          {currentStep < STEPS.length}
         </button>
       </div>
     </div>
