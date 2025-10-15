@@ -88,12 +88,13 @@ export default function Sidebar() {
       <div className="flex-[1.3]"></div>
 
       {/* Add Button at Bottom */}
-      <button
+      <Link
+        href="/create/product"
         className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-        title="Add New"
+        title="Create New Product"
       >
         <Plus size={18} />
-      </button>
+      </Link>
     </aside>
   );
 }
