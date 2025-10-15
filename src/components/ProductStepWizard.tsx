@@ -119,7 +119,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
   const progressPercentage = (currentStep / STEPS.length) * 100;
 
   return (
-    <div className="w-full max-w-full bg-white rounded-2xl shadow overflow-hidden p-6 flex flex-col" style={{ height: 'calc(100vh - 100px)' }}>
+    <div className="w-full max-w-full bg-white rounded-2xl shadow overflow-hidden p-6 flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
       {/* Header */}
       <div className="mb-4 flex-shrink-0">{/* Header */}
         <h2 className="text-2xl font-bold text-gray-900 mb-1">
@@ -127,13 +127,13 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
           
         </h2>
         <h3 className="text-xl text-gray-500">
-          Create New Product
+        New Product
         </h3>
       </div>
 
       {/* Progress Bar */}
       <div className="mb-6 flex-shrink-0">
-        <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-400 transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
