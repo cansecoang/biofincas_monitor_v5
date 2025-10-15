@@ -35,7 +35,7 @@ const STEPS = [
   { id: 2, title: 'General Information', subtitle: 'View your income in a certain period of time' },
   { id: 3, title: 'Team', subtitle: 'View your income in a certain period of time' },
   { id: 4, title: 'Indicators', subtitle: 'View your income in a certain period of time' },
-  { id: 5, title: 'Resume', subtitle: 'View your income in a certain period of time' },
+  { id: 5, title: 'Summary', subtitle: 'View your income in a certain period of time' },
 ];
 
 const INDICATORS = [
@@ -434,7 +434,12 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
         <button
           type="button"
           onClick={handleBack}
-          className="px-8 py-3 border border-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition-colors"
+          disabled={currentStep === 1}
+          className={`px-8 py-3 border border-gray-300 text-gray-700 rounded-full font-medium transition-colors ${
+            currentStep === 1 
+              ? 'opacity-50 cursor-default' 
+              : 'hover:bg-gray-50'
+          }`}
         >
           Back
         </button>
