@@ -33,7 +33,7 @@ export default function TopBar() {
         {/* Site ID / Brand */}
         <div className="flex items-center gap-3">
 
-          <div className="flex items-center ">
+          <Link href="/" className="flex items-center cursor-pointer hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 relative">
               <Image 
                 src="/biofincas.png" 
@@ -44,7 +44,7 @@ export default function TopBar() {
               />
             </div>
             <h1 className="text-s font-semibold text-gray-900">Biofincas</h1>
-          </div>
+          </Link>
 
           {/* Tabs Section - Rendered dynamically */}
       {tabs.length > 0 && (

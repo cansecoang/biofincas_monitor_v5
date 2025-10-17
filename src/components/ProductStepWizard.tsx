@@ -135,7 +135,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
       <div className="mb-6 flex-shrink-0">
         <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-400 transition-all duration-300"
+            className="h-full bg-gradient-to-r from-blue-500 via-blue-500 to-cyan-400 transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
@@ -153,7 +153,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <select
                 value={formData.output}
                 onChange={(e) => updateFormData('output', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >
                 <option value="">Select output</option>
                 <option value="output1">Output 1 - Biodiversity Assessment</option>
@@ -170,7 +170,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <select
                 value={formData.workpackage}
                 onChange={(e) => updateFormData('workpackage', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >
                 <option value="">Select workpackage</option>
                 <option value="wp1">WP1 - Research and Development</option>
@@ -187,7 +187,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <select
                 value={formData.country}
                 onChange={(e) => updateFormData('country', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >
                 <option value="">Select country</option>
                 <option value="mexico">Mexico</option>
@@ -203,7 +203,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <select
                 value={formData.productOwner}
                 onChange={(e) => updateFormData('productOwner', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >
                 <option value="">Select product owner</option>
                 <option value="nuup">Nuup</option>
@@ -225,7 +225,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
                 value={formData.productName}
                 onChange={(e) => updateFormData('productName', e.target.value)}
                 placeholder="Product Name"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -238,7 +238,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
                 value={formData.productObjective}
                 onChange={(e) => updateFormData('productObjective', e.target.value)}
                 placeholder="Product Objective"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -251,7 +251,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
                 value={formData.deliverable}
                 onChange={(e) => updateFormData('deliverable', e.target.value)}
                 placeholder="Deliverable"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -263,7 +263,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
                 type="date"
                 value={formData.deliveryDate}
                 onChange={(e) => updateFormData('deliveryDate', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -279,7 +279,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <select
                 value={formData.responsable}
                 onChange={(e) => updateFormData('responsable', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >
                 <option value="">Select responsable</option>
                 <option value="oro-verde">Oro Verde</option>
@@ -294,7 +294,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <select
                 value={formData.otherOrganizations}
                 onChange={(e) => updateFormData('otherOrganizations', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >
                 <option value="">Select organizations</option>
                 <option value="nuup">Nuup</option>
@@ -447,7 +447,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
         <button
           type="button"
           onClick={handleNext}
-          className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 px-8 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 transition-colors"
         >
           {currentStep === STEPS.length ? 'Create Product' : 'Next'}
           {currentStep < STEPS.length}

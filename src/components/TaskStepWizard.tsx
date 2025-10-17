@@ -97,7 +97,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
       <div className="mb-6 flex-shrink-0">
         <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-400 transition-all duration-300"
+            className="h-full bg-gradient-to-r from-green-600 via-green-600 to-lime-400 transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
@@ -115,7 +115,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
               <select
                 value={formData.assignToProduct}
                 onChange={(e) => updateFormData('assignToProduct', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 appearance-none"
               >
                 <option value="">Product Name</option>
                 <option value="product1">Línea base de biodiversidad en campo — México</option>
@@ -134,7 +134,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                   value={formData.taskName}
                   onChange={(e) => updateFormData('taskName', e.target.value)}
                   placeholder="Task Name"
-                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
                 />
               </div>
 
@@ -147,7 +147,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                   value={formData.taskDescription}
                   onChange={(e) => updateFormData('taskDescription', e.target.value)}
                   placeholder="Task Description"
-                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
                 />
               </div>
             </div>
@@ -164,7 +164,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
               <select
                 value={formData.assignedTo}
                 onChange={(e) => updateFormData('assignedTo', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 appearance-none"
               >
                 <option value="">Organization Name</option>
                 <option value="oro-verde">Oro Verde</option>
@@ -180,7 +180,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 <select
                   value={formData.phase}
                   onChange={(e) => updateFormData('phase', e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 appearance-none"
                 >
                   <option value="">Planning</option>
                   <option value="planning">Planning</option>
@@ -197,7 +197,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 <select
                   value={formData.status}
                   onChange={(e) => updateFormData('status', e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 appearance-none"
                 >
                   <option value="">Not Started</option>
                   <option value="not-started">Not Started</option>
@@ -218,11 +218,10 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 Start Date
               </label>
               <input
-                type="text"
+                type="date"
                 value={formData.startDate}
                 onChange={(e) => updateFormData('startDate', e.target.value)}
-                placeholder="dd/mm/yyyy"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
 
@@ -231,11 +230,10 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 End Date
               </label>
               <input
-                type="text"
+                type="date"
                 value={formData.endDate}
                 onChange={(e) => updateFormData('endDate', e.target.value)}
-                placeholder="dd/mm/yyyy"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
 
@@ -244,11 +242,10 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 Actual Start Date
               </label>
               <input
-                type="text"
+                type="date"
                 value={formData.actualStartDate}
                 onChange={(e) => updateFormData('actualStartDate', e.target.value)}
-                placeholder="dd/mm/yyyy"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
 
@@ -257,11 +254,10 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 Actual End Date
               </label>
               <input
-                type="text"
+                type="date"
                 value={formData.actualEndDate}
                 onChange={(e) => updateFormData('actualEndDate', e.target.value)}
-                placeholder="dd/mm/yyyy"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
           </div>
@@ -275,11 +271,10 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 Check-in Oro Verde
               </label>
               <input
-                type="text"
+                type="datetime-local"
                 value={formData.checkInOroVerde}
                 onChange={(e) => updateFormData('checkInOroVerde', e.target.value)}
-                placeholder="dd/mm/yyyy"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
 
@@ -288,11 +283,10 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 Check-in User
               </label>
               <input
-                type="text"
+                type="datetime-local"
                 value={formData.checkInUser}
                 onChange={(e) => updateFormData('checkInUser', e.target.value)}
-                placeholder="dd/mm/yyyy"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
 
@@ -301,11 +295,10 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 Check-in Communication
               </label>
               <input
-                type="text"
+                type="datetime-local"
                 value={formData.checkInCommunication}
                 onChange={(e) => updateFormData('checkInCommunication', e.target.value)}
-                placeholder="dd/mm/yyyy"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
 
@@ -314,11 +307,10 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 Check-in Gender
               </label>
               <input
-                type="text"
+                type="datetime-local"
                 value={formData.checkInGender}
                 onChange={(e) => updateFormData('checkInGender', e.target.value)}
-                placeholder="dd/mm/yyyy"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
           </div>
@@ -438,7 +430,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
         <button
           type="button"
           onClick={handleNext}
-          className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-colors"
         >
           {currentStep === STEPS.length ? 'Create Task' : 'Next'}
           {currentStep < STEPS.length && <ChevronRight size={20} />}
