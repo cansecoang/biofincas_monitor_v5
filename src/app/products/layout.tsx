@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import TabsLayout from '@/components/TabsLayout';
 
 const productTabs = [
@@ -41,9 +42,18 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
 
         {/* Dropdowns Section */}
         <div className="flex gap-3 pr-6">
+          {/*Botón agregar tarea */}
+          <div className="relative">
+            <Link 
+              href="/create/task"
+              className="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-colors inline-block"
+            >
+              + Add Task
+            </Link>
+          </div>
           {/* Workpackage Dropdown */}
           <div className="relative">
-            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer">
+            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer">
               <option>Workpackage</option>
               <option>Package 1</option>
               <option>Package 2</option>
@@ -58,7 +68,7 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
 
           {/* Output Dropdown */}
           <div className="relative">
-            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer">
+            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer">
               <option>Output</option>
               <option>Output 1</option>
               <option>Output 2</option>
@@ -73,7 +83,7 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
 
           {/* Product Dropdown */}
           <div className="relative">
-            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer">
+            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer">
               <option>Product</option>
               <option>Product 1</option>
               <option>Product 2</option>
