@@ -95,8 +95,14 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col">
+    <div 
+      className="fixed inset-0  z-[200] flex items-start justify-end pt-20 p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[calc(100vh-6rem)] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4">
           <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
@@ -104,7 +110,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <X size={24} className="text-gray-600" />
+            <X size={24} className="text-gray-300" />
           </button>
         </div>
 
