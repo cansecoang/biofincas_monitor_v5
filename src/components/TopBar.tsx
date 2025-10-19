@@ -6,11 +6,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTabsContext } from '@/contexts/TabsContext';
 import { useState, useRef, useEffect } from 'react';
+import NotificationsModal from '@/components/NotificationsModal';
 
 export default function TopBar() {
   const pathname = usePathname();
   const { tabs } = useTabsContext();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
@@ -93,7 +95,10 @@ export default function TopBar() {
           </div>
 
           {/* Notifications */}
-          <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+          <button 
+            onClick={() => setIsNotificationsOpen(true)}
+            className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+          >
             <Bell size={20} />
             <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
           </button>
@@ -156,6 +161,12 @@ export default function TopBar() {
           </div>
         </div>
       </div>
+
+      {/* Notifications Modal */}
+      <NotificationsModal 
+        isOpen={isNotificationsOpen} 
+        onClose={() => setIsNotificationsOpen(false)} 
+      />
     </header>
   );
 }
