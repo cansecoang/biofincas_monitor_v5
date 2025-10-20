@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import NotificationCard from '@/components/ui/NotificationCard';
 
@@ -81,6 +81,20 @@ type Category = typeof categories[number];
 export default function NotificationsModal({ isOpen, onClose }: NotificationsModalProps) {
   const [activeCategory, setActiveCategory] = useState<Category>('All');
 
+  // Deshabilitar scroll en el body cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup al desmontar
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   // Filtrar notificaciones según la categoría activa
@@ -96,16 +110,16 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
 
   return (
     <div 
-      className="fixed inset-0  z-[200] flex items-start justify-end pt-20 p-4"
+      className="fixed inset-0  z-[200] flex items-start justify-end pt-[67px] py-4 pl-4 pr-6"
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[calc(100vh-6rem)] flex flex-col"
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[calc(100vh-5rem)] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4">
-          <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
+        <div className="flex items-center justify-between px-6 py-2">
+          <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
