@@ -46,7 +46,7 @@ export default function ProductDetailModal({
     <div className="fixed inset-0 z-[300] flex items-start justify-center pl-16 pt-20 overflow-y-auto">
       {/* Modal Container */}
       <div 
-        className="bg-white rounded-2xl shadow-xl w-full max-w-7xl max-h-[calc(100vh-8rem)] flex flex-col"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-[94vw] max-h-[calc(100vh-8rem)] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
