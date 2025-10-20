@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft  } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 interface ProductDetailModalProps {
   isOpen: boolean;
@@ -43,7 +43,9 @@ export default function ProductDetailModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-start justify-center pl-16 pt-20 overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-[300] flex items-start justify-center pl-16 pt-20 overflow-y-auto"
+    >
       {/* Modal Container */}
       <div 
         className="bg-white rounded-2xl border border-gray-200 shadow-sm w-full max-w-[94.2vw] max-h-[calc(100vh-8rem)] flex flex-col"
