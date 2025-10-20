@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import CancelConfirmationModal from './CancelConfirmationModal';
 
 interface TaskStepWizardProps {
   onComplete: (data: TaskFormData) => void;
@@ -41,7 +43,9 @@ const STEPS = [
 ];
 
 export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardProps) {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [formData, setFormData] = useState<TaskFormData>({
     assignToProduct: '',
     taskName: '',
@@ -74,6 +78,14 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
     }
   };
 
+  const handleGoBack = () => {
+    setIsCancelModalOpen(true);
+  };
+
+  const handleConfirmCancel = () => {
+    router.back();
+  };
+
   const updateFormData = (field: keyof TaskFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -85,11 +97,19 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
     <div className="w-full max-w-full bg-white rounded-2xl shadow overflow-hidden p-6 flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
       {/* Header */}
       <div className="mb-4 flex-shrink-0">
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">
-          {STEPS[currentStep - 1].title}
-        </h2>
-        <h3 className="text-xl text-gray-500">
-        New Task
+        <div className="flex items-center gap-3 mb-1">
+          <button
+            onClick={handleGoBack}
+            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ChevronLeft size={20} className="text-gray-700" />
+          </button>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {STEPS[currentStep - 1].title}
+          </h2>
+        </div>
+        <h3 className="text-xl text-gray-500 ml-11">
+          New Task
         </h3>
       </div>
 
@@ -436,6 +456,14 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
           {currentStep < STEPS.length && <ChevronRight size={20} />}
         </button>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <CancelConfirmationModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleConfirmCancel}
+        operationType="task creation"
+      />
     </div>
   );
 }

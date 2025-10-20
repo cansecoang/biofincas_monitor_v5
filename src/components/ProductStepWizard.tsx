@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import CancelConfirmationModal from './CancelConfirmationModal';
 
 interface ProductStepWizardProps {
   onComplete: (data: ProductFormData) => void;
@@ -72,7 +74,9 @@ const INDICATORS = [
 ];
 
 export default function ProductStepWizard({ onComplete, onCancel }: ProductStepWizardProps) {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>({
     productName: '',
     productObjective: '',
@@ -102,6 +106,14 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
     }
   };
 
+  const handleGoBack = () => {
+    setIsCancelModalOpen(true);
+  };
+
+  const handleConfirmCancel = () => {
+    router.back();
+  };
+
   const updateFormData = (field: keyof ProductFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -121,13 +133,20 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
   return (
     <div className="w-full max-w-full bg-white rounded-2xl shadow overflow-hidden p-6 flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
       {/* Header */}
-      <div className="mb-4 flex-shrink-0">{/* Header */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">
-          {STEPS[currentStep - 1].title}
-          
-        </h2>
-        <h3 className="text-xl text-gray-500">
-        New Product
+      <div className="mb-4 flex-shrink-0">
+        <div className="flex items-center gap-3 mb-1">
+          <button
+            onClick={handleGoBack}
+            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ChevronLeft size={20} className="text-gray-700" />
+          </button>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {STEPS[currentStep - 1].title}
+          </h2>
+        </div>
+        <h3 className="text-xl text-gray-500 ml-11">
+          New Product
         </h3>
       </div>
 
@@ -453,6 +472,14 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
           {currentStep < STEPS.length}
         </button>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <CancelConfirmationModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleConfirmCancel}
+        operationType="product creation"
+      />
     </div>
   );
 }
