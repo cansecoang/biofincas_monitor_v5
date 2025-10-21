@@ -153,6 +153,7 @@ const GanttChart = ({ tasks, refreshData }: GanttChartProps) => {
   const [tooltipData, setTooltipData] = useState<FormattedTask | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
 
@@ -763,6 +764,11 @@ const GanttChart = ({ tasks, refreshData }: GanttChartProps) => {
       .on("click", function(event, d) { // Al hacer clic...
         event.stopPropagation(); // Evitar que se propague el evento
         setSelectedTaskId(d.task_id);
+        // Encontrar la tarea completa en el array original
+        const fullTask = tasks.find(t => t.id === d.task_id);
+        if (fullTask) {
+          setSelectedTask(fullTask);
+        }
         setIsTaskModalOpen(true);  // ...abrir modal de detalles
       })
       .on("mouseover", function (event, d) { 
@@ -824,6 +830,11 @@ const GanttChart = ({ tasks, refreshData }: GanttChartProps) => {
       .on("click", function(event, d) { // Al hacer clic en barra de duración real...
         event.stopPropagation(); // Evitar que se propague el evento
         setSelectedTaskId(d.task_id);
+        // Encontrar la tarea completa en el array original
+        const fullTask = tasks.find(t => t.id === d.task_id);
+        if (fullTask) {
+          setSelectedTask(fullTask);
+        }
         setIsTaskModalOpen(true);  // ...abrir modal de detalles
       })
       .on("mouseover", (event, d) => { setTooltipData(d); })
@@ -1035,6 +1046,11 @@ const GanttChart = ({ tasks, refreshData }: GanttChartProps) => {
       .style("cursor", "pointer")       // Indicar que es clickeable
       .on("click", (event, d) => {      // Al hacer clic en el nombre...
         setSelectedTaskId(d.task_id);   // ...también abrir modal de detalles
+        // Encontrar la tarea completa en el array original
+        const fullTask = tasks.find(t => t.id === d.task_id);
+        if (fullTask) {
+          setSelectedTask(fullTask);
+        }
         setIsTaskModalOpen(true);
       });
 
@@ -1078,6 +1094,7 @@ const GanttChart = ({ tasks, refreshData }: GanttChartProps) => {
   const closeTaskModal = () => {
     setIsTaskModalOpen(false);
     setSelectedTaskId(null);
+    setSelectedTask(null);
   };
 
   const handleTaskComplete = () => {
@@ -1336,20 +1353,23 @@ const GanttChart = ({ tasks, refreshData }: GanttChartProps) => {
       )}
 
       {/* 🔧 MODAL DE DETALLE DE TAREA */}
-      <TaskDetailModal
-        isOpen={isTaskModalOpen}
-        onClose={closeTaskModal}
-        onEdit={() => {
-          // TODO: Implementar edición de tarea
-          toast.info('Edición de tarea en desarrollo');
-        }}
-        onDelete={() => {
-          // TODO: Implementar eliminación de tarea
-          toast.info('Eliminación de tarea en desarrollo');
-          closeTaskModal();
-          refreshData();
-        }}
-      />
+      {selectedTask && (
+        <TaskDetailModal
+          isOpen={isTaskModalOpen}
+          onClose={closeTaskModal}
+          task={selectedTask}
+          onEdit={() => {
+            // TODO: Implementar edición de tarea
+            toast.info('Edición de tarea en desarrollo');
+          }}
+          onDelete={() => {
+            // TODO: Implementar eliminación de tarea
+            toast.info('Eliminación de tarea en desarrollo');
+            closeTaskModal();
+            refreshData();
+          }}
+        />
+      )}
 
       {/* ➕ WIZARD DE CREACIÓN DE TAREA */}
       {isAddTaskOpen && (

@@ -2,6 +2,8 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import TaskDetailModal from '@/components/TaskDetailModal';
+import { toast } from 'sonner';
 
 interface Task {
   id: number;
@@ -40,6 +42,10 @@ export default function ProductListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<string>('start_planned');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  
+  // Estados para el modal de detalles
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   // Cargar tareas cuando cambia el productId o la página
   useEffect(() => {
@@ -107,6 +113,30 @@ export default function ProductListPage() {
       setSortOrder('asc');
     }
     setCurrentPage(1); // Resetear a primera página al ordenar
+  };
+
+  // Manejar clic en una tarea para abrir el modal
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  // Cerrar el modal
+  const closeTaskModal = () => {
+    setIsTaskModalOpen(false);
+    setSelectedTask(null);
+  };
+
+  // Manejar edición (placeholder)
+  const handleEdit = () => {
+    toast.info('Edit functionality coming soon');
+  };
+
+  // Manejar eliminación (placeholder)
+  const handleDelete = () => {
+    toast.info('Delete functionality coming soon');
+    closeTaskModal();
+    // Aquí podrías recargar las tareas después de eliminar
   };
 
   // Componente para el ícono de ordenamiento
@@ -284,7 +314,11 @@ export default function ProductListPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {tasks.map((task) => (
-              <tr key={task.id} className="hover:bg-gray-50 transition-colors">
+              <tr 
+                key={task.id} 
+                onClick={() => handleTaskClick(task)}
+                className="hover:bg-blue-50 transition-colors cursor-pointer"
+              >
                 <td className="px-6 py-4">
                   <div className="text-sm font-medium text-gray-900">{task.name}</div>
                   {task.detail && (
@@ -304,15 +338,11 @@ export default function ProductListPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{formatDate(task.start_planned)}</div>
-                  {task.start_actual && (
-                    <div className="text-xs text-blue-600">Actual: {formatDate(task.start_actual)}</div>
-                  )}
+                  
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{formatDate(task.end_planned)}</div>
-                  {task.end_actual && (
-                    <div className="text-xs text-blue-600">Actual: {formatDate(task.end_actual)}</div>
-                  )}
+                  
                 </td>
               </tr>
             ))}
@@ -351,6 +381,17 @@ export default function ProductListPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Modal de detalles de tarea */}
+      {selectedTask && (
+        <TaskDetailModal
+          isOpen={isTaskModalOpen}
+          onClose={closeTaskModal}
+          task={selectedTask}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
     </div>
   );

@@ -1,60 +1,136 @@
 'use client';
 
+import { useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
+
+interface Task {
+  id: number;
+  name: string;
+  detail?: string;
+  start_planned?: string;
+  end_planned?: string;
+  start_actual?: string | null;
+  end_actual?: string | null;
+  checkin_oro_verde?: string;
+  checkin_user?: string;
+  checkin_communication?: string;
+  checkin_gender?: string;
+  phase_id?: number;
+  phase_name?: string;
+  status_id?: number;
+  status_name?: string;
+  product_id?: number;
+  product_name?: string;
+  org_id?: number;
+  org_name?: string;
+}
 
 interface TaskDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
+  task?: Task;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
-// Datos de ejemplo - reemplazar con datos reales
-const mockTaskData = {
-  generalInformation: {
-    assignToProduct: 'Línea base de biodiversidad en campo — México',
-    taskName: 'Diseño del protocolo de muestreo',
-    taskDescription: 'Crear y documentar el protocolo completo de muestreo de biodiversidad para el campo en México',
-  },
-  assignment: {
-    assignedTo: 'Oro Verde',
-    phase: 'Planning',
-    status: 'In Progress',
-  },
-  dates: {
-    startDate: '01/15/2025',
-    endDate: '03/30/2025',
-    actualStartDate: '01/20/2025',
-    actualEndDate: '—',
-  },
-  checkIn: {
-    oroVerde: '01/20/2025 10:00 AM',
-    user: '01/22/2025 02:30 PM',
-    communication: '01/25/2025 09:15 AM',
-    gender: '02/01/2025 11:45 AM',
-  },
-};
-
 export default function TaskDetailModal({
   isOpen,
   onClose,
+  task,
   onEdit,
   onDelete,
 }: TaskDetailModalProps) {
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      // Guardar el valor actual del scroll
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Prevenir scroll
+      document.body.style.overflow = 'hidden';
+      // Compensar el ancho del scrollbar para evitar el "salto" del contenido
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      
+      // Cleanup: restaurar cuando el modal se cierre
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
+  // Formatear fechas
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: '2-digit', 
+      day: '2-digit', 
+      year: 'numeric' 
+    });
+  };
+
+  const formatDateTime = (dateString?: string | null) => {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', { 
+      month: '2-digit', 
+      day: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  // Usar datos de la tarea o valores por defecto
+  const taskData = {
+    generalInformation: {
+      assignToProduct: task?.product_name || 'N/A',
+      taskName: task?.name || 'N/A',
+      taskDescription: task?.detail || 'No description available',
+    },
+    assignment: {
+      assignedTo: task?.org_name || 'Unassigned',
+      phase: task?.phase_name || 'N/A',
+      status: task?.status_name || 'N/A',
+    },
+    dates: {
+      startDate: formatDate(task?.start_planned),
+      endDate: formatDate(task?.end_planned),
+      actualStartDate: formatDate(task?.start_actual),
+      actualEndDate: formatDate(task?.end_actual),
+    },
+    checkIn: {
+      oroVerde: formatDateTime(task?.checkin_oro_verde),
+      user: formatDateTime(task?.checkin_user),
+      communication: formatDateTime(task?.checkin_communication),
+      gender: formatDateTime(task?.checkin_gender),
+    },
+  };
+
   return (
-    <div 
-      className="fixed inset-0 z-[300] flex items-start justify-center pl-16 pt-20 overflow-y-auto"
-    >
+    <>
+      {/* Backdrop overlay - bloquea interacciones */}
+      <div 
+        className="fixed inset-0 bg-black/50 z-[400]"
+        onClick={onClose}
+      />
+      
       {/* Modal Container */}
       <div 
-        className="bg-white rounded-2xl border border-gray-200 shadow-sm w-full max-w-[94.2vw] max-h-[calc(100vh-8rem)] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[500] flex items-start justify-center pt-20 overflow-y-auto"
       >
-        {/* Header */}
-        <div className="pl-2 pr-6 py-4 rounded-t-2xl">
-        <div className="flex items-center justify-between">
+        <div 
+          className="bg-white rounded-2xl border border-gray-200 shadow-xl w-full 
+          max-w-[90vw] max-h-[calc(100vh-8rem)] flex flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="pl-2 pr-6 py-4 rounded-t-2xl">
+          <div className="flex items-center justify-between">
           {/* Left: Back button and Title */}
           <div className="flex items-center gap-3">
             <button
@@ -101,17 +177,17 @@ export default function TaskDetailModal({
           <div className="space-y-4">
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Assigned to Product</span>
-              <span className="text-sm text-gray-900">{mockTaskData.generalInformation.assignToProduct}</span>
+              <span className="text-sm text-gray-900">{taskData.generalInformation.assignToProduct}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Task Name</span>
-              <span className="text-sm text-gray-900">{mockTaskData.generalInformation.taskName}</span>
+              <span className="text-sm text-gray-900">{taskData.generalInformation.taskName}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Task Description</span>
-              <span className="text-sm text-gray-900">{mockTaskData.generalInformation.taskDescription}</span>
+              <span className="text-sm text-gray-900">{taskData.generalInformation.taskDescription}</span>
             </div>
           </div>
         </section>
@@ -122,20 +198,19 @@ export default function TaskDetailModal({
           <div className="space-y-4">
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Assigned to</span>
-              <span className="text-sm text-gray-900">{mockTaskData.assignment.assignedTo}</span>
+              <span className="text-sm text-gray-900">{taskData.assignment.assignedTo}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Phase</span>
-              <span className="text-sm text-gray-900">{mockTaskData.assignment.phase}</span>
+              <span className="text-sm text-gray-900">{taskData.assignment.phase}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Status</span>
               <span className="text-sm text-gray-900 flex items-center gap-2">
-                {/* {mockTaskData.assignment.status} */}
                 <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  {mockTaskData.assignment.status}
+                  {taskData.assignment.status}
                 </span>
               </span>
             </div>
@@ -148,22 +223,22 @@ export default function TaskDetailModal({
           <div className="space-y-4">
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Start Date</span>
-              <span className="text-sm text-gray-900">{mockTaskData.dates.startDate}</span>
+              <span className="text-sm text-gray-900">{taskData.dates.startDate}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">End Date</span>
-              <span className="text-sm text-gray-900">{mockTaskData.dates.endDate}</span>
+              <span className="text-sm text-gray-900">{taskData.dates.endDate}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Actual Start Date</span>
-              <span className="text-sm text-gray-900">{mockTaskData.dates.actualStartDate}</span>
+              <span className="text-sm text-gray-900">{taskData.dates.actualStartDate}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Actual End Date</span>
-              <span className="text-sm text-gray-900">{mockTaskData.dates.actualEndDate}</span>
+              <span className="text-sm text-gray-900">{taskData.dates.actualEndDate}</span>
             </div>
           </div>
         </section>
@@ -174,28 +249,29 @@ export default function TaskDetailModal({
           <div className="space-y-4">
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Check-in Oro Verde</span>
-              <span className="text-sm text-gray-900">{mockTaskData.checkIn.oroVerde}</span>
+              <span className="text-sm text-gray-900">{taskData.checkIn.oroVerde}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Check-in User</span>
-              <span className="text-sm text-gray-900">{mockTaskData.checkIn.user}</span>
+              <span className="text-sm text-gray-900">{taskData.checkIn.user}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Check-in Communication</span>
-              <span className="text-sm text-gray-900">{mockTaskData.checkIn.communication}</span>
+              <span className="text-sm text-gray-900">{taskData.checkIn.communication}</span>
             </div>
 
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Check-in Gender</span>
-              <span className="text-sm text-gray-900">{mockTaskData.checkIn.gender}</span>
+              <span className="text-sm text-gray-900">{taskData.checkIn.gender}</span>
             </div>
           </div>
         </section>
 
       </div>
-    </div>
-    </div>
+        </div>
+      </div>
+    </>
   );
 }

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 import CancelConfirmationModal from './CancelConfirmationModal';
 
 interface TaskStepWizardProps {
@@ -44,8 +45,12 @@ const STEPS = [
 
 export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const productId = searchParams.get('productId');
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<TaskFormData>({
     assignToProduct: '',
     taskName: '',
@@ -66,8 +71,60 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
   const handleNext = () => {
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1);
+    } else if (currentStep === STEPS.length) {
+      // En el último paso, crear la tarea
+      handleCreateTask();
     }
-    // No hacer nada en el último step (Create Task)
+  };
+
+  const handleCreateTask = async () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Mapear los datos del formulario al formato del API
+      const taskData = {
+        task_name: formData.taskName,
+        task_detail: formData.taskDescription,
+        start_date_planned: formData.startDate,
+        end_date_planned: formData.endDate,
+        start_date_actual: formData.actualStartDate || null,
+        end_date_actual: formData.actualEndDate || null,
+        checkin_oro_verde: formData.checkInOroVerde || null,
+        checkin_user: formData.checkInUser || null,
+        checkin_communication: formData.checkInCommunication || null,
+        checkin_gender: formData.checkInGender || null,
+        phase_id: parseInt(formData.phase) || null,
+        status_id: parseInt(formData.status) || null,
+        responsable_id: parseInt(formData.assignedTo) || null,
+        product_id: productId ? parseInt(productId) : parseInt(formData.assignToProduct)
+      };
+
+      const response = await fetch('/api/add-task', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(taskData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create task');
+      }
+
+      const result = await response.json();
+      
+      toast.success('Task created successfully!');
+      onComplete(formData); // Llamar al callback de éxito
+      
+    } catch (error) {
+      console.error('Error creating task:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create task');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBack = () => {
@@ -450,10 +507,27 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
         <button
           type="button"
           onClick={handleNext}
-          className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-colors"
+          disabled={isSubmitting}
+          className={`flex items-center gap-2 px-8 py-3 rounded-full font-medium transition-colors ${
+            isSubmitting 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-green-600 hover:bg-green-700'
+          } text-white`}
         >
-          {currentStep === STEPS.length ? 'Create Task' : 'Next'}
-          {currentStep < STEPS.length && <ChevronRight size={20} />}
+          {isSubmitting ? (
+            <>
+              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Creating...
+            </>
+          ) : (
+            <>
+              {currentStep === STEPS.length ? 'Create Task' : 'Next'}
+              {currentStep < STEPS.length && <ChevronRight size={20} />}
+            </>
+          )}
         </button>
       </div>
 

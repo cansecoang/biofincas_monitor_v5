@@ -159,9 +159,9 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
           <p className="text-gray-600 text-sm">
             {selectedProductData ? (
               <>
-                <span className="font-medium">Country:</span> {selectedProductData.country_name || 'N/A'} • 
-                <span className="font-medium ml-2">Owner:</span> {selectedProductData.product_owner_name || 'N/A'} • 
-                <span className="font-medium ml-2">Delivery:</span> {formatDate(selectedProductData.delivery_date)}
+                <span className="font-bold">Country:</span> {selectedProductData.country_name || 'N/A'} • 
+                <span className="font-bold ml-2">Owner:</span> {selectedProductData.product_owner_name || 'N/A'} • 
+                <span className="font-bold ml-2">Delivery:</span> {formatDate(selectedProductData.delivery_date)}
               </>
             ) : (
               'Select a product to view details'
