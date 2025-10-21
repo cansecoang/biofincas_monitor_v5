@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import TaskStepWizard from './TaskStepWizard';
 
 interface Task {
   id: number;
@@ -47,6 +48,7 @@ export default function TaskDetailModal({
   const searchParams = useSearchParams();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
@@ -68,6 +70,42 @@ export default function TaskDetailModal({
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  // Si está en modo edición, mostrar el wizard
+  if (isEditMode && task) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-[400] flex items-center justify-center p-4">
+        <div className="w-full max-w-6xl">
+          <TaskStepWizard
+            existingTask={{
+              id: task.id,
+              name: task.name,
+              detail: task.detail,
+              start_planned: task.start_planned,
+              end_planned: task.end_planned,
+              start_actual: task.start_actual,
+              end_actual: task.end_actual,
+              checkin_oro_verde: task.checkin_oro_verde,
+              checkin_user: task.checkin_user,
+              checkin_communication: task.checkin_communication,
+              checkin_gender: task.checkin_gender,
+              phase_id: task.phase_id,
+              status_id: task.status_id,
+              responsable_id: task.org_id,
+              product_id: task.product_id,
+            }}
+            onComplete={() => {
+              setIsEditMode(false);
+              onClose();
+            }}
+            onCancel={() => {
+              setIsEditMode(false);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   // Función para manejar la eliminación de la tarea
   const handleDeleteTask = async () => {
@@ -205,7 +243,7 @@ export default function TaskDetailModal({
               Delete
             </button>
             <button
-              onClick={onEdit}
+              onClick={() => setIsEditMode(true)}
               className="px-4 py-1.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"
             >
               Edit

@@ -9,6 +9,23 @@ import CancelConfirmationModal from './CancelConfirmationModal';
 interface TaskStepWizardProps {
   onComplete: (data: TaskFormData) => void;
   onCancel: () => void;
+  existingTask?: {
+    id: number;
+    name: string;
+    detail?: string;
+    start_planned?: string;
+    end_planned?: string;
+    start_actual?: string | null;
+    end_actual?: string | null;
+    checkin_oro_verde?: string | null;
+    checkin_user?: string | null;
+    checkin_communication?: string | null;
+    checkin_gender?: string | null;
+    phase_id?: number;
+    status_id?: number;
+    responsable_id?: number;
+    product_id?: number;
+  };
 }
 
 interface TaskFormData {
@@ -64,10 +81,11 @@ const STEPS = [
   { id: 5, title: 'Summary', subtitle: 'Create New Task' },
 ];
 
-export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardProps) {
+export default function TaskStepWizard({ onComplete, onCancel, existingTask }: TaskStepWizardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productId = searchParams.get('productId');
+  const isEditMode = !!existingTask;
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -76,21 +94,36 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [statuses, setStatuses] = useState<Status[]>([]);
+  
+  // Helper function to format date for input[type="date"]
+  const formatDateForInput = (dateString?: string | null) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  };
+
+  // Helper function to format datetime for input[type="datetime-local"]
+  const formatDateTimeForInput = (dateString?: string | null) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 16);
+  };
+
   const [formData, setFormData] = useState<TaskFormData>({
-    assignToProduct: productId || '', // Pre-fill with productId from URL
-    taskName: '',
-    taskDescription: '',
-    assignedTo: '',
-    phase: '',
-    status: '',
-    startDate: '',
-    endDate: '',
-    actualStartDate: '',
-    actualEndDate: '',
-    checkInOroVerde: '',
-    checkInUser: '',
-    checkInCommunication: '',
-    checkInGender: '',
+    assignToProduct: existingTask?.product_id?.toString() || productId || '',
+    taskName: existingTask?.name || '',
+    taskDescription: existingTask?.detail || '',
+    assignedTo: existingTask?.responsable_id?.toString() || '',
+    phase: existingTask?.phase_id?.toString() || '',
+    status: existingTask?.status_id?.toString() || '',
+    startDate: formatDateForInput(existingTask?.start_planned) || '',
+    endDate: formatDateForInput(existingTask?.end_planned) || '',
+    actualStartDate: formatDateForInput(existingTask?.start_actual) || '',
+    actualEndDate: formatDateForInput(existingTask?.end_actual) || '',
+    checkInOroVerde: formatDateTimeForInput(existingTask?.checkin_oro_verde) || '',
+    checkInUser: formatDateTimeForInput(existingTask?.checkin_user) || '',
+    checkInCommunication: formatDateTimeForInput(existingTask?.checkin_communication) || '',
+    checkInGender: formatDateTimeForInput(existingTask?.checkin_gender) || '',
   });
 
   // Cargar productos al montar el componente
@@ -204,8 +237,12 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
         product_id: productId ? parseInt(productId) : parseInt(formData.assignToProduct)
       };
 
-      const response = await fetch('/api/add-task', {
-        method: 'POST',
+      // Determinar si es creación o actualización
+      const url = isEditMode ? `/api/update-task?taskId=${existingTask?.id}` : '/api/add-task';
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -214,20 +251,19 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create task');
+        throw new Error(error.error || `Failed to ${isEditMode ? 'update' : 'create'} task`);
       }
 
       const result = await response.json();
       
-      toast.success('Task created successfully!');
+      toast.success(`Task ${isEditMode ? 'updated' : 'created'} successfully!`);
       
-      // Redirigir a la página de productos con el productId seleccionado
-      const selectedProductId = productId || formData.assignToProduct;
-      router.push(`/products/gantt?productId=${selectedProductId}`);
+      // Recargar la página para reflejar cambios
+      window.location.reload();
       
     } catch (error) {
-      console.error('Error creating task:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create task');
+      console.error(`Error ${isEditMode ? 'updating' : 'creating'} task:`, error);
+      toast.error(error instanceof Error ? error.message : `Failed to ${isEditMode ? 'update' : 'create'} task`);
     } finally {
       setIsSubmitting(false);
     }
@@ -290,7 +326,7 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
           </h2>
         </div>
         <h3 className="text-xl text-gray-500 ml-11">
-          New Task
+          {isEditMode ? 'Edit Task' : 'New Task'}
         </h3>
       </div>
 
@@ -682,11 +718,11 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Creating...
+              {isEditMode ? 'Saving...' : 'Creating...'}
             </>
           ) : (
             <>
-              {currentStep === STEPS.length ? 'Create Task' : 'Next'}
+              {currentStep === STEPS.length ? (isEditMode ? 'Save Task' : 'Create Task') : 'Next'}
               {currentStep < STEPS.length && <ChevronRight size={20} />}
             </>
           )}
