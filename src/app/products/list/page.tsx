@@ -154,10 +154,9 @@ export default function ProductListPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phase</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsible</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned to</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -181,13 +180,6 @@ export default function ProductListPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex gap-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
-                  </div>
                 </td>
               </tr>
             ))}
@@ -266,7 +258,7 @@ export default function ProductListPage() {
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
               >
                 <div className="flex items-center gap-2">
-                  <span>Product Owner</span>
+                  <span>Assigned to</span>
                   <SortIcon column="org_name" />
                 </div>
               </th>
