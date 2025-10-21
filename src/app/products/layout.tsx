@@ -174,12 +174,22 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
         
           {/*Botón agregar tarea */}
           <div className="relative">
-            <Link 
-              href="/create/task"
-              className="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-colors inline-block"
-            >
-              + Add Task
-            </Link>
+            {selectedProduct ? (
+              <Link 
+                href={`/create/task?productId=${selectedProduct}`}
+                className="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-colors inline-block"
+              >
+                + Add Task
+              </Link>
+            ) : (
+              <button
+                disabled
+                className="bg-gray-300 text-gray-500 rounded-full px-4 py-2 text-sm font-medium cursor-not-allowed inline-block"
+                title="Select a product first"
+              >
+                + Add Task
+              </button>
+            )}
           </div>
           {/* Workpackage Dropdown */}
           <div className="relative w-36">
