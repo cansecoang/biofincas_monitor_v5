@@ -3,6 +3,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 import { TabsProvider } from "@/contexts/TabsContext";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Biofincas - Product Report",
@@ -33,6 +34,9 @@ export default function RootLayout({
               </div>
             </main>
           </div>
+          
+          {/* Toaster for notifications */}
+          <Toaster position="top-right" richColors />
         </TabsProvider>
       </body>
     </html>
