@@ -85,6 +85,7 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
   const router = useRouter();
   const searchParams = useSearchParams();
   const productId = searchParams.get('productId');
+  const returnUrl = searchParams.get('returnUrl');
   const isEditMode = !!existingTask;
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -258,8 +259,16 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
       
       toast.success(`Task ${isEditMode ? 'updated' : 'created'} successfully!`);
       
-      // Recargar la página para reflejar cambios
-      window.location.reload();
+      // Si estamos en modo edición, solo recargar
+      if (isEditMode) {
+        window.location.reload();
+      } else {
+        // Si es creación nueva, volver a la URL de origen o al Gantt
+        const redirectUrl = returnUrl || (productId 
+          ? `/products/gantt?productId=${productId}`
+          : '/products/gantt');
+        window.location.href = redirectUrl;
+      }
       
     } catch (error) {
       console.error(`Error ${isEditMode ? 'updating' : 'creating'} task:`, error);

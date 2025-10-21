@@ -175,12 +175,15 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
           {/*Botón agregar tarea */}
           <div className="relative">
             {selectedProduct ? (
-              <Link 
-                href={`/create/task?productId=${selectedProduct}`}
+              <button
+                onClick={() => {
+                  const currentUrl = window.location.pathname + window.location.search;
+                  router.push(`/create/task?productId=${selectedProduct}&returnUrl=${encodeURIComponent(currentUrl)}`);
+                }}
                 className="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-colors inline-block"
               >
                 + Add Task
-              </Link>
+              </button>
             ) : (
               <button
                 disabled
