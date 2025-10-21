@@ -291,7 +291,13 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
   };
 
   const handleConfirmCancel = () => {
-    router.back();
+    // Si estamos en modo edición, solo cerrar el wizard sin navegar
+    if (isEditMode) {
+      onCancel();
+    } else {
+      // Si estamos creando, navegar hacia atrás
+      router.back();
+    }
   };
 
   const updateFormData = (field: keyof TaskFormData, value: any) => {
