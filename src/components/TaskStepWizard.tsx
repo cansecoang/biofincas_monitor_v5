@@ -43,6 +43,7 @@ interface Product {
 interface Organization {
   organization_id: number;
   organization_name: string;
+  organization_type?: string;
 }
 
 interface Phase {
@@ -116,7 +117,11 @@ export default function TaskStepWizard({ onComplete, onCancel }: TaskStepWizardP
         const response = await fetch('/api/organizations');
         const data = await response.json();
         if (data.organizations) {
-          setOrganizations(data.organizations);
+          // Filtrar solo organizaciones con organization_type === 'M'
+          const filteredOrganizations = data.organizations.filter(
+            (org: Organization) => org.organization_type === 'M'
+          );
+          setOrganizations(filteredOrganizations);
         }
       } catch (error) {
         console.error('Error loading organizations:', error);
