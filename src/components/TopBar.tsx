@@ -3,13 +3,14 @@
 import { Search, Bell, User, LogOut, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useTabsContext } from '@/contexts/TabsContext';
 import { useState, useRef, useEffect } from 'react';
 import NotificationsModal from '@/components/NotificationsModal';
 
 export default function TopBar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { tabs } = useTabsContext();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -54,11 +55,13 @@ export default function TopBar() {
           <div className="flex items-center gap-1 px-6">
             {tabs.map((tab) => {
               const isActive = pathname === tab.href;
+              const queryString = searchParams.toString();
+              const href = queryString ? `${tab.href}?${queryString}` : tab.href;
               
               return (
                 <Link
                   key={tab.id}
-                  href={tab.href}
+                  href={href}
                   className={`
                     relative px-6 py-3 text-sm font-medium transition-colors
                     ${isActive 

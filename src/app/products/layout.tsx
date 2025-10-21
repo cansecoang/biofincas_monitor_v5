@@ -1,7 +1,7 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { ReactNode, useState, useEffect, Suspense } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import TabsLayout from '@/components/TabsLayout';
 import ProductDetailModal from '@/components/ProductDetailModal';
@@ -14,36 +14,138 @@ const productTabs = [
   { id: 'metrics', label: 'Metrics', href: '/products/metrics' },
 ];
 
-// Configuración de títulos y subtítulos por ruta
-const pageHeaders: Record<string, { title: string; subtitle: string }> = {
-  '/products/list': {
-    title: 'Products List',
-    subtitle: 'Manage and view all your loan products'
-  },
-  '/products/gantt': {
-    title: 'Products Gantt Chart',
-    subtitle: 'Visualize product timelines and milestones'
-  },
-  '/products/metrics': {
-    title: 'Products Metrics',
-    subtitle: 'Key performance indicators and analytics'
-  }
-};
+interface Workpackage {
+  workpackage_id: number;
+  workpackage_name: string;
+}
 
-export default function ProductsLayout({ children }: { children: ReactNode }) {
+interface Output {
+  output_id: number;
+  output_number: string;
+  output_name: string;
+}
+
+interface Product {
+  product_id: number;
+  product_name: string;
+  workpackage_id: number;
+  product_output: number;
+}
+
+function ProductsLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const header = pageHeaders[pathname] || { title: 'Products', subtitle: 'Product management system' };
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const [workpackages, setWorkpackages] = useState<Workpackage[]>([]);
+  const [outputs, setOutputs] = useState<Output[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  
+  const [selectedWorkpackage, setSelectedWorkpackage] = useState<string>('');
+  const [selectedOutput, setSelectedOutput] = useState<string>('');
+  const [selectedProduct, setSelectedProduct] = useState<string>('');
+  
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Cargar catálogos al montar
+  useEffect(() => {
+    const fetchCatalogs = async () => {
+      try {
+        const [workpackagesRes, outputsRes] = await Promise.all([
+          fetch('/api/work-packages'),
+          fetch('/api/outputs')
+        ]);
+        
+        const workpackagesData = await workpackagesRes.json();
+        const outputsData = await outputsRes.json();
+        
+        if (workpackagesData.success) setWorkpackages(workpackagesData.workpackages);
+        if (outputsData.success) setOutputs(outputsData.outputs);
+      } catch (error) {
+        console.error('Error loading catalogs:', error);
+      }
+    };
+    
+    fetchCatalogs();
+  }, []);
+
+  // Cargar productos filtrados
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (selectedWorkpackage) params.append('workpackageId', selectedWorkpackage);
+        if (selectedOutput) params.append('outputId', selectedOutput);
+        
+        const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success) {
+          setProducts(data.products);
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    };
+    
+    fetchProducts();
+  }, [selectedWorkpackage, selectedOutput]);
+
+  // Sincronizar con URL params al cargar
+  useEffect(() => {
+    const workpackageId = searchParams.get('workpackageId') || '';
+    const outputId = searchParams.get('outputId') || '';
+    const productId = searchParams.get('productId') || '';
+    
+    setSelectedWorkpackage(workpackageId);
+    setSelectedOutput(outputId);
+    setSelectedProduct(productId);
+  }, [searchParams]);
+
+  // Actualizar URL manteniendo la ruta actual
+  const updateURL = (workpackageId: string, outputId: string, productId: string) => {
+    const params = new URLSearchParams();
+    if (workpackageId) params.set('workpackageId', workpackageId);
+    if (outputId) params.set('outputId', outputId);
+    if (productId) params.set('productId', productId);
+    
+    const queryString = params.toString();
+    router.push(`${pathname}${queryString ? `?${queryString}` : ''}`, { scroll: false });
+  };
+
+  const handleWorkpackageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedWorkpackage(value);
+    setSelectedProduct(''); // Reset product
+    updateURL(value, selectedOutput, '');
+  };
+
+  const handleOutputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedOutput(value);
+    setSelectedProduct(''); // Reset product
+    updateURL(selectedWorkpackage, value, '');
+  };
+
+  const handleProductChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedProduct(value);
+    updateURL(selectedWorkpackage, selectedOutput, value);
+  };
+
+  // Obtener nombre del producto seleccionado para el título
+  const selectedProductName = products.find(p => p.product_id.toString() === selectedProduct)?.product_name || 'Select Product';
 
   return (
     <TabsLayout tabs={productTabs} basePath="/products">
       <div className="mb-6 flex items-start justify-between">
         {/* Header Section */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{header.title}</h1>
-          <p className="text-gray-600">{header.subtitle}</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{selectedProductName}</h1>
+          <p className="text-gray-600">View Product Detail</p>
         </div>
 
         {/* Dropdowns Section */}
@@ -60,11 +162,17 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
           </div>
           {/* Workpackage Dropdown */}
           <div className="relative">
-            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer">
-              <option>Workpackage</option>
-              <option>Package 1</option>
-              <option>Package 2</option>
-              <option>Package 3</option>
+            <select 
+              value={selectedWorkpackage}
+              onChange={handleWorkpackageChange}
+              className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+            >
+              <option value="">Workpackage</option>
+              {workpackages.map((wp) => (
+                <option key={wp.workpackage_id} value={wp.workpackage_id}>
+                  {wp.workpackage_name}
+                </option>
+              ))}
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,11 +183,17 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
 
           {/* Output Dropdown */}
           <div className="relative">
-            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer">
-              <option>Output</option>
-              <option>Output 1</option>
-              <option>Output 2</option>
-              <option>Output 3</option>
+            <select 
+              value={selectedOutput}
+              onChange={handleOutputChange}
+              className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+            >
+              <option value="">Output</option>
+              {outputs.map((output) => (
+                <option key={output.output_id} value={output.output_id}>
+                  {output.output_name}
+                </option>
+              ))}
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,11 +204,17 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
 
           {/* Product Dropdown */}
           <div className="relative">
-            <select className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer">
-              <option>Product</option>
-              <option>Product 1</option>
-              <option>Product 2</option>
-              <option>Product 3</option>
+            <select 
+              value={selectedProduct}
+              onChange={handleProductChange}
+              className="appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+            >
+              <option value="">Product</option>
+              {products.map((product) => (
+                <option key={product.product_id} value={product.product_id}>
+                  {product.product_name}
+                </option>
+              ))}
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,6 +266,14 @@ export default function ProductsLayout({ children }: { children: ReactNode }) {
         itemType="product"
       />
     </TabsLayout>
+  );
+}
+
+export default function ProductsLayout({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductsLayoutContent>{children}</ProductsLayoutContent>
+    </Suspense>
   );
 }
 
