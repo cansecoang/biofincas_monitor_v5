@@ -30,6 +30,9 @@ interface Product {
   product_name: string;
   workpackage_id: number;
   product_output: number;
+  country_name?: string;
+  product_owner_name?: string;
+  delivery_date?: string;
 }
 
 function ProductsLayoutContent({ children }: { children: ReactNode }) {
@@ -136,8 +139,16 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
     updateURL(selectedWorkpackage, selectedOutput, value);
   };
 
-  // Obtener nombre del producto seleccionado para el título
-  const selectedProductName = products.find(p => p.product_id.toString() === selectedProduct)?.product_name || 'Select Product';
+  // Obtener datos del producto seleccionado
+  const selectedProductData = products.find(p => p.product_id.toString() === selectedProduct);
+  const selectedProductName = selectedProductData?.product_name || 'Select Product';
+  
+  // Formatear fecha de entrega
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
 
   return (
     <TabsLayout tabs={productTabs} basePath="/products">
@@ -145,7 +156,17 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
         {/* Header Section */}
         <div className="max-w-2xl">
           <h1 className="text-2xl font-bold text-gray-900 mb-2 break-words line-clamp-2 overflow-y-auto max-h-[4.5rem]">{selectedProductName}</h1>
-          <p className="text-gray-600">View Product Detail</p>
+          <p className="text-gray-600 text-sm">
+            {selectedProductData ? (
+              <>
+                <span className="font-medium">Country:</span> {selectedProductData.country_name || 'N/A'} • 
+                <span className="font-medium ml-2">Owner:</span> {selectedProductData.product_owner_name || 'N/A'} • 
+                <span className="font-medium ml-2">Delivery:</span> {formatDate(selectedProductData.delivery_date)}
+              </>
+            ) : (
+              'Select a product to view details'
+            )}
+          </p>
         </div>
 
         {/* Dropdowns Section */}

@@ -16,9 +16,13 @@ export async function GET(request: Request) {
         p.deliverable,
         p.delivery_date,
         p.workpackage_id,
-        w.workpackage_name
+        w.workpackage_name,
+        c.country_name,
+        po.organization_name as product_owner_name
       FROM products p
       LEFT JOIN workpackages w ON p.workpackage_id = w.workpackage_id
+      LEFT JOIN countries c ON p.country_id = c.country_id
+      LEFT JOIN organizations po ON p.product_owner_id = po.organization_id
       WHERE 1=1
     `;
     

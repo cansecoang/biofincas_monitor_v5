@@ -24,6 +24,7 @@ export async function POST(request: Request) {
   try {
     const { name, description } = await request.json();
     
+
     const result = await query(
       'INSERT INTO workpackages (workpackage_name, workpackage_description) VALUES ($1, $2) RETURNING *',
       [name, description]
