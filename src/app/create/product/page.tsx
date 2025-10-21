@@ -1,11 +1,22 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 import ProductStepWizard from '@/components/ProductStepWizard';
 
-export default function CreateProductPage() {
-  const router = useRouter();
+export const dynamic = 'force-dynamic';
 
+function CreateProductContent({ onComplete, onCancel }: { onComplete: (data: any) => void; onCancel: () => void }) {
+  return (
+    <div className="pr-4 pl-2 pb-2">
+      <ProductStepWizard 
+        onComplete={onComplete}
+        onCancel={onCancel}
+      />
+    </div>
+  );
+}
+
+export default function CreateProductPage() {
   const handleComplete = async (data: any) => {
     try {
       console.log('Product data:', data);
@@ -20,7 +31,7 @@ export default function CreateProductPage() {
       if (!response.ok) throw new Error('Failed to create product');
       
       alert('Product created successfully!');
-      router.push('/products/list');
+      window.location.href = '/products/list';
     } catch (error) {
       console.error('Error creating product:', error);
       alert('Error creating product. Please try again.');
@@ -28,15 +39,16 @@ export default function CreateProductPage() {
   };
 
   const handleCancel = () => {
-    router.back();
+    window.history.back();
   };
 
   return (
-    <div className="pr-4 pl-2 pb-2">
-      <ProductStepWizard 
-        onComplete={handleComplete}
-        onCancel={handleCancel}
-      />
-    </div>
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500">Loading product form...</div>
+      </div>
+    }>
+      <CreateProductContent onComplete={handleComplete} onCancel={handleCancel} />
+    </Suspense>
   );
 }

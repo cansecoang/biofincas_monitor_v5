@@ -1,9 +1,11 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import TaskDetailModal from '@/components/TaskDetailModal';
 import { toast } from 'sonner';
+
+export const dynamic = 'force-dynamic';
 
 interface Task {
   id: number;
@@ -31,7 +33,7 @@ interface Pagination {
   hasPrevPage: boolean;
 }
 
-export default function ProductListPage() {
+function ProductListContent() {
   const searchParams = useSearchParams();
   const productId = searchParams.get('productId');
   
@@ -394,5 +396,17 @@ export default function ProductListPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ProductListPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500">Loading tasks...</div>
+      </div>
+    }>
+      <ProductListContent />
+    </Suspense>
   );
 }

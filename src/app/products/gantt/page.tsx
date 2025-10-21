@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import GanttChart from '@/components/gantt-chart';
 
+export const dynamic = 'force-dynamic';
+
 interface Task {
   id: number;
   name: string;

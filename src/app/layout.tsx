@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
@@ -25,7 +26,15 @@ export default function RootLayout({
           {/* Main Content Area */}
           <div className="ml-[60px]">
             {/* TopBar - Site ID and User Info */}
-            <TopBar />
+            <Suspense fallback={
+              <div className="fixed top-0 left-[60px] right-0 h-16 bg-white border-b border-gray-200 z-40">
+                <div className="h-full px-4 flex items-center justify-between">
+                  <div className="text-gray-400">Loading...</div>
+                </div>
+              </div>
+            }>
+              <TopBar />
+            </Suspense>
             
             {/* Content Area - padding top dinámico para TopBar + Tabs */}
             <main className="pt-16 min-h-screen bg-gray-50">

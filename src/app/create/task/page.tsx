@@ -1,11 +1,22 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 import TaskStepWizard from '@/components/TaskStepWizard';
 
-export default function CreateTaskPage() {
-  const router = useRouter();
+export const dynamic = 'force-dynamic';
 
+function CreateTaskContent({ onComplete, onCancel }: { onComplete: (data: any) => void; onCancel: () => void }) {
+  return (
+    <div className="pr-4 pl-2 pb-2">
+      <TaskStepWizard 
+        onComplete={onComplete}
+        onCancel={onCancel}
+      />
+    </div>
+  );
+}
+
+export default function CreateTaskPage() {
   const handleComplete = async (data: any) => {
     try {
       console.log('Task data:', data);
@@ -20,7 +31,7 @@ export default function CreateTaskPage() {
       if (!response.ok) throw new Error('Failed to create task');
       
       alert('Task created successfully!');
-      router.push('/products/list');
+      window.location.href = '/products/list';
     } catch (error) {
       console.error('Error creating task:', error);
       alert('Error creating task. Please try again.');
@@ -28,16 +39,17 @@ export default function CreateTaskPage() {
   };
 
   const handleCancel = () => {
-    router.back();
+    window.history.back();
   };
 
   return (
-    <div className="pr-4 pl-2 pb-2">
-      <TaskStepWizard 
-        onComplete={handleComplete}
-        onCancel={handleCancel}
-      />
-    </div>
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500">Loading task form...</div>
+      </div>
+    }>
+      <CreateTaskContent onComplete={handleComplete} onCancel={handleCancel} />
+    </Suspense>
   );
 }
 
