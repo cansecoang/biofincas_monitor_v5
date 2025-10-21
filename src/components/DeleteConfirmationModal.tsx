@@ -31,12 +31,12 @@ export default function DeleteConfirmationModal({
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 z-[400] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 z-[600] flex items-center justify-center p-4"
       onClick={onClose}
     >
       {/* Modal Container */}
       <div 
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md z-[700]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon and Content */}

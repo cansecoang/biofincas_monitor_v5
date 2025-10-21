@@ -1,7 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { toast } from 'sonner';
+import { useRouter, useSearchParams } from 'next/navigation';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface Task {
   id: number;
@@ -40,6 +43,11 @@ export default function TaskDetailModal({
   onEdit,
   onDelete,
 }: TaskDetailModalProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
@@ -60,6 +68,42 @@ export default function TaskDetailModal({
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  // Función para manejar la eliminación de la tarea
+  const handleDeleteTask = async () => {
+    if (!task?.id) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      const response = await fetch(`/api/delete-task?taskId=${task.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete task');
+      }
+
+      toast.success('Task deleted successfully!');
+      setIsDeleteModalOpen(false);
+      onClose(); // Cerrar el modal de detalles
+      
+      // Llamar al callback onDelete si existe para actualizar el componente padre
+      if (onDelete) {
+        onDelete();
+      }
+      
+      // Forzar recarga completa de la página para reflejar los cambios
+      window.location.reload();
+      
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete task');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Formatear fechas
   const formatDate = (dateString?: string | null) => {
@@ -154,8 +198,9 @@ export default function TaskDetailModal({
               Cancel
             </button>
             <button
-              onClick={onDelete}
-              className="px-4 py-1.5 border border-red-300 text-red-600 rounded-full text-sm font-medium hover:bg-red-50 transition-colors"
+              onClick={() => setIsDeleteModalOpen(true)}
+              disabled={isDeleting}
+              className="px-4 py-1.5 border border-red-300 text-red-600 rounded-full text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Delete
             </button>
@@ -272,6 +317,15 @@ export default function TaskDetailModal({
       </div>
         </div>
       </div>
+
+      {/* Modal de confirmación para eliminar */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteTask}
+        itemName={task?.name || 'this task'}
+        itemType="task"
+      />
     </>
   );
 }
