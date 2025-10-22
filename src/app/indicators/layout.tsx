@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import TabsLayout from '@/components/TabsLayout';
 
 // Tabs específicas para Indicators
@@ -52,6 +52,8 @@ const pageHeaders: Record<string, { title: string; subtitle: string }> = {
 
 export default function IndicatorsLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const header = pageHeaders[pathname] || { title: 'Indicators', subtitle: 'Performance tracking system' };
 
   // Estados para los dropdowns
@@ -87,6 +89,50 @@ export default function IndicatorsLayout({ children }: { children: ReactNode }) 
     fetchData();
   }, []);
 
+  // Sincronizar estados con URL params al cargar
+  useEffect(() => {
+    const outputId = searchParams.get('outputId');
+    const workpackageId = searchParams.get('workpackageId');
+    const countryId = searchParams.get('countryId');
+
+    if (outputId) setSelectedOutput(outputId);
+    if (workpackageId) setSelectedWorkpackage(workpackageId);
+    if (countryId) setSelectedCountry(countryId);
+  }, [searchParams]);
+
+  // Función para actualizar URL con los parámetros seleccionados
+  const updateURL = (outputId: string, workpackageId: string, countryId: string) => {
+    const params = new URLSearchParams();
+    
+    if (outputId) params.append('outputId', outputId);
+    if (workpackageId) params.append('workpackageId', workpackageId);
+    if (countryId) params.append('countryId', countryId);
+    
+    const queryString = params.toString();
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+    
+    router.push(newUrl, { scroll: false });
+  };
+
+  // Handlers para cada dropdown
+  const handleOutputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedOutput(value);
+    updateURL(value, selectedWorkpackage, selectedCountry);
+  };
+
+  const handleWorkpackageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedWorkpackage(value);
+    updateURL(selectedOutput, value, selectedCountry);
+  };
+
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedCountry(value);
+    updateURL(selectedOutput, selectedWorkpackage, value);
+  };
+
   return (
     <TabsLayout tabs={indicatorTabs} basePath="/indicators">
       <div className="mb-6 flex items-start justify-between">
@@ -102,7 +148,7 @@ export default function IndicatorsLayout({ children }: { children: ReactNode }) 
           <div className="relative w-36">
             <select 
               value={selectedOutput}
-              onChange={(e) => setSelectedOutput(e.target.value)}
+              onChange={handleOutputChange}
               className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
             >
               <option value="">Output</option>
@@ -123,7 +169,7 @@ export default function IndicatorsLayout({ children }: { children: ReactNode }) 
           <div className="relative w-36">
             <select 
               value={selectedWorkpackage}
-              onChange={(e) => setSelectedWorkpackage(e.target.value)}
+              onChange={handleWorkpackageChange}
               className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
             >
               <option value="">Workpackage</option>
@@ -144,7 +190,7 @@ export default function IndicatorsLayout({ children }: { children: ReactNode }) 
           <div className="relative w-36">
             <select 
               value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
+              onChange={handleCountryChange}
               className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
             >
               <option value="">Country</option>
