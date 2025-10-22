@@ -83,7 +83,7 @@ export default function IndicatorsLayout({ children }: { children: ReactNode }) 
               <option>Country</option>
               <option>Country 1</option>
               <option>Country 2</option>
-              <option>Package 3</option>
+              <option>Country 3</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
