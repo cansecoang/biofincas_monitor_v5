@@ -173,6 +173,7 @@ export default function IndicatorsLayout({ children }: { children: ReactNode }) 
               className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
             >
               <option value="">Workpackage</option>
+              <option value="all">Todos</option>
               {workpackages.map((wp) => (
                 <option key={wp.workpackage_id} value={wp.workpackage_id}>
                   {wp.workpackage_name}
@@ -194,6 +195,7 @@ export default function IndicatorsLayout({ children }: { children: ReactNode }) 
               className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
             >
               <option value="">Country</option>
+              <option value="all">Todos</option>
               {countries.map((country) => (
                 <option key={country.country_id} value={country.country_id}>
                   {country.country_name}
