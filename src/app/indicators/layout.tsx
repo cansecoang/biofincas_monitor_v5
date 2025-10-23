@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, Suspense } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import TabsLayout from '@/components/TabsLayout';
 
@@ -50,7 +50,7 @@ const pageHeaders: Record<string, { title: string; subtitle: string }> = {
   }
 };
 
-export default function IndicatorsLayout({ children }: { children: ReactNode }) {
+function IndicatorsLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -213,5 +213,13 @@ export default function IndicatorsLayout({ children }: { children: ReactNode }) 
       </div>
       {children}
     </TabsLayout>
+  );
+}
+
+export default function IndicatorsLayout({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <IndicatorsLayoutContent>{children}</IndicatorsLayoutContent>
+    </Suspense>
   );
 }

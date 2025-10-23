@@ -8,6 +8,9 @@ import CancelConfirmationModal from './CancelConfirmationModal';
 interface ProductStepWizardProps {
   onComplete: (data: ProductFormData) => void;
   onCancel: () => void;
+  editMode?: boolean;
+  productId?: number;
+  initialData?: Partial<ProductFormData>;
 }
 
 interface ProductFormData {
@@ -87,7 +90,13 @@ const STEPS = [
   { id: 6, title: 'Summary', subtitle: 'Review and confirm' },
 ];
 
-export default function ProductStepWizard({ onComplete, onCancel }: ProductStepWizardProps) {
+export default function ProductStepWizard({ 
+  onComplete, 
+  onCancel, 
+  editMode = false, 
+  productId, 
+  initialData 
+}: ProductStepWizardProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -168,6 +177,17 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
 
     loadData();
   }, []);
+
+  // Load initial data in edit mode
+  useEffect(() => {
+    if (editMode && initialData) {
+      setFormData(prev => ({
+        ...prev,
+        ...initialData
+      }));
+    }
+  }, [editMode, initialData]);
+
 
   const handleNext = () => {
     if (currentStep < STEPS.length) {
@@ -262,6 +282,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
     
     try {
       const payload = {
+        ...(editMode && productId ? { product_id: productId } : {}),
         product_name: formData.productName,
         product_objective: formData.productObjective,
         deliverable: formData.deliverable,
@@ -269,7 +290,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
         methodology_description: formData.methodologyDescription || null,
         gender_specific_actions: formData.genderSpecificActions || null,
         next_steps: formData.nextSteps || null,
-        product_output: formData.output,
+        product_output: formData.output ? parseInt(formData.output) : null,
         workpackage_id: formData.workpackage ? parseInt(formData.workpackage) : null,
         workinggroup_id: formData.workingGroup ? parseInt(formData.workingGroup) : null,
         product_owner_id: formData.productOwner ? parseInt(formData.productOwner) : null,
@@ -290,8 +311,11 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
         distributor_others: formData.distributorOthers.filter(d => d.display_name.trim() !== ''),
       };
 
-      const response = await fetch('/api/add-product', {
-        method: 'POST',
+      const endpoint = editMode ? '/api/update-product' : '/api/add-product';
+      const method = editMode ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -304,11 +328,12 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
         onComplete(formData);
         router.push('/products/list');
       } else {
-        alert(`Error: ${result.message}`);
+        console.error('Server error:', result);
+        alert(`Error: ${result.error || result.message}\n${result.details || ''}`);
       }
     } catch (error) {
-      console.error('Error creating product:', error);
-      alert('An error occurred while creating the product');
+      console.error(`Error ${editMode ? 'updating' : 'creating'} product:`, error);
+      alert(`An error occurred while ${editMode ? 'updating' : 'creating'} the product`);
     } finally {
       setIsSubmitting(false);
     }
@@ -935,10 +960,10 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
             {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin" size={20} />
-                Creating...
+                {editMode ? 'Updating...' : 'Creating...'}
               </>
             ) : (
-              'Create Product'
+              editMode ? 'Update Product' : 'Create Product'
             )}
           </button>
         ) : (

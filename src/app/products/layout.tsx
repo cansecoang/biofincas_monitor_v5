@@ -51,6 +51,8 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string>('');
+  const [productNameToDelete, setProductNameToDelete] = useState<string>('');
 
   // Cargar catálogos al montar
   useEffect(() => {
@@ -137,6 +139,56 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
     const value = e.target.value;
     setSelectedProduct(value);
     updateURL(selectedWorkpackage, selectedOutput, value);
+  };
+
+  // Handle Edit Product
+  const handleEditProduct = () => {
+    setIsDetailModalOpen(false);
+    router.push(`/products/edit?productId=${selectedProduct}`);
+  };
+
+  // Handle Delete Product
+  const handleDeleteProduct = () => {
+    setIsDetailModalOpen(false);
+    setProductToDelete(selectedProduct);
+    setProductNameToDelete(selectedProductName);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Confirm Delete
+  const confirmDeleteProduct = async () => {
+    try {
+      const response = await fetch(`/api/delete-product?productId=${productToDelete}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Refresh products list
+        const params = new URLSearchParams();
+        if (selectedWorkpackage) params.append('workpackageId', selectedWorkpackage);
+        if (selectedOutput) params.append('outputId', selectedOutput);
+        
+        const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
+        const refreshResponse = await fetch(url);
+        const refreshData = await refreshResponse.json();
+        
+        if (refreshData.success) {
+          setProducts(refreshData.products);
+          setSelectedProduct('');
+          updateURL(selectedWorkpackage, selectedOutput, '');
+        }
+
+        setIsDeleteModalOpen(false);
+        alert('Product deleted successfully');
+      } else {
+        alert(`Error deleting product: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('An error occurred while deleting the product');
+    }
   };
 
   // Obtener datos del producto seleccionado
@@ -278,16 +330,8 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         productId={selectedProduct}
-        onEdit={() => {
-          console.log('Edit clicked');
-          setIsDetailModalOpen(false);
-          // Aquí puedes agregar la lógica de edición
-        }}
-        onDelete={() => {
-          console.log('Delete clicked');
-          setIsDetailModalOpen(false);
-          // Aquí puedes agregar la lógica de eliminación
-        }}
+        onEdit={handleEditProduct}
+        onDelete={handleDeleteProduct}
       />
 
       {/* Task Detail Modal */}
@@ -308,11 +352,8 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={() => {
-          console.log('Item deleted confirmed!');
-          // Aquí puedes agregar la lógica de eliminación real
-        }}
-        itemName="Línea base de biodiversidad en campo — México"
+        onConfirm={confirmDeleteProduct}
+        itemName={productNameToDelete}
         itemType="product"
       />
     </TabsLayout>
