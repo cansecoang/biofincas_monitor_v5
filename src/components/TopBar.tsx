@@ -83,7 +83,7 @@ function TopBarContent() {
       } catch (error) {
         console.error('Error searching:', error);
       }
-    }, 200);
+    }, 150);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
