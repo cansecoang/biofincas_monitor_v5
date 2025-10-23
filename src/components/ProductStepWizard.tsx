@@ -33,6 +33,11 @@ interface ProductFormData {
   
   // Step 4: Indicators
   selectedIndicators: number[];
+  
+  // Step 5: Distributors
+  distributorOrganizations: number[];
+  distributorUsers: number[];
+  distributorOthers: Array<{ display_name: string; contact: string }>;
 }
 
 interface Output {
@@ -78,7 +83,8 @@ const STEPS = [
   { id: 2, title: 'Location and Context', subtitle: 'Output, workpackage, and location' },
   { id: 3, title: 'Team', subtitle: 'Responsible parties and organizations' },
   { id: 4, title: 'Indicators', subtitle: 'Select related indicators' },
-  { id: 5, title: 'Summary', subtitle: 'Review and confirm' },
+  { id: 5, title: 'Distributors', subtitle: 'Define distribution channels' },
+  { id: 6, title: 'Summary', subtitle: 'Review and confirm' },
 ];
 
 export default function ProductStepWizard({ onComplete, onCancel }: ProductStepWizardProps) {
@@ -114,6 +120,9 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
     responsable: '',
     otherOrganizations: [],
     selectedIndicators: [],
+    distributorOrganizations: [],
+    distributorUsers: [],
+    distributorOthers: [],
   });
 
   // Load all data on mount
@@ -204,6 +213,50 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
     }));
   };
 
+  // Distributor Organizations functions
+  const toggleDistributorOrganization = (orgId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      distributorOrganizations: prev.distributorOrganizations.includes(orgId)
+        ? prev.distributorOrganizations.filter(id => id !== orgId)
+        : [...prev.distributorOrganizations, orgId]
+    }));
+  };
+
+  // Distributor Users functions
+  const toggleDistributorUser = (userId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      distributorUsers: prev.distributorUsers.includes(userId)
+        ? prev.distributorUsers.filter(id => id !== userId)
+        : [...prev.distributorUsers, userId]
+    }));
+  };
+
+  // Distributor Others functions
+  const addDistributorOther = () => {
+    setFormData(prev => ({
+      ...prev,
+      distributorOthers: [...prev.distributorOthers, { display_name: '', contact: '' }]
+    }));
+  };
+
+  const removeDistributorOther = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      distributorOthers: prev.distributorOthers.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateDistributorOther = (index: number, field: 'display_name' | 'contact', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      distributorOthers: prev.distributorOthers.map((item, i) => 
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
   const handleCreateProduct = async () => {
     setIsSubmitting(true);
     
@@ -232,6 +285,9 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
           position: index + 1
         })),
         indicators: formData.selectedIndicators,
+        distributor_orgs: formData.distributorOrganizations,
+        distributor_users: formData.distributorUsers,
+        distributor_others: formData.distributorOthers.filter(d => d.display_name.trim() !== ''),
       };
 
       const response = await fetch('/api/add-product', {
@@ -591,8 +647,111 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
           </div>
         )}
 
-        {/* Step 5: Resume */}
+        {/* Step 5: Distributors */}
         {currentStep === 5 && (
+          <div className="space-y-6 px-1">
+            {/* Distributor Organizations */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Distributor Organizations (Optional)
+              </label>
+              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+                {organizations.map((org) => (
+                  <div
+                    key={org.organization_id}
+                    onClick={() => toggleDistributorOrganization(org.organization_id)}
+                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      formData.distributorOrganizations.includes(org.organization_id)
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <p className="text-sm font-medium text-gray-900">{org.organization_name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Distributor Users */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Distributor Users (Optional)
+              </label>
+              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+                {users.map((user) => (
+                  <div
+                    key={user.user_id}
+                    onClick={() => toggleDistributorUser(user.user_id)}
+                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      formData.distributorUsers.includes(user.user_id)
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <p className="text-sm font-medium text-gray-900">{user.user_name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Other Distributors */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-medium text-gray-900">
+                  Other Distributors (Optional)
+                </label>
+                <button
+                  type="button"
+                  onClick={addDistributorOther}
+                  className="px-3 py-1.5 bg-blue-500 text-white rounded-full text-xs font-medium hover:bg-blue-600 transition-colors"
+                >
+                  + Add
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {formData.distributorOthers.map((distributor, index) => (
+                  <div key={index} className="flex gap-2 items-start p-3 border-2 border-gray-200 rounded-xl">
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="text"
+                        value={distributor.display_name}
+                        onChange={(e) => updateDistributorOther(index, 'display_name', e.target.value)}
+                        placeholder="Name"
+                        className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <input
+                        type="text"
+                        value={distributor.contact}
+                        onChange={(e) => updateDistributorOther(index, 'contact', e.target.value)}
+                        placeholder="Contact (email, phone, etc.)"
+                        className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeDistributorOther(index)}
+                      className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                    >
+                      <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+
+                {formData.distributorOthers.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No other distributors added
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 6: Summary */}
+        {currentStep === 6 && (
           <div className="space-y-6 px-1">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -709,6 +868,42 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
                 ) : (
                   <span className="text-sm text-gray-500">No indicators selected</span>
                 )}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Distributors
+              </h3>
+              <div className="space-y-3">
+                <div className="flex">
+                  <span className="w-48 text-sm font-medium text-gray-600">Distributor Organizations</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">
+                    {formData.distributorOrganizations.length > 0
+                      ? formData.distributorOrganizations.map(id => 
+                          organizations.find(o => o.organization_id === id)?.organization_name
+                        ).join(', ')
+                      : '—'}
+                  </span>
+                </div>
+                <div className="flex">
+                  <span className="w-48 text-sm font-medium text-gray-600">Distributor Users</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">
+                    {formData.distributorUsers.length > 0
+                      ? formData.distributorUsers.map(id => 
+                          users.find(u => u.user_id === id)?.user_name
+                        ).join(', ')
+                      : '—'}
+                  </span>
+                </div>
+                <div className="flex">
+                  <span className="w-48 text-sm font-medium text-gray-600">Other Distributors</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">
+                    {formData.distributorOthers.length > 0
+                      ? formData.distributorOthers.map(d => d.display_name).filter(n => n).join(', ')
+                      : '—'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
