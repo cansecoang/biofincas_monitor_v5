@@ -5,10 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useTabsContext } from '@/contexts/TabsContext';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import NotificationsModal from '@/components/NotificationsModal';
 
-export default function TopBar() {
+function TopBarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { tabs } = useTabsContext();
@@ -171,5 +171,32 @@ export default function TopBar() {
         onClose={() => setIsNotificationsOpen(false)} 
       />
     </header>
+  );
+}
+
+export default function TopBar() {
+  return (
+    <Suspense fallback={
+      <header className="fixed top-0 left-0 right-0 bg-gray-50 z-50">
+        <div className="h-16 flex items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="w-10 h-10 relative">
+                <Image 
+                  src="/biofincas.png" 
+                  alt="Biofincas Logo" 
+                  width={30}
+                  height={30}
+                  className="object-contain"
+                />
+              </div>
+              <h1 className="text-s font-semibold text-gray-900">Biofincas</h1>
+            </Link>
+          </div>
+        </div>
+      </header>
+    }>
+      <TopBarContent />
+    </Suspense>
   );
 }

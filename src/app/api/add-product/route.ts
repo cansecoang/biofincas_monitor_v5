@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
       product_objective?.trim() || null,
       deliverable?.trim() || null,
       delivery_date || null,
-      product_output?.trim() || null,
+      product_output || null,
       methodology_description?.trim() || null,
       gender_specific_actions?.trim() || null,
       next_steps?.trim() || null,
