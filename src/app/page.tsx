@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
