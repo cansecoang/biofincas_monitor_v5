@@ -17,25 +17,10 @@ function CreateProductContent({ onComplete, onCancel }: { onComplete: (data: any
 }
 
 export default function CreateProductPage() {
-  const handleComplete = async (data: any) => {
-    try {
-      console.log('Product data:', data);
-      
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) throw new Error('Failed to create product');
-      
-      alert('Product created successfully!');
-      window.location.href = '/products/list';
-    } catch (error) {
-      console.error('Error creating product:', error);
-      alert('Error creating product. Please try again.');
-    }
+  const handleComplete = (data: any) => {
+    // ProductStepWizard ya maneja la creación del producto internamente
+    // Esta función solo se llama cuando el producto se creó exitosamente
+    console.log('Product created successfully with data:', data);
   };
 
   const handleCancel = () => {

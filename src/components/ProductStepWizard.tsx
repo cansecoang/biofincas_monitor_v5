@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import CancelConfirmationModal from './CancelConfirmationModal';
 
@@ -11,91 +11,159 @@ interface ProductStepWizardProps {
 }
 
 interface ProductFormData {
-  [x: string]: string | number | readonly string[] | undefined;
   // Step 1: General Information
   productName: string;
   productObjective: string;
   deliverable: string;
   deliveryDate: string;
+  methodologyDescription: string;
+  genderSpecificActions: string;
+  nextSteps: string;
   
   // Step 2: Location and Context
   output: string;
   workpackage: string;
+  workingGroup: string;
   country: string;
   productOwner: string;
   
   // Step 3: Team
   responsable: string;
-  otherOrganizations: string;
+  otherOrganizations: number[];
   
   // Step 4: Indicators
-  selectedIndicators: string[];
+  selectedIndicators: number[];
+}
+
+interface Output {
+  output_id: number;
+  output_number: string;
+  output_name: string;
+}
+
+interface Workpackage {
+  workpackage_id: number;
+  workpackage_name: string;
+}
+
+interface WorkingGroup {
+  workinggroup_id: number;
+  workinggroup_name: string;
+}
+
+interface Country {
+  country_id: number;
+  country_name: string;
+}
+
+interface Organization {
+  organization_id: number;
+  organization_name: string;
+  organization_type?: string;
+}
+
+interface User {
+  user_id: number;
+  user_name: string;
+}
+
+interface Indicator {
+  indicator_id: number;
+  indicator_code: string;
+  indicator_description: string;
 }
 
 const STEPS = [
-  { id: 1, title: 'Location and Context', subtitle: 'View your income in a certain period of time' },
-  { id: 2, title: 'General Information', subtitle: 'View your income in a certain period of time' },
-  { id: 3, title: 'Team', subtitle: 'View your income in a certain period of time' },
-  { id: 4, title: 'Indicators', subtitle: 'View your income in a certain period of time' },
-  { id: 5, title: 'Summary', subtitle: 'View your income in a certain period of time' },
-];
-
-const INDICATORS = [
-  {
-    id: '1.1',
-    code: 'META 1.1',
-    description: 'The state of biodiversity under different production systems in cocoa, coffee, and banana is identified (Milestone [1]) and related to the agricultural practices used in order to scale the best practices.',
-  },
-  {
-    id: '1.2',
-    code: 'META 1.2',
-    description: 'The state of biodiversity under different production systems in cocoa, coffee, and banana is identified (Milestone [1]) and related to the agricultural practices used in order to scale the best practices.',
-  },
-  {
-    id: '1.3',
-    code: 'META 1.3',
-    description: 'The state of biodiversity under different production systems in cocoa, coffee, and banana is identified (Milestone [1]) and related to the agricultural practices used in order to scale the best practices.',
-  },
-  {
-    id: '1.4',
-    code: 'META 1.4',
-    description: 'The state of biodiversity under different production systems in cocoa, coffee, and banana is identified (Milestone [1]) and related to the agricultural practices used in order to scale the best practices.',
-  },
-  {
-    id: '1.5',
-    code: 'META 1.5',
-    description: 'The state of biodiversity under different production systems in cocoa, coffee, and banana is identified (Milestone [1]) and related to the agricultural practices used in order to scale the best practices.',
-  },
-  {
-    id: '1.6',
-    code: 'META 1.6',
-    description: 'The state of biodiversity under different production systems in cocoa, coffee, and banana is identified (Milestone [1]) and related to the agricultural practices used in order to scale the best practices.',
-  },
+  { id: 1, title: 'General Information', subtitle: 'Basic product details' },
+  { id: 2, title: 'Location and Context', subtitle: 'Output, workpackage, and location' },
+  { id: 3, title: 'Team', subtitle: 'Responsible parties and organizations' },
+  { id: 4, title: 'Indicators', subtitle: 'Select related indicators' },
+  { id: 5, title: 'Summary', subtitle: 'Review and confirm' },
 ];
 
 export default function ProductStepWizard({ onComplete, onCancel }: ProductStepWizardProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Data from APIs
+  const [outputs, setOutputs] = useState<Output[]>([]);
+  const [workpackages, setWorkpackages] = useState<Workpackage[]>([]);
+  const [workingGroups, setWorkingGroups] = useState<WorkingGroup[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [productOwnerOrgs, setProductOwnerOrgs] = useState<Organization[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [indicators, setIndicators] = useState<Indicator[]>([]);
+
   const [formData, setFormData] = useState<ProductFormData>({
     productName: '',
     productObjective: '',
     deliverable: '',
     deliveryDate: '',
+    methodologyDescription: '',
+    genderSpecificActions: '',
+    nextSteps: '',
     output: '',
     workpackage: '',
+    workingGroup: '',
     country: '',
     productOwner: '',
     responsable: '',
-    otherOrganizations: '',
+    otherOrganizations: [],
     selectedIndicators: [],
   });
+
+  // Load all data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const [outputsRes, workpackagesRes, workingGroupsRes, countriesRes, orgsRes, usersRes, indicatorsRes] = await Promise.all([
+          fetch('/api/outputs'),
+          fetch('/api/work-packages'),
+          fetch('/api/working-groups'),
+          fetch('/api/countries'),
+          fetch('/api/organizations'),
+          fetch('/api/users'),
+          fetch('/api/indicators')
+        ]);
+
+        const outputsData = await outputsRes.json();
+        const workpackagesData = await workpackagesRes.json();
+        const workingGroupsData = await workingGroupsRes.json();
+        const countriesData = await countriesRes.json();
+        const orgsData = await orgsRes.json();
+        const usersData = await usersRes.json();
+        const indicatorsData = await indicatorsRes.json();
+
+        if (outputsData.success) setOutputs(outputsData.outputs);
+        if (workpackagesData.success) setWorkpackages(workpackagesData.workpackages);
+        if (workingGroupsData.workingGroups) setWorkingGroups(workingGroupsData.workingGroups);
+        if (countriesData.success) setCountries(countriesData.countries);
+        if (orgsData.organizations) {
+          setOrganizations(orgsData.organizations);
+          // Filter organizations with type 'M' for Product Owner dropdown
+          setProductOwnerOrgs(orgsData.organizations.filter((org: Organization) => org.organization_type === 'M'));
+        }
+        if (usersData.success) setUsers(usersData.users);
+        if (indicatorsData.success) setIndicators(indicatorsData.indicators);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const handleNext = () => {
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1);
     }
-    // No hacer nada en el último step (Create Product)
   };
 
   const handleBack = () => {
@@ -118,7 +186,7 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const toggleIndicator = (indicatorId: string) => {
+  const toggleIndicator = (indicatorId: number) => {
     setFormData(prev => ({
       ...prev,
       selectedIndicators: prev.selectedIndicators.includes(indicatorId)
@@ -127,8 +195,79 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
     }));
   };
 
+  const toggleOrganization = (orgId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      otherOrganizations: prev.otherOrganizations.includes(orgId)
+        ? prev.otherOrganizations.filter(id => id !== orgId)
+        : [...prev.otherOrganizations, orgId]
+    }));
+  };
+
+  const handleCreateProduct = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      const payload = {
+        product_name: formData.productName,
+        product_objective: formData.productObjective,
+        deliverable: formData.deliverable,
+        delivery_date: formData.deliveryDate || null,
+        methodology_description: formData.methodologyDescription || null,
+        gender_specific_actions: formData.genderSpecificActions || null,
+        next_steps: formData.nextSteps || null,
+        product_output: formData.output,
+        workpackage_id: formData.workpackage ? parseInt(formData.workpackage) : null,
+        workinggroup_id: formData.workingGroup ? parseInt(formData.workingGroup) : null,
+        product_owner_id: formData.productOwner ? parseInt(formData.productOwner) : null,
+        country_id: formData.country ? parseInt(formData.country) : null,
+        responsibles: formData.responsable ? [{ 
+          user_id: parseInt(formData.responsable), 
+          is_primary: true,
+          position: 1 
+        }] : [],
+        organizations: formData.otherOrganizations.map((orgId, index) => ({
+          organization_id: orgId,
+          relation_type: 'collaborator',
+          position: index + 1
+        })),
+        indicators: formData.selectedIndicators,
+      };
+
+      const response = await fetch('/api/add-product', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        onComplete(formData);
+        router.push('/products/list');
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error creating product:', error);
+      alert('An error occurred while creating the product');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Calculate progress percentage
   const progressPercentage = (currentStep / STEPS.length) * 100;
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-full bg-white rounded-2xl shadow overflow-hidden p-6 flex items-center justify-center" style={{ height: 'calc(100vh - 120px)' }}>
+        <Loader2 className="animate-spin text-blue-500" size={48} />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-full bg-white rounded-2xl shadow overflow-hidden p-6 flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
@@ -162,82 +301,12 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
 
       {/* Step Content */}
       <div className="flex-1 overflow-y-auto mb-2">
-        {/* Step 1: Location and Context */}
+        {/* Step 1: General Information */}
         {currentStep === 1 && (
           <div className="grid grid-cols-2 gap-6 px-1">
-            <div>
+            <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Output
-              </label>
-              <select
-                value={formData.output}
-                onChange={(e) => updateFormData('output', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-              >
-                <option value="">Select output</option>
-                <option value="output1">Output 1 - Biodiversity Assessment</option>
-                <option value="output2">Output 2 - Best Practices Guide</option>
-                <option value="output3">Output 3 - Training Materials</option>
-                <option value="output4">Output 4 - Monitoring System</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Workpackage
-              </label>
-              <select
-                value={formData.workpackage}
-                onChange={(e) => updateFormData('workpackage', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-              >
-                <option value="">Select workpackage</option>
-                <option value="wp1">WP1 - Research and Development</option>
-                <option value="wp2">WP2 - Implementation</option>
-                <option value="wp3">WP3 - Monitoring and Evaluation</option>
-                <option value="wp4">WP4 - Communication and Dissemination</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Country
-              </label>
-              <select
-                value={formData.country}
-                onChange={(e) => updateFormData('country', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-              >
-                <option value="">Select country</option>
-                <option value="mexico">Mexico</option>
-                <option value="colombia">Colombia</option>
-                <option value="peru">Peru</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Product Owner
-              </label>
-              <select
-                value={formData.productOwner}
-                onChange={(e) => updateFormData('productOwner', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-              >
-                <option value="">Select product owner</option>
-                <option value="nuup">Nuup</option>
-                <option value="oro-verde">Oro Verde</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: General Information */}
-        {currentStep === 2 && (
-          <div className="grid grid-cols-2 gap-6 px-1">
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Product Name
+                Product Name *
               </label>
               <input
                 type="text"
@@ -248,29 +317,29 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               />
             </div>
 
-            <div>
+            <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Product Objective
               </label>
-              <input
-                type="text"
+              <textarea
                 value={formData.productObjective}
                 onChange={(e) => updateFormData('productObjective', e.target.value)}
                 placeholder="Product Objective"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={3}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               />
             </div>
 
-            <div>
+            <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Deliverable
               </label>
-              <input
-                type="text"
+              <textarea
                 value={formData.deliverable}
                 onChange={(e) => updateFormData('deliverable', e.target.value)}
                 placeholder="Deliverable"
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={2}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               />
             </div>
 
@@ -285,40 +354,183 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
                 className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Methodology Description
+              </label>
+              <textarea
+                value={formData.methodologyDescription}
+                onChange={(e) => updateFormData('methodologyDescription', e.target.value)}
+                placeholder="Describe the methodology to be used"
+                rows={3}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Gender Specific Actions
+              </label>
+              <textarea
+                value={formData.genderSpecificActions}
+                onChange={(e) => updateFormData('genderSpecificActions', e.target.value)}
+                placeholder="Describe gender-specific actions or considerations"
+                rows={2}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Next Steps
+              </label>
+              <textarea
+                value={formData.nextSteps}
+                onChange={(e) => updateFormData('nextSteps', e.target.value)}
+                placeholder="Describe the next steps for this product"
+                rows={2}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Location and Context */}
+        {currentStep === 2 && (
+          <div className="grid grid-cols-2 gap-6 px-1">
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Output
+              </label>
+              <select
+                value={formData.output}
+                onChange={(e) => updateFormData('output', e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+              >
+                <option value="">Select output</option>
+                {outputs.map((output) => (
+                  <option key={output.output_id} value={output.output_id}>
+                    {output.output_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Workpackage
+              </label>
+              <select
+                value={formData.workpackage}
+                onChange={(e) => updateFormData('workpackage', e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+              >
+                <option value="">Select workpackage</option>
+                {workpackages.map((wp) => (
+                  <option key={wp.workpackage_id} value={wp.workpackage_id}>
+                    {wp.workpackage_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Working Group
+              </label>
+              <select
+                value={formData.workingGroup}
+                onChange={(e) => updateFormData('workingGroup', e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+              >
+                <option value="">Select working group</option>
+                {workingGroups.map((wg) => (
+                  <option key={wg.workinggroup_id} value={wg.workinggroup_id}>
+                    {wg.workinggroup_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Country
+              </label>
+              <select
+                value={formData.country}
+                onChange={(e) => updateFormData('country', e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+              >
+                <option value="">Select country</option>
+                {countries.map((country) => (
+                  <option key={country.country_id} value={country.country_id}>
+                    {country.country_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Product Owner
+              </label>
+              <select
+                value={formData.productOwner}
+                onChange={(e) => updateFormData('productOwner', e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+              >
+                <option value="">Select product owner</option>
+                {productOwnerOrgs.map((org) => (
+                  <option key={org.organization_id} value={org.organization_id}>
+                    {org.organization_name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
 
         {/* Step 3: Team */}
         {currentStep === 3 && (
-          <div className="grid grid-cols-2 gap-6 px-1">
+          <div className="space-y-6 px-1">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Responsable
+                Responsible
               </label>
               <select
                 value={formData.responsable}
                 onChange={(e) => updateFormData('responsable', e.target.value)}
                 className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >
-                <option value="">Select responsable</option>
-                <option value="oro-verde">Oro Verde</option>
-                <option value="nuup">Nuup</option>
+                <option value="">Select responsible</option>
+                {users.map((user) => (
+                  <option key={user.user_id} value={user.user_id}>
+                    {user.user_name}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
                 Other Organizations
               </label>
-              <select
-                value={formData.otherOrganizations}
-                onChange={(e) => updateFormData('otherOrganizations', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-              >
-                <option value="">Select organizations</option>
-                <option value="nuup">Nuup</option>
-                <option value="oro-verde">Oro Verde</option>
-              </select>
+              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+                {organizations.map((org) => (
+                  <div
+                    key={org.organization_id}
+                    onClick={() => toggleOrganization(org.organization_id)}
+                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      formData.otherOrganizations.includes(org.organization_id)
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <p className="text-sm font-medium text-gray-900">{org.organization_name}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -326,35 +538,57 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
         {/* Step 4: Indicators */}
         {currentStep === 4 && (
           <div>
-            <div className="grid grid-cols-2 gap-4 px-1">
-              {INDICATORS.map((indicator) => (
-                  <div
-                    key={indicator.id}
-                    className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                      formData.selectedIndicators.includes(indicator.id)
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
-                    }`}
-                    onClick={() => toggleIndicator(indicator.id)}
-                  >
-                    {/* Index Pill Label */}
-                    <div className="absolute top-4 right-4">
-                      <span className="inline-flex items-center justify-center px-3 py-1 bg-white border border-gray-300 text-gray-900 text-sm font-medium rounded-full">
-                        {indicator.id}
-                      </span>
-                    </div>
+            {formData.output ? (
+              <div className="grid grid-cols-2 gap-4 px-1">
+                {(() => {
+                  // Get the selected output's number
+                  const selectedOutput = outputs.find(o => o.output_id.toString() === formData.output);
+                  const outputNumber = selectedOutput?.output_number;
+                  
+                  // Filter indicators that belong to the selected output
+                  const filteredIndicators = indicators.filter(indicator => 
+                    outputNumber && indicator.indicator_code.startsWith(outputNumber + '.')
+                  );
 
-                    {/* Content */}
-                    <p className="text-xs text-gray-500 mb-2 pr-12">
-                      {indicator.description}
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {indicator.code}
-                    </p>
-                  </div>
-                ))}
+                  if (filteredIndicators.length === 0) {
+                    return (
+                      <div className="col-span-2 text-center py-8 text-gray-500">
+                        No indicators available for this output
+                      </div>
+                    );
+                  }
+
+                  return filteredIndicators.map((indicator) => (
+                    <div
+                      key={indicator.indicator_id}
+                      className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                        formData.selectedIndicators.includes(indicator.indicator_id)
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                      onClick={() => toggleIndicator(indicator.indicator_id)}
+                    >
+                      {/* Code Label */}
+                      <div className="absolute top-4 right-4">
+                        <span className="inline-flex items-center justify-center px-3 py-1 bg-white border border-gray-300 text-gray-900 text-sm font-medium rounded-full">
+                          {indicator.indicator_code}
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-xs text-gray-500 mb-2 pr-12">
+                        {indicator.indicator_description}
+                      </p>
+                    </div>
+                  ));
+                })()}
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                Please select an output in Step 2 to view available indicators
+              </div>
+            )}
+          </div>
         )}
 
         {/* Step 5: Resume */}
@@ -362,50 +596,75 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
           <div className="space-y-6 px-1">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Location and Context
+                General Information
               </h3>
               <div className="space-y-3">
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Output</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.output || '—'}</span>
+                  <span className="w-48 text-sm font-medium text-gray-600">Product Name</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">{formData.productName || '—'}</span>
                 </div>
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Workpackage</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.workpackage || '—'}</span>
+                  <span className="w-48 text-sm font-medium text-gray-600">Product Objective</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">{formData.productObjective || '—'}</span>
                 </div>
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Country</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.country || '—'}</span>
+                  <span className="w-48 text-sm font-medium text-gray-600">Deliverable (s)</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">{formData.deliverable || '—'}</span>
                 </div>
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Product Owner</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.productOwner || '—'}</span>
+                  <span className="w-48 text-sm font-medium text-gray-600">Delivery Date</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">{formData.deliveryDate || '—'}</span>
+                </div>
+                <div className="flex">
+                  <span className="w-48 text-sm font-medium text-gray-600">Methodology Description</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">{formData.methodologyDescription || '—'}</span>
+                </div>
+                <div className="flex">
+                  <span className="w-48 text-sm font-medium text-gray-600">Gender Specific Actions</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">{formData.genderSpecificActions || '—'}</span>
+                </div>
+                <div className="flex">
+                  <span className="w-48 text-sm font-medium text-gray-600">Next Steps</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">{formData.nextSteps || '—'}</span>
                 </div>
               </div>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                General Information
+                Location and Context
               </h3>
               <div className="space-y-3">
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Product Name</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.productName || '—'}</span>
+                  <span className="w-40 text-sm font-medium text-gray-600">Output</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {outputs.find(o => o.output_id.toString() === formData.output)?.output_name || '—'}
+                  </span>
                 </div>
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Product Objective</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.productObjective || '—'}</span>
+                  <span className="w-40 text-sm font-medium text-gray-600">Workpackage</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {workpackages.find(w => w.workpackage_id.toString() === formData.workpackage)?.workpackage_name || '—'}
+                  </span>
                 </div>
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Deliverable (s)</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.deliverable || '—'}</span>
+                  <span className="w-40 text-sm font-medium text-gray-600">Working Group</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {workingGroups.find(wg => wg.workinggroup_id.toString() === formData.workingGroup)?.workinggroup_name || '—'}
+                  </span>
                 </div>
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Delivery Date</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.deliveryDate || '—'}</span>
+                  <span className="w-40 text-sm font-medium text-gray-600">Country</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {countries.find(c => c.country_id.toString() === formData.country)?.country_name || '—'}
+                  </span>
                 </div>
-                
+                <div className="flex">
+                  <span className="w-40 text-sm font-medium text-gray-600">Product Owner</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {productOwnerOrgs.find(o => o.organization_id.toString() === formData.productOwner)?.organization_name || '—'}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -415,12 +674,20 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               </h3>
               <div className="space-y-3">
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Responsable</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.responsable || '—'}</span>
+                  <span className="w-40 text-sm font-medium text-gray-600">Responsible</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {users.find(u => u.user_id.toString() === formData.responsable)?.user_name || '—'}
+                  </span>
                 </div>
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Other Organizations</span>
-                  <span className="text-sm font-bold text-gray-900">{formData.otherOrganizations || '—'}</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {formData.otherOrganizations.length > 0
+                      ? formData.otherOrganizations.map(id => 
+                          organizations.find(o => o.organization_id === id)?.organization_name
+                        ).join(', ')
+                      : '—'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -432,10 +699,10 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
               <div className="flex flex-wrap gap-2">
                 {formData.selectedIndicators.length > 0 ? (
                   formData.selectedIndicators.map(id => {
-                    const indicator = INDICATORS.find(i => i.id === id);
+                    const indicator = indicators.find(i => i.indicator_id === id);
                     return (
                       <span key={id} className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
-                        {indicator?.code}
+                        {indicator?.indicator_code}
                       </span>
                     );
                   })
@@ -453,24 +720,42 @@ export default function ProductStepWizard({ onComplete, onCancel }: ProductStepW
         <button
           type="button"
           onClick={handleBack}
-          disabled={currentStep === 1}
+          disabled={currentStep === 1 || isSubmitting}
           className={`px-8 py-3 border border-gray-300 text-gray-700 rounded-full font-medium transition-colors ${
-            currentStep === 1 
-              ? 'opacity-50 cursor-default' 
+            currentStep === 1 || isSubmitting
+              ? 'opacity-50 cursor-not-allowed' 
               : 'hover:bg-gray-50'
           }`}
         >
           Back
         </button>
         
-        <button
-          type="button"
-          onClick={handleNext}
-          className="flex items-center gap-2 px-8 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 transition-colors"
-        >
-          {currentStep === STEPS.length ? 'Create Product' : 'Next'}
-          {currentStep < STEPS.length}
-        </button>
+        {currentStep === STEPS.length ? (
+          <button
+            type="button"
+            onClick={handleCreateProduct}
+            disabled={isSubmitting || !formData.productName}
+            className="flex items-center gap-2 px-8 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin" size={20} />
+                Creating...
+              </>
+            ) : (
+              'Create Product'
+            )}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleNext}
+            className="flex items-center gap-2 px-8 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 transition-colors"
+          >
+            Next
+            <ChevronRight size={20} />
+          </button>
+        )}
       </div>
 
       {/* Cancel Confirmation Modal */}
