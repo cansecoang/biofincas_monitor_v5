@@ -44,14 +44,12 @@ export async function GET(request: Request) {
            NULLIF(COUNT(t.task_id), 0)), 1
         ) as completion_percentage
       FROM indicators i
-      INNER JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
-      INNER JOIN products p ON pi.product_id = p.product_id
+      LEFT JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
+      LEFT JOIN products p ON pi.product_id = p.product_id ${whereConditions.replace('AND', 'AND')}
       LEFT JOIN tasks t ON p.product_id = t.product_id
       LEFT JOIN status s ON t.status_id = s.status_id
       WHERE i.output_number = $1
-      ${whereConditions}
       GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number
-      HAVING COUNT(DISTINCT pi.product_id) > 0
       ORDER BY i.indicator_code
     `;
 
