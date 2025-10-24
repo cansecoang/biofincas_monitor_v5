@@ -75,7 +75,6 @@ export async function POST(request: NextRequest) {
       organizations = [],
       indicators = [],
       distributor_orgs = [],
-      distributor_users = [],
       distributor_others = []
     } = body;
 
@@ -171,7 +170,7 @@ export async function POST(request: NextRequest) {
     // ✅ VALIDACIÓN DE ARRAYS
     if (!Array.isArray(responsibles) || !Array.isArray(organizations) || 
         !Array.isArray(indicators) || !Array.isArray(distributor_orgs) || 
-        !Array.isArray(distributor_users) || !Array.isArray(distributor_others)) {
+        !Array.isArray(distributor_others)) {
       await client.query('ROLLBACK');
       return NextResponse.json({
         success: false,
@@ -348,39 +347,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 6. Insertar distribuidores usuarios (con validación)
-    if (distributor_users && distributor_users.length > 0) {
-      for (let i = 0; i < distributor_users.length; i++) {
-        const userId = distributor_users[i];
-        
-        // Validar que sea un número
-        if (typeof userId !== 'number') {
-          await client.query('ROLLBACK');
-          return NextResponse.json({
-            success: false,
-            message: 'Each distributor user must be a valid number'
-          }, { status: 400 });
-        }
-
-        // Validar que el usuario existe
-        const userExists = await validateIdExists(client, 'users', 'user_id', userId);
-        if (!userExists) {
-          await client.query('ROLLBACK');
-          return NextResponse.json({
-            success: false,
-            message: `Distributor user with ID ${userId} does not exist`
-          }, { status: 400 });
-        }
-
-        await client.query(
-          `INSERT INTO product_distributor_users (product_id, user_id, position)
-           VALUES ($1, $2, $3)`,
-          [productId, userId, i + 1]
-        );
-      }
-    }
-
-    // 7. Insertar otros distribuidores (con validación)
+    // 6. Insertar otros distribuidores (con validación)
     if (distributor_others && distributor_others.length > 0) {
       for (let i = 0; i < distributor_others.length; i++) {
         const other = distributor_others[i];

@@ -39,7 +39,6 @@ interface ProductFormData {
   
   // Step 5: Distributors
   distributorOrganizations: number[];
-  distributorUsers: number[];
   distributorOthers: Array<{ display_name: string; contact: string }>;
 }
 
@@ -130,7 +129,6 @@ export default function ProductStepWizard({
     otherOrganizations: [],
     selectedIndicators: [],
     distributorOrganizations: [],
-    distributorUsers: [],
     distributorOthers: [],
   });
 
@@ -243,16 +241,6 @@ export default function ProductStepWizard({
     }));
   };
 
-  // Distributor Users functions
-  const toggleDistributorUser = (userId: number) => {
-    setFormData(prev => ({
-      ...prev,
-      distributorUsers: prev.distributorUsers.includes(userId)
-        ? prev.distributorUsers.filter(id => id !== userId)
-        : [...prev.distributorUsers, userId]
-    }));
-  };
-
   // Distributor Others functions
   const addDistributorOther = () => {
     setFormData(prev => ({
@@ -307,7 +295,6 @@ export default function ProductStepWizard({
         })),
         indicators: formData.selectedIndicators,
         distributor_orgs: formData.distributorOrganizations,
-        distributor_users: formData.distributorUsers,
         distributor_others: formData.distributorOthers.filter(d => d.display_name.trim() !== ''),
       };
 
@@ -451,7 +438,7 @@ export default function ProductStepWizard({
 
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Gender Specific Actions
+                Gender Specific Actions (See gender action plan)
               </label>
               <textarea
                 value={formData.genderSpecificActions}
@@ -464,7 +451,7 @@ export default function ProductStepWizard({
 
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Next Steps
+                Next Steps (Add related products)
               </label>
               <textarea
                 value={formData.nextSteps}
@@ -597,8 +584,8 @@ export default function ProductStepWizard({
               <label className="block text-sm font-medium text-gray-900 mb-3">
                 Other Organizations
               </label>
-              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-                {organizations.map((org) => (
+              <div className="grid grid-cols-2 gap-3">
+                {organizations.filter(org => org.organization_type === 'M').map((org) => (
                   <div
                     key={org.organization_id}
                     onClick={() => toggleOrganization(org.organization_id)}
@@ -678,10 +665,10 @@ export default function ProductStepWizard({
             {/* Distributor Organizations */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-3">
-                Distributor Organizations (Optional)
+                Distributor/Partner (Optional)
               </label>
-              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-                {organizations.map((org) => (
+              <div className="grid grid-cols-2 gap-3">
+                {organizations.filter(org => org.organization_type === 'M').map((org) => (
                   <div
                     key={org.organization_id}
                     onClick={() => toggleDistributorOrganization(org.organization_id)}
@@ -692,28 +679,6 @@ export default function ProductStepWizard({
                     }`}
                   >
                     <p className="text-sm font-medium text-gray-900">{org.organization_name}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Distributor Users */}
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-3">
-                Distributor Users (Optional)
-              </label>
-              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-                {users.map((user) => (
-                  <div
-                    key={user.user_id}
-                    onClick={() => toggleDistributorUser(user.user_id)}
-                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                      formData.distributorUsers.includes(user.user_id)
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
-                    }`}
-                  >
-                    <p className="text-sm font-medium text-gray-900">{user.user_name}</p>
                   </div>
                 ))}
               </div>
@@ -749,7 +714,7 @@ export default function ProductStepWizard({
                         type="text"
                         value={distributor.contact}
                         onChange={(e) => updateDistributorOther(index, 'contact', e.target.value)}
-                        placeholder="Contact (email, phone, etc.)"
+                        placeholder="Description"
                         className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -804,11 +769,11 @@ export default function ProductStepWizard({
                   <span className="text-sm font-bold text-gray-900 flex-1">{formData.methodologyDescription || '—'}</span>
                 </div>
                 <div className="flex">
-                  <span className="w-48 text-sm font-medium text-gray-600">Gender Specific Actions</span>
+                  <span className="w-48 text-sm font-medium text-gray-600">Gender Specific Actions (See gender action plan)</span>
                   <span className="text-sm font-bold text-gray-900 flex-1">{formData.genderSpecificActions || '—'}</span>
                 </div>
                 <div className="flex">
-                  <span className="w-48 text-sm font-medium text-gray-600">Next Steps</span>
+                  <span className="w-48 text-sm font-medium text-gray-600">Next Steps (Add related products)</span>
                   <span className="text-sm font-bold text-gray-900 flex-1">{formData.nextSteps || '—'}</span>
                 </div>
               </div>
@@ -907,16 +872,6 @@ export default function ProductStepWizard({
                     {formData.distributorOrganizations.length > 0
                       ? formData.distributorOrganizations.map(id => 
                           organizations.find(o => o.organization_id === id)?.organization_name
-                        ).join(', ')
-                      : '—'}
-                  </span>
-                </div>
-                <div className="flex">
-                  <span className="w-48 text-sm font-medium text-gray-600">Distributor Users</span>
-                  <span className="text-sm font-bold text-gray-900 flex-1">
-                    {formData.distributorUsers.length > 0
-                      ? formData.distributorUsers.map(id => 
-                          users.find(u => u.user_id === id)?.user_name
                         ).join(', ')
                       : '—'}
                   </span>

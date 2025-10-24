@@ -91,6 +91,25 @@ export default function ProductDetailModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      // Guardar el valor actual del scroll
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Prevenir scroll
+      document.body.style.overflow = 'hidden';
+      // Compensar el ancho del scrollbar para evitar el "salto" del contenido
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      
+      // Cleanup: restaurar cuando el modal se cierre
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      };
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen && productId) {
       loadProductData();
@@ -121,17 +140,24 @@ export default function ProductDetailModal({
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-[300] flex items-start justify-center pl-16 pt-20 overflow-y-auto bg-black bg-opacity-50"
-      onClick={onClose}
-    >
+    <>
+      {/* Backdrop overlay - bloquea interacciones */}
+      <div 
+        className="fixed inset-0 bg-black/50 z-[400]"
+        onClick={onClose}
+      />
+      
       {/* Modal Container */}
       <div 
-        className="bg-white rounded-2xl border border-gray-200 shadow-sm w-full max-w-[94.2vw] max-h-[calc(100vh-8rem)] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[500] flex items-start justify-center pt-20 overflow-y-auto"
       >
+        <div 
+          className="bg-white rounded-2xl border border-gray-200 shadow-xl w-full 
+          max-w-[90vw] max-h-[calc(100vh-8rem)] flex flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
-        <div className="pl-2 pr-6 py-4 rounded-t-2xl border-b border-gray-200">
+        <div className="pl-2 pr-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
             {/* Left: Back button and Title */}
             <div className="flex items-center gap-3">
@@ -392,6 +418,7 @@ export default function ProductDetailModal({
           ) : null}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

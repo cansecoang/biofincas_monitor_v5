@@ -22,7 +22,6 @@ interface ProductFormData {
   otherOrganizations: number[];
   selectedIndicators: number[];
   distributorOrganizations: number[];
-  distributorUsers: number[];
   distributorOthers: Array<{ display_name: string; contact: string }>;
 }
 
@@ -69,7 +68,6 @@ function EditProductContent() {
           otherOrganizations: data.organizations?.map((org: any) => org.organization_id) || [],
           selectedIndicators: data.indicators?.map((ind: any) => ind.indicator_id) || [],
           distributorOrganizations: data.distributors?.organizations?.map((org: any) => org.organization_id) || [],
-          distributorUsers: data.distributors?.users?.map((user: any) => user.user_id) || [],
           distributorOthers: data.distributors?.others?.map((other: any) => ({
             display_name: other.display_name || '',
             contact: other.contact || ''

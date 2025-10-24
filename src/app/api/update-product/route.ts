@@ -63,7 +63,6 @@ export async function PUT(request: NextRequest) {
       organizations = [],
       indicators = [],
       distributor_orgs = [],
-      distributor_users = [],
       distributor_others = []
     } = body;
 
@@ -295,34 +294,7 @@ export async function PUT(request: NextRequest) {
       console.log(`   ✓ Updated ${distributor_orgs.length} distributor organizations`);
     }
 
-    // 6. Eliminar y recrear distributor users
-    await client.query('DELETE FROM product_distributor_users WHERE product_id = $1', [product_id]);
-    
-    if (distributor_users && distributor_users.length > 0) {
-      for (let i = 0; i < distributor_users.length; i++) {
-        const userId = distributor_users[i];
-        
-        // Validar que sea un número
-        if (typeof userId !== 'number') {
-          throw new Error('Each distributor user must be a valid number');
-        }
-
-        // Validar que el usuario existe
-        const userExists = await validateIdExists(client, 'users', 'user_id', userId);
-        if (!userExists) {
-          throw new Error(`Distributor user with ID ${userId} does not exist`);
-        }
-
-        await client.query(
-          `INSERT INTO product_distributor_users (product_id, user_id, position)
-           VALUES ($1, $2, $3)`,
-          [product_id, userId, i + 1]
-        );
-      }
-      console.log(`   ✓ Updated ${distributor_users.length} distributor users`);
-    }
-
-    // 7. Eliminar y recrear distributor others
+    // 6. Eliminar y recrear distributor others
     await client.query('DELETE FROM product_distributor_others WHERE product_id = $1', [product_id]);
     
     if (distributor_others && distributor_others.length > 0) {
