@@ -312,7 +312,6 @@ export default function ProductDetailModal({
                             {responsible.role_label && (
                               <span className="block text-gray-600 text-xs">{responsible.role_label}</span>
                             )}
-                            <span className="block text-gray-500 text-xs">{responsible.user_email}</span>
                           </div>
                         ))}
                       </div>
@@ -373,9 +372,7 @@ export default function ProductDetailModal({
                           {productData.distributors.organizations.map((org) => (
                             <div key={org.organization_id} className="text-sm">
                               <span className="text-gray-900 font-medium">{org.organization_name}</span>
-                              {org.organization_description && (
-                                <span className="block text-gray-600 text-xs">{org.organization_description}</span>
-                              )}
+                              
                             </div>
                           ))}
                         </div>
@@ -388,9 +385,8 @@ export default function ProductDetailModal({
                           {productData.distributors.users.map((user) => (
                             <div key={user.user_id} className="text-sm">
                               <span className="text-gray-900 font-medium">
-                                {user.user_name} {user.user_last_name}
+                                {user.user_name}
                               </span>
-                              <span className="block text-gray-500 text-xs">{user.user_email}</span>
                             </div>
                           ))}
                         </div>
@@ -403,9 +399,7 @@ export default function ProductDetailModal({
                           {productData.distributors.others.map((other, index) => (
                             <div key={index} className="text-sm">
                               <span className="text-gray-900 font-medium">{other.display_name}</span>
-                              {other.contact && (
-                                <span className="block text-gray-500 text-xs">{other.contact}</span>
-                              )}
+                              
                             </div>
                           ))}
                         </div>
