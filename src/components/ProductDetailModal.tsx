@@ -324,12 +324,7 @@ export default function ProductDetailModal({
                         {productData.organizations.map((org) => (
                           <div key={org.organization_id} className="text-sm">
                             <span className="text-gray-900 font-medium">{org.organization_name}</span>
-                            {org.relation_type && (
-                              <span className="ml-2 text-gray-600 text-xs">({org.relation_type})</span>
-                            )}
-                            {org.organization_description && (
-                              <span className="block text-gray-600 text-xs">{org.organization_description}</span>
-                            )}
+                            
                           </div>
                         ))}
                       </div>
