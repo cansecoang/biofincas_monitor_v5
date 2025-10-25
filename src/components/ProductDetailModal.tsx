@@ -304,13 +304,10 @@ export default function ProductDetailModal({
                         {productData.responsibles.map((responsible) => (
                           <div key={responsible.user_id} className="text-sm">
                             <span className="text-gray-900 font-medium">
-                              {responsible.user_name} {responsible.user_last_name}
+                              {responsible.user_name}
                             </span>
                             {responsible.is_primary && (
                               <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs">Primary</span>
-                            )}
-                            {responsible.role_label && (
-                              <span className="block text-gray-600 text-xs">{responsible.role_label}</span>
                             )}
                           </div>
                         ))}
