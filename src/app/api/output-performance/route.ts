@@ -16,15 +16,18 @@ export async function GET(request: Request) {
 
     // 🎯 QUERY SIMPLIFICADA: Obtener indicadores con métricas básicas por output
     let paramIndex = 2;
-    let whereConditions = '';
+    let indicatorWhereConditions = ''; // Condiciones para filtrar indicadores directamente
+    let productWhereConditions = '';   // Condiciones para filtrar productos
     
+    // Filtro de workPackage: aplicar a indicadores
     if (workPackageFilter && workPackageFilter !== 'all') {
-      whereConditions += ` AND p.workpackage_id = $${paramIndex}`;
+      indicatorWhereConditions += ` AND i.workpackage_id = $${paramIndex}`;
       paramIndex++;
     }
     
+    // Filtro de country: aplicar a productos
     if (countryFilter && countryFilter !== 'all') {
-      whereConditions += ` AND p.country_id = $${paramIndex}`;
+      productWhereConditions += ` AND p.country_id = $${paramIndex}`;
       paramIndex++;
     }
 
@@ -35,6 +38,7 @@ export async function GET(request: Request) {
         i.indicator_name,
         COALESCE(i.indicator_description, '') as indicator_description,
         i.output_number,
+        i.workpackage_id,
         COUNT(DISTINCT pi.product_id) as assigned_products_count,
         COUNT(t.task_id) as total_tasks,
         COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) as completed_tasks,
@@ -45,11 +49,11 @@ export async function GET(request: Request) {
         ) as completion_percentage
       FROM indicators i
       LEFT JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
-      LEFT JOIN products p ON pi.product_id = p.product_id ${whereConditions.replace('AND', 'AND')}
+      LEFT JOIN products p ON pi.product_id = p.product_id ${productWhereConditions.replace('AND', 'AND')}
       LEFT JOIN tasks t ON p.product_id = t.product_id
       LEFT JOIN status s ON t.status_id = s.status_id
-      WHERE i.output_number = $1
-      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number
+      WHERE i.output_number = $1 ${indicatorWhereConditions}
+      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number, i.workpackage_id
       ORDER BY i.indicator_code
     `;
 
@@ -68,14 +72,9 @@ export async function GET(request: Request) {
 
     // 🎯 Para cada indicador, obtener productos asignados
     const indicators = await Promise.all(result.rows.map(async (row) => {
-      // Construir WHERE conditions para sub-queries
+      // Construir WHERE conditions para sub-queries (solo country, workpackage ya se filtró en indicadores)
       let subParamIndex = 2;
       let subWhereConditions = '';
-      
-      if (workPackageFilter && workPackageFilter !== 'all') {
-        subWhereConditions += ` AND p.workpackage_id = $${subParamIndex}`;
-        subParamIndex++;
-      }
       
       if (countryFilter && countryFilter !== 'all') {
         subWhereConditions += ` AND p.country_id = $${subParamIndex}`;
@@ -99,9 +98,6 @@ export async function GET(request: Request) {
       `;
       
       const productsParams: any[] = [row.indicator_id];
-      if (workPackageFilter && workPackageFilter !== 'all') {
-        productsParams.push(workPackageFilter);
-      }
       if (countryFilter && countryFilter !== 'all') {
         productsParams.push(countryFilter);
       }
