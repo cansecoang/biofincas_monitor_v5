@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, Activity, BarChart3, Eye, MapPin, Package2, Target } from "lucide-react";
 import { IndicatorPerformance } from "@/types/indicators";
 
@@ -10,6 +11,8 @@ interface IndicatorDetailModalProps {
 }
 
 export default function IndicatorDetailModal({ open, onClose, indicator, onProductClick }: IndicatorDetailModalProps) {
+  const router = useRouter();
+
   // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
     if (open) {
@@ -22,6 +25,12 @@ export default function IndicatorDetailModal({ open, onClose, indicator, onProdu
       };
     }
   }, [open]);
+
+  // Función para navegar al detalle del producto
+  const handleProductClick = (productId: number) => {
+    router.push(`/products/list?productId=${productId}`);
+    onClose(); // Cerrar el modal después de navegar
+  };
 
   if (!open || !indicator) return null;
 
@@ -150,7 +159,7 @@ export default function IndicatorDetailModal({ open, onClose, indicator, onProdu
                 {indicatorData.products && indicatorData.products.length > 0 ? (
                   indicatorData.products.map((product, idx) => (
                     <div key={idx} className="grid grid-cols-[160px_1fr_1fr] gap-x-6 gap-y-1 items-center cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition-all"
-                      onClick={() => onProductClick(product.product_id)}
+                      onClick={() => handleProductClick(product.product_id)}
                     >
                       <span className="text-sm text-gray-600 font-medium">{product.product_name}</span>
                       <span className="text-xs text-gray-500">{product.country_name}</span>
