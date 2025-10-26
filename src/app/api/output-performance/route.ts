@@ -54,7 +54,11 @@ export async function GET(request: Request) {
       LEFT JOIN status s ON t.status_id = s.status_id
       WHERE i.output_number = $1 ${indicatorWhereConditions}
       GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number, i.workpackage_id
-      ORDER BY i.indicator_code
+      ORDER BY 
+        -- Ordenamiento natural: primero por la parte numérica antes del punto
+        CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER),
+        -- Luego por la parte numérica después del punto
+        CAST(SPLIT_PART(i.indicator_code, '.', 2) AS INTEGER)
     `;
 
     const queryParams: any[] = [outputFilter];
