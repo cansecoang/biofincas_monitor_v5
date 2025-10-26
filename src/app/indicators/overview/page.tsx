@@ -203,10 +203,10 @@ function IndicatorCard({
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900">
-              {indicator.indicator_code}
+              META {indicator.indicator_code}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              {indicator.indicator_name}
+              {indicator.workpackage_name}
             </p>
             <div className="flex items-center gap-2 mt-2">
               <Package2 className="h-4 w-4 text-gray-400" />

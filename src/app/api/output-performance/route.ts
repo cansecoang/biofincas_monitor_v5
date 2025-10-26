@@ -39,6 +39,7 @@ export async function GET(request: Request) {
         COALESCE(i.indicator_description, '') as indicator_description,
         i.output_number,
         i.workpackage_id,
+        COALESCE(wp.workpackage_name, 'Sin WP') as workpackage_name,
         COUNT(DISTINCT pi.product_id) as assigned_products_count,
         COUNT(t.task_id) as total_tasks,
         COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) as completed_tasks,
@@ -48,12 +49,13 @@ export async function GET(request: Request) {
            NULLIF(COUNT(t.task_id), 0)), 1
         ) as completion_percentage
       FROM indicators i
+      LEFT JOIN workpackages wp ON i.workpackage_id = wp.workpackage_id
       LEFT JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
       LEFT JOIN products p ON pi.product_id = p.product_id ${productWhereConditions.replace('AND', 'AND')}
       LEFT JOIN tasks t ON p.product_id = t.product_id
       LEFT JOIN status s ON t.status_id = s.status_id
       WHERE i.output_number = $1 ${indicatorWhereConditions}
-      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number, i.workpackage_id
+      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number, i.workpackage_id, wp.workpackage_name
       ORDER BY 
         -- Ordenamiento natural: primero por la parte numérica antes del punto
         CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER),
@@ -135,6 +137,7 @@ export async function GET(request: Request) {
         indicator_code: row.indicator_code,
         indicator_name: row.indicator_name,
         indicator_description: row.indicator_description,
+        workpackage_name: row.workpackage_name,
         assigned_products_count: parseInt(row.assigned_products_count) || 0,
         assigned_products: productsResult.rows,
         total_tasks: parseInt(row.total_tasks) || 0,
