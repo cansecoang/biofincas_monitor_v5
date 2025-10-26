@@ -334,7 +334,7 @@ function IndicatorsContent() {
   // 🎯 RENDER
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-8xl mx-auto">
         {!selectedOutput ? (
           // Estado: No hay output seleccionado
           <div className="bg-white rounded-2xl shadow p-12">
