@@ -3,6 +3,7 @@
 import { ReactNode, useState, useEffect, Suspense } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import TabsLayout from '@/components/TabsLayout';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import TaskDetailModal from '@/components/TaskDetailModal';
@@ -181,13 +182,13 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
         }
 
         setIsDeleteModalOpen(false);
-        alert('Product deleted successfully');
+        toast.success('Product deleted successfully');
       } else {
-        alert(`Error deleting product: ${result.error}`);
+        toast.error(`Error deleting product: ${result.error}`);
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('An error occurred while deleting the product');
+      toast.error('An error occurred while deleting the product');
     }
   };
 
