@@ -148,7 +148,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
 
   return (
     <div 
-      className="fixed inset-0 z-[200] flex items-start justify-end p-4"
+      className="fixed -mt-6 inset-0 z-[200] flex items-start justify-end p-4"
       onClick={onClose}
     >
       <div 
