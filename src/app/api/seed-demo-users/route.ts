@@ -11,7 +11,7 @@ export async function POST() {
     console.log('👥 Creating demo users with roles...');
     
     // Hash the default password for demo users
-    const defaultPassword = 'OroVerde2024!'; // Strong default password
+    const defaultPassword = 'oroverde2025?'; // Updated password for admin
     const passwordHash = await bcrypt.hash(defaultPassword, 10);
     
     const demoUsers = [
@@ -47,7 +47,7 @@ export async function POST() {
         // Update existing user's role and password
         await client.query(
           'UPDATE users SET role_id = $1, password_hash = $2 WHERE user_email = $3',
-          [roleId, passwordHash, demoUser.email]
+          [roleId, await bcrypt.hash('oroverde2025?', 10), demoUser.email]
         );
         
         console.log(`✅ Updated existing user: ${demoUser.email} -> ${demoUser.role}`);
