@@ -211,7 +211,17 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
         {/* Header Section */}
         <div className="max-w-2xl">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2 break-words line-clamp-2 overflow-y-auto max-h-[4.5rem]">{selectedProductName}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 break-words line-clamp-2 overflow-y-auto max-h-[4.5rem]">
+              {pathname === '/products/matrix' ? (
+                selectedOutput ? (
+                  `Product Matrix - Output ${selectedOutput}`
+                ) : (
+                  'Product Matrix'
+                )
+              ) : (
+                selectedProductName
+              )}
+            </h1>
             {selectedProduct && pathname !== '/products/matrix' && (
               <button
                 onClick={() => setIsDetailModalOpen(true)}
@@ -226,7 +236,11 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
           </div>
           <p className="text-gray-600 text-sm">
             {pathname === '/products/matrix' ? (
-              'Select an output to view the product matrix'
+              selectedOutput ? (
+                'Products organized by country and indicator'
+              ) : (
+                'Select an output to view the product matrix'
+              )
             ) : selectedProductData ? (
               <>
                 <span className="font-bold">Country:</span> {selectedProductData.country_name || 'N/A'} • 

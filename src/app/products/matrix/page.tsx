@@ -107,7 +107,7 @@ function MatrixContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-full mx-auto px-4 py-6">
+      <div className="max-w-full mx-auto">
         {!selectedOutput ? (
           // No output selected state
           <div className="bg-white rounded-2xl shadow p-12">
@@ -132,21 +132,10 @@ function MatrixContent() {
           </div>
         ) : (
           // Matrix view
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm p-4 border-l-4 border-blue-500">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Product Matrix - Output {selectedOutput}
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Products organized by country and indicator
-              </p>
-            </div>
-            
-            <ProductMatrix 
-              matrixData={matrixData} 
-              isLoadingMatrix={isLoadingMatrix} 
-            />
-          </div>
+          <ProductMatrix 
+            matrixData={matrixData} 
+            isLoadingMatrix={isLoadingMatrix} 
+          />
         )}
       </div>
     </div>

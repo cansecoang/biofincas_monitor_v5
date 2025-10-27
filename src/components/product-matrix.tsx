@@ -1,17 +1,16 @@
 "use client"
 
-import { useState } from 'react';
-import ProductDetailModal from "@/components/ProductDetailModal";
+import { useRouter } from 'next/navigation';
 
 // Simple skeleton component for the matrix
 function MatrixSkeleton() {
   return (
-    <div className="bg-white rounded-lg border overflow-hidden">
+    <div className="bg-white rounded-2xl border overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left border-b">
+              <th className="px-2 py-3 text-left border-b">
                 <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
               </th>
               {[...Array(4)].map((_, i) => (
@@ -85,9 +84,7 @@ interface ProductMatrixProps {
 }
 
 export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProps) {
-  // Estados para el modal de detalles del producto
-  const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   // Log when component receives data
   console.log('🎨 ProductMatrix render:', {
@@ -98,11 +95,10 @@ export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProp
     totalProducts: matrixData?.totalProducts || 0
   });
 
-  // Handler para abrir modal de detalles del producto
+  // Handler para navegar al producto
   const handleProductClick = (productId: number) => {
     console.log('🖱️ Product clicked:', productId);
-    setSelectedProductId(productId.toString());
-    setIsModalOpen(true);
+    router.push(`/products/list?productId=${productId}`);
   };
 
   return (
@@ -113,7 +109,7 @@ export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProp
       )}
 
       {matrixData && !isLoadingMatrix && (
-        <div className="bg-white rounded-lg border overflow-hidden">
+        <div className="bg-white rounded-2xl border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -203,25 +199,6 @@ export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProp
           </div>
         </div>
       )}
-
-
-      {/* Product Detail Modal */}
-      <ProductDetailModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedProductId('');
-        }}
-        productId={selectedProductId}
-        onEdit={() => {
-          // Edit functionality can be implemented if needed
-          console.log('Edit from matrix not implemented');
-        }}
-        onDelete={() => {
-          // Delete functionality can be implemented if needed
-          console.log('Delete from matrix not implemented');
-        }}
-      />
     </div>
   );
 }
