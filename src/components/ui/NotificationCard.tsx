@@ -1,7 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 interface NotificationCardProps {
   category: 'Oro Verde' | 'User' | 'Communication' | 'Gender';
   date: string;
@@ -11,6 +9,8 @@ interface NotificationCardProps {
   taskTitle: string;
   productTitle: string;
   productId: number;
+  taskId: number;
+  onViewTask: (taskId: number) => void;
 }
 
 // Configuración de colores por categoría
@@ -46,12 +46,13 @@ export default function NotificationCard({
   taskTitle,
   productTitle,
   productId,
+  taskId,
+  onViewTask,
 }: NotificationCardProps) {
   const colors = categoryColors[category];
-  const router = useRouter();
 
-  const handleViewProduct = () => {
-    router.push(`/products/list?productId=${productId}`);
+  const handleViewTask = () => {
+    onViewTask(taskId);
   };
 
   return (
@@ -88,12 +89,12 @@ export default function NotificationCard({
           <span className="text-gray-400 break-words">{productTitle}</span>
         </div>
 
-        {/* View Product Button */}
+        {/* View Task Button */}
         <button
-          onClick={handleViewProduct}
+          onClick={handleViewTask}
           className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${colors.button}`}
         >
-          View Product
+          View Task
         </button>
       </div>
     </div>

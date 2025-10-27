@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import NotificationCard from '@/components/ui/NotificationCard';
+import TaskDetailModal from '@/components/TaskDetailModal';
 
 interface Notification {
   id: string;
@@ -30,6 +31,10 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [loadingTask, setLoadingTask] = useState(false);
 
   // Fetch notifications cuando el modal se abre
   useEffect(() => {
@@ -53,6 +58,48 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
       console.error('Error fetching notifications:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Manejar apertura del modal de tarea
+  const handleViewTask = async (taskId: number) => {
+    setSelectedTaskId(taskId);
+    setLoadingTask(true);
+    
+    try {
+      // Cargar los detalles de la tarea
+      const response = await fetch(`/api/product-tasks?taskId=${taskId}`);
+      const data = await response.json();
+      
+      if (data.success && data.tasks.length > 0) {
+        const taskData = data.tasks[0];
+        setSelectedTask({
+          id: taskData.id,
+          name: taskData.name,
+          detail: taskData.detail,
+          start_planned: taskData.start_planned,
+          end_planned: taskData.end_planned,
+          start_actual: taskData.start_actual,
+          end_actual: taskData.end_actual,
+          checkin_oro_verde: taskData.checkin_oro_verde,
+          checkin_user: taskData.checkin_user,
+          checkin_communication: taskData.checkin_communication,
+          checkin_gender: taskData.checkin_gender,
+          phase_id: taskData.phase_id,
+          phase_name: taskData.phase_name,
+          status_id: taskData.status_id,
+          status_name: taskData.status_name,
+          product_id: taskData.product_id,
+          product_name: taskData.product_name,
+          org_id: taskData.org_id,
+          org_name: taskData.org_name
+        });
+        setIsTaskDetailModalOpen(true);
+      }
+    } catch (error) {
+      console.error('Error loading task details:', error);
+    } finally {
+      setLoadingTask(false);
     }
   };
 
@@ -164,12 +211,35 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
                   taskTitle={notification.task_name}
                   productTitle={notification.product_name}
                   productId={notification.product_id}
+                  taskId={notification.task_id}
+                  onViewTask={handleViewTask}
                 />
               );
             })
           )}
         </div>
       </div>
+
+      {/* Task Detail Modal */}
+      {selectedTask && (
+        <TaskDetailModal
+          isOpen={isTaskDetailModalOpen}
+          onClose={() => {
+            setIsTaskDetailModalOpen(false);
+            setSelectedTaskId(null);
+            setSelectedTask(null);
+          }}
+          task={selectedTask}
+          onEdit={() => {
+            console.log('Edit task clicked');
+            // Aquí puedes agregar la lógica de edición de tarea
+          }}
+          onDelete={() => {
+            console.log('Delete task clicked');
+            // Aquí puedes agregar la lógica de eliminación de tarea
+          }}
+        />
+      )}
     </div>
   );
 }
