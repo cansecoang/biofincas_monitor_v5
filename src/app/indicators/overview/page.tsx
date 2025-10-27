@@ -38,6 +38,11 @@ interface OutputData {
     total_tasks: number;
     completed_tasks: number;
     overdue_tasks: number;
+    // Métricas de productos
+    total_products: number;
+    products_completed: number;
+    products_in_progress: number;
+    products_with_overdue: number;
   };
 }
 
@@ -366,23 +371,23 @@ function IndicatorsContent() {
                 <PerformanceIndicator value={outputData.summary.avg_completion} />
               </div>
 
-              {/* Métricas resumen */}
+              {/* Métricas resumen - Productos */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div key="total-indicators" className="bg-blue-50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-blue-600">{outputData.summary.total_indicators}</div>
-                  <div className="text-sm text-blue-700">Indicadores</div>
+                <div key="total-products" className="bg-indigo-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-indigo-600">{outputData.summary.total_products}</div>
+                  <div className="text-sm text-indigo-700">Total Productos</div>
                 </div>
-                <div key="completed-tasks" className="bg-green-50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-green-600">{outputData.summary.completed_tasks}</div>
-                  <div className="text-sm text-green-700">Tareas Completadas</div>
+                <div key="completed-products" className="bg-green-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-green-600">{outputData.summary.products_completed}</div>
+                  <div className="text-sm text-green-700">Productos Completados</div>
                 </div>
-                <div key="total-tasks" className="bg-gray-50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-gray-600">{outputData.summary.total_tasks}</div>
-                  <div className="text-sm text-gray-700">Total Tareas</div>
+                <div key="in-progress-products" className="bg-blue-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-600">{outputData.summary.products_in_progress}</div>
+                  <div className="text-sm text-blue-700">Productos en Progreso</div>
                 </div>
-                <div key="overdue-tasks" className="bg-red-50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-red-600">{outputData.summary.overdue_tasks}</div>
-                  <div className="text-sm text-red-700">Tareas Vencidas</div>
+                <div key="overdue-products" className="bg-amber-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-amber-600">{outputData.summary.products_with_overdue}</div>
+                  <div className="text-sm text-amber-700">Productos con Retrasos</div>
                 </div>
               </div>
             </div>

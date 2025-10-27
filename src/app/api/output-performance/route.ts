@@ -153,6 +153,49 @@ export async function GET(request: Request) {
       };
     }));
 
+    // 🎯 Calcular métricas de productos
+    const allProducts = new Set<number>();
+    const productsWithAllTasksCompleted = new Set<number>();
+    const productsWithOverdueTasks = new Set<number>();
+    
+    indicators.forEach(ind => {
+      ind.assigned_products.forEach(product => {
+        allProducts.add(product.product_id);
+      });
+    });
+
+    // Obtener productos con todas las tareas completadas y con tareas vencidas
+    if (allProducts.size > 0) {
+      const productIds = Array.from(allProducts);
+      const productStatusQuery = `
+        SELECT 
+          p.product_id,
+          COUNT(t.task_id) as total_tasks,
+          COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) as completed_tasks,
+          COUNT(CASE WHEN t.end_date_planned < CURRENT_DATE AND s.status_name NOT IN ('Completed', 'Reviewed') THEN 1 END) as overdue_tasks
+        FROM products p
+        LEFT JOIN tasks t ON p.product_id = t.product_id
+        LEFT JOIN status s ON t.status_id = s.status_id
+        WHERE p.product_id = ANY($1)
+        GROUP BY p.product_id
+      `;
+      
+      const productStatusResult = await pool.query(productStatusQuery, [productIds]);
+      
+      productStatusResult.rows.forEach(row => {
+        const totalTasks = parseInt(row.total_tasks) || 0;
+        const completedTasks = parseInt(row.completed_tasks) || 0;
+        const overdueTasks = parseInt(row.overdue_tasks) || 0;
+        
+        if (totalTasks > 0 && completedTasks === totalTasks) {
+          productsWithAllTasksCompleted.add(row.product_id);
+        }
+        if (overdueTasks > 0) {
+          productsWithOverdueTasks.add(row.product_id);
+        }
+      });
+    }
+
     // 🎯 Calcular métricas resumen
     const summary = {
       total_indicators: indicators.length,
@@ -161,6 +204,11 @@ export async function GET(request: Request) {
       total_tasks: indicators.reduce((acc, ind) => acc + ind.total_tasks, 0),
       completed_tasks: indicators.reduce((acc, ind) => acc + ind.completed_tasks, 0),
       overdue_tasks: indicators.reduce((acc, ind) => acc + ind.overdue_tasks, 0),
+      // Métricas de productos
+      total_products: allProducts.size,
+      products_completed: productsWithAllTasksCompleted.size,
+      products_in_progress: allProducts.size - productsWithAllTasksCompleted.size,
+      products_with_overdue: productsWithOverdueTasks.size,
     };
 
     const responseData = {
