@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X, Package2, User, MapPin, Calendar } from "lucide-react";
+import { ChevronLeft, Package2, User, MapPin, Calendar } from "lucide-react";
 
 interface Product {
   product_id: number;
@@ -30,7 +30,7 @@ export default function ProductListModal({ open, onClose, products, title }: Pro
     }
   }, [open, products, title]);
 
-  // Bloquear scroll del body cuando el modal está abierto
+  // Block body scroll when modal is open
   useEffect(() => {
     if (open) {
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -43,17 +43,17 @@ export default function ProductListModal({ open, onClose, products, title }: Pro
     }
   }, [open]);
 
-  // Función para navegar al detalle del producto
+  // Navigate to product detail
   const handleProductClick = (productId: number) => {
     router.push(`/products/list?productId=${productId}`);
-    onClose(); // Cerrar el modal después de navegar
+    onClose(); // Close modal after navigation
   };
 
-  // Función para formatear la fecha
+  // Format date function
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'Sin fecha';
+    if (!dateString) return 'No date';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { 
+    return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'short', 
       day: 'numeric' 
@@ -63,41 +63,56 @@ export default function ProductListModal({ open, onClose, products, title }: Pro
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/50 z-[400]"
         onClick={onClose}
       />
       
-      {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col">
+      {/* Modal Container */}
+      <div 
+        className="fixed inset-0 z-[500] flex items-start justify-center pt-20 overflow-y-auto"
+      >
+        <div 
+          className="bg-white rounded-2xl border border-gray-200 shadow-xl w-full max-w-[90vw] max-h-[calc(100vh-8rem)] flex flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Package2 className="h-6 w-6 text-blue-600" />
+          <div className="pl-2 pr-6 py-4 rounded-t-2xl">
+            <div className="flex items-center justify-between">
+              {/* Left: Back button and Title */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={onClose}
+                  className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <ChevronLeft size={20} className="text-gray-700" />
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+                  <p className="text-sm text-gray-500 mt-0.5">{products.length} product{products.length !== 1 ? 's' : ''}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-                <p className="text-sm text-gray-500">{products.length} producto{products.length !== 1 ? 's' : ''}</p>
+              
+              {/* Right: Action Button */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onClose}
+                  className="px-4 py-1.5 border border-gray-300 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Close
+                </button>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="h-5 w-5 text-gray-500" />
-            </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto px-4 py-4 rounded-t-2xl">
             {products.length === 0 ? (
               <div className="text-center py-12">
                 <Package2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-500">No hay productos para mostrar</p>
+                <p className="text-gray-500">No products to display</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -105,16 +120,16 @@ export default function ProductListModal({ open, onClose, products, title }: Pro
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Producto
+                        Product
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        País
+                        Country
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Responsable
+                        Owner
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Fecha de Entrega
+                        Delivery Date
                       </th>
                     </tr>
                   </thead>
@@ -147,7 +162,7 @@ export default function ProductListModal({ open, onClose, products, title }: Pro
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-gray-400" />
                             <span className="text-sm text-gray-700">
-                              {product.product_owner || 'Sin asignar'}
+                              {product.product_owner || 'Unassigned'}
                             </span>
                           </div>
                         </td>
@@ -166,20 +181,8 @@ export default function ProductListModal({ open, onClose, products, title }: Pro
               </div>
             )}
           </div>
-
-          {/* Footer */}
-          <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 rounded-b-2xl">
-            <div className="flex justify-end">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
