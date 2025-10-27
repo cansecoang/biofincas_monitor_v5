@@ -154,9 +154,16 @@ export async function GET(request: Request) {
     }));
 
     // 🎯 Calcular métricas de productos
+    console.log('🔍 Starting product metrics calculation...');
     const allProducts = new Set<number>();
     const productsWithAllTasksCompleted = new Set<number>();
     const productsWithOverdueTasks = new Set<number>();
+    
+    // Mapas para almacenar información detallada de productos
+    const allProductsDetails: any[] = [];
+    const completedProductsDetails: any[] = [];
+    const inProgressProductsDetails: any[] = [];
+    const overdueProductsDetails: any[] = [];
     
     indicators.forEach(ind => {
       ind.assigned_products.forEach(product => {
@@ -164,36 +171,80 @@ export async function GET(request: Request) {
       });
     });
 
+    console.log('📊 Total unique products found:', allProducts.size);
+
     // Obtener productos con todas las tareas completadas y con tareas vencidas
     if (allProducts.size > 0) {
       const productIds = Array.from(allProducts);
-      const productStatusQuery = `
+      console.log('🔍 Product IDs to query:', productIds);
+      
+      // Query para obtener información detallada de productos con métricas de tareas
+      const productDetailsQuery = `
         SELECT 
           p.product_id,
+          p.product_name,
+          p.delivery_date,
+          COALESCE(c.country_name, 'Sin país') as country_name,
+          COALESCE(org.organization_name, 'Sin asignar') as product_owner,
           COUNT(t.task_id) as total_tasks,
           COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) as completed_tasks,
           COUNT(CASE WHEN t.end_date_planned < CURRENT_DATE AND s.status_name NOT IN ('Completed', 'Reviewed') THEN 1 END) as overdue_tasks
         FROM products p
+        LEFT JOIN countries c ON p.country_id = c.country_id
+        LEFT JOIN organizations org ON p.product_owner_id = org.organization_id
         LEFT JOIN tasks t ON p.product_id = t.product_id
         LEFT JOIN status s ON t.status_id = s.status_id
         WHERE p.product_id = ANY($1)
-        GROUP BY p.product_id
+        GROUP BY p.product_id, p.product_name, p.delivery_date, c.country_name, org.organization_name
+        ORDER BY p.product_name
       `;
       
-      const productStatusResult = await pool.query(productStatusQuery, [productIds]);
+      console.log('🚀 Executing product details query...');
+      const productDetailsResult = await pool.query(productDetailsQuery, [productIds]);
+      console.log('✅ Query executed successfully. Rows returned:', productDetailsResult.rows.length);
       
-      productStatusResult.rows.forEach(row => {
+      if (productDetailsResult.rows.length > 0) {
+        console.log('📋 Sample row:', productDetailsResult.rows[0]);
+      }
+      
+      productDetailsResult.rows.forEach(row => {
         const totalTasks = parseInt(row.total_tasks) || 0;
         const completedTasks = parseInt(row.completed_tasks) || 0;
         const overdueTasks = parseInt(row.overdue_tasks) || 0;
         
+        const productDetail = {
+          product_id: row.product_id,
+          product_name: row.product_name,
+          product_owner: row.product_owner,
+          country_name: row.country_name,
+          delivery_date: row.delivery_date
+        };
+        
+        // Todos los productos
+        allProductsDetails.push(productDetail);
+        
+        // Productos completados (tienen tareas y todas están completadas)
         if (totalTasks > 0 && completedTasks === totalTasks) {
           productsWithAllTasksCompleted.add(row.product_id);
+          completedProductsDetails.push(productDetail);
+        } 
+        // Productos en progreso (tienen tareas pero no todas completadas)
+        else if (totalTasks > 0) {
+          inProgressProductsDetails.push(productDetail);
         }
+        
+        // Productos con retrasos
         if (overdueTasks > 0) {
           productsWithOverdueTasks.add(row.product_id);
+          overdueProductsDetails.push(productDetail);
         }
       });
+      
+      console.log('📊 Product metrics calculated:');
+      console.log('  - All products:', allProductsDetails.length);
+      console.log('  - Completed:', completedProductsDetails.length);
+      console.log('  - In progress:', inProgressProductsDetails.length);
+      console.log('  - With overdue:', overdueProductsDetails.length);
     }
 
     // 🎯 Calcular métricas resumen
@@ -209,6 +260,11 @@ export async function GET(request: Request) {
       products_completed: productsWithAllTasksCompleted.size,
       products_in_progress: allProducts.size - productsWithAllTasksCompleted.size,
       products_with_overdue: productsWithOverdueTasks.size,
+      // Detalles de productos para los modales
+      all_products_details: allProductsDetails,
+      completed_products_details: completedProductsDetails,
+      in_progress_products_details: inProgressProductsDetails,
+      overdue_products_details: overdueProductsDetails,
     };
 
     const responseData = {
@@ -222,12 +278,28 @@ export async function GET(request: Request) {
       }
     };
 
-    console.log('✅ Final response data:', responseData);
+    console.log('✅ Final response data summary:', {
+      output: responseData.output_number,
+      indicators_count: responseData.indicators.length,
+      summary_counts: {
+        total_products: responseData.summary.total_products,
+        products_completed: responseData.summary.products_completed,
+        products_in_progress: responseData.summary.products_in_progress,
+        products_with_overdue: responseData.summary.products_with_overdue,
+      },
+      product_details_arrays: {
+        all_products_details: responseData.summary.all_products_details.length,
+        completed_products_details: responseData.summary.completed_products_details.length,
+        in_progress_products_details: responseData.summary.in_progress_products_details.length,
+        overdue_products_details: responseData.summary.overdue_products_details.length,
+      }
+    });
     
     return NextResponse.json(responseData);
 
   } catch (error) {
     console.error('❌ Error in output performance API:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack available');
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'

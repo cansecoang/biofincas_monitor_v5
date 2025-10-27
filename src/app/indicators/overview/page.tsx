@@ -15,6 +15,7 @@ import {
   MapPin
 } from "lucide-react";
 import IndicatorDetailModal from '@/components/IndicatorDetailModal';
+import ProductListModal from '@/components/ProductListModal';
 import { IndicatorPerformance } from '@/types/indicators';
 
 
@@ -27,6 +28,14 @@ interface Output {
 interface WorkPackage {
   workpackage_id: number;
   workpackage_name: string;
+}
+
+interface ProductDetail {
+  product_id: number;
+  product_name: string;
+  product_owner: string;
+  country_name: string;
+  delivery_date: string;
 }
 
 interface OutputData {
@@ -43,6 +52,11 @@ interface OutputData {
     products_completed: number;
     products_in_progress: number;
     products_with_overdue: number;
+    // Detalles de productos
+    all_products_details: ProductDetail[];
+    completed_products_details: ProductDetail[];
+    in_progress_products_details: ProductDetail[];
+    overdue_products_details: ProductDetail[];
   };
 }
 
@@ -277,9 +291,50 @@ function IndicatorsContent() {
   const [outputData, setOutputData] = useState<OutputData | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // 🎯 Estado para el modal de productos
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<ProductDetail[]>([]);
+  const [modalTitle, setModalTitle] = useState('');
+  
   // 🎯 Función para manejar click en producto
   const handleProductClick = (productId: number) => {
     console.log('Product clicked:', productId);
+  };
+
+  // 🎯 Función para abrir modal con lista de productos
+  const handleMetricClick = (type: 'all' | 'completed' | 'in_progress' | 'overdue') => {
+    if (!outputData) {
+      console.log('❌ No hay outputData disponible');
+      return;
+    }
+    
+    console.log('🔍 handleMetricClick called with type:', type);
+    console.log('📊 outputData.summary:', outputData.summary);
+    
+    switch (type) {
+      case 'all':
+        console.log('📦 all_products_details:', outputData.summary.all_products_details);
+        setSelectedProducts(outputData.summary.all_products_details || []);
+        setModalTitle('Total de Productos');
+        break;
+      case 'completed':
+        console.log('✅ completed_products_details:', outputData.summary.completed_products_details);
+        setSelectedProducts(outputData.summary.completed_products_details || []);
+        setModalTitle('Productos Completados');
+        break;
+      case 'in_progress':
+        console.log('🔄 in_progress_products_details:', outputData.summary.in_progress_products_details);
+        setSelectedProducts(outputData.summary.in_progress_products_details || []);
+        setModalTitle('Productos en Progreso');
+        break;
+      case 'overdue':
+        console.log('⚠️ overdue_products_details:', outputData.summary.overdue_products_details);
+        setSelectedProducts(outputData.summary.overdue_products_details || []);
+        setModalTitle('Productos con Retrasos');
+        break;
+    }
+    
+    setIsProductModalOpen(true);
   };
 
   // 🎯 Leer parámetros de la URL
@@ -373,19 +428,35 @@ function IndicatorsContent() {
 
               {/* Métricas resumen - Productos */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div key="total-products" className="bg-indigo-50 rounded-lg p-4 text-center">
+                <div 
+                  key="total-products" 
+                  className="bg-indigo-50 rounded-lg p-4 text-center cursor-pointer hover:bg-indigo-100 transition-colors"
+                  onClick={() => handleMetricClick('all')}
+                >
                   <div className="text-2xl font-bold text-indigo-600">{outputData.summary.total_products}</div>
                   <div className="text-sm text-indigo-700">Total Productos</div>
                 </div>
-                <div key="completed-products" className="bg-green-50 rounded-lg p-4 text-center">
+                <div 
+                  key="completed-products" 
+                  className="bg-green-50 rounded-lg p-4 text-center cursor-pointer hover:bg-green-100 transition-colors"
+                  onClick={() => handleMetricClick('completed')}
+                >
                   <div className="text-2xl font-bold text-green-600">{outputData.summary.products_completed}</div>
                   <div className="text-sm text-green-700">Productos Completados</div>
                 </div>
-                <div key="in-progress-products" className="bg-blue-50 rounded-lg p-4 text-center">
+                <div 
+                  key="in-progress-products" 
+                  className="bg-blue-50 rounded-lg p-4 text-center cursor-pointer hover:bg-blue-100 transition-colors"
+                  onClick={() => handleMetricClick('in_progress')}
+                >
                   <div className="text-2xl font-bold text-blue-600">{outputData.summary.products_in_progress}</div>
                   <div className="text-sm text-blue-700">Productos en Progreso</div>
                 </div>
-                <div key="overdue-products" className="bg-amber-50 rounded-lg p-4 text-center">
+                <div 
+                  key="overdue-products" 
+                  className="bg-amber-50 rounded-lg p-4 text-center cursor-pointer hover:bg-amber-100 transition-colors"
+                  onClick={() => handleMetricClick('overdue')}
+                >
                   <div className="text-2xl font-bold text-amber-600">{outputData.summary.products_with_overdue}</div>
                   <div className="text-sm text-amber-700">Productos con Retrasos</div>
                 </div>
@@ -421,6 +492,14 @@ function IndicatorsContent() {
             </p>
           </div>
         )}
+
+        {/* Modal de lista de productos */}
+        <ProductListModal
+          open={isProductModalOpen}
+          onClose={() => setIsProductModalOpen(false)}
+          products={selectedProducts}
+          title={modalTitle}
+        />
       </div>
     </div>
   );
