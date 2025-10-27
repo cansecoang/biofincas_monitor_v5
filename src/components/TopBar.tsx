@@ -3,17 +3,21 @@
 import { Search, Bell, User, LogOut, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { useTabsContext } from '@/contexts/TabsContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState, useRef, useEffect, Suspense } from 'react';
 import NotificationsModal from '@/components/NotificationsModal';
 import IndicatorDetailModal from '@/components/IndicatorDetailModal';
 import { IndicatorPerformance } from '@/types/indicators';
+import { toast } from 'sonner';
 
 function TopBarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { tabs } = useTabsContext();
+  const { user, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -114,6 +118,32 @@ function TopBarContent() {
     } catch (error) {
       console.error('Error fetching indicator details:', error);
     }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout');
+    }
+  };
+
+  // Obtener iniciales del usuario
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Capitalizar rol
+  const capitalizeRole = (role: string) => {
+    return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
   return (
@@ -277,11 +307,17 @@ function TopBarContent() {
               className="flex items-center gap-3 hover:bg-gray-100 rounded-lg p-2 transition-colors"
             >
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden">
-                <span className="text-white font-semibold text-sm">OV</span>
+                <span className="text-white font-semibold text-sm">
+                  {user ? getUserInitials(user.user_name) : 'OV'}
+                </span>
               </div>
               <div className="hidden lg:block text-left">
-                <p className="text-sm font-semibold text-gray-900">Oro Verde</p>
-                <p className="text-xs text-gray-500">Admin</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {user?.user_name || 'Guest'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {user ? capitalizeRole(user.role) : 'Viewer'}
+                </p>
               </div>
               <ChevronDown 
                 size={16} 
@@ -296,12 +332,21 @@ function TopBarContent() {
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
                 {/* User Info Section */}
                 <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-semibold text-gray-900">Oro Verde</p>
-                  <p className="text-xs text-gray-500">admin@biofincas.com</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {user?.user_name || 'Guest'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {user?.user_email || 'Not logged in'}
+                  </p>
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                      {user ? capitalizeRole(user.role) : 'Viewer'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Menu Items */}
-                <div className="py-1 ">
+                <div className="py-1">
                   <Link
                     href="/profile"
                     className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -315,8 +360,7 @@ function TopBarContent() {
                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     onClick={() => {
                       setIsUserMenuOpen(false);
-                      // Aquí puedes agregar la lógica de logout
-                      console.log('Logging out...');
+                      handleLogout();
                     }}
                   >
                     <LogOut size={16} />
