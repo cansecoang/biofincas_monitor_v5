@@ -25,6 +25,11 @@ interface Task {
   product_name: string;
 }
 
+interface Status {
+  status_id: number;
+  status_name: string;
+}
+
 interface Pagination {
   currentPage: number;
   totalPages: number;
@@ -38,6 +43,7 @@ function ProductListContent() {
   const productId = searchParams.get('productId');
   
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [statuses, setStatuses] = useState<Status[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +54,21 @@ function ProductListContent() {
   // Estados para el modal de detalles
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  // Cargar statuses al montar
+  useEffect(() => {
+    const fetchStatuses = async () => {
+      try {
+        const response = await fetch('/api/statuses');
+        const data = await response.json();
+        setStatuses(data.statuses || []);
+      } catch (err) {
+        console.error('Error loading statuses:', err);
+      }
+    };
+    
+    fetchStatuses();
+  }, []);
 
   // Cargar tareas cuando cambia el productId o la página
   useEffect(() => {
@@ -139,6 +160,43 @@ function ProductListContent() {
     toast.info('Delete functionality coming soon');
     closeTaskModal();
     // Aquí podrías recargar las tareas después de eliminar
+  };
+
+  // Manejar cambio de estado
+  const handleStatusChange = async (taskId: number, newStatusId: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Evitar que se abra el modal
+    
+    // Optimistic update
+    const oldTasks = [...tasks];
+    const newStatus = statuses.find(s => s.status_id === newStatusId);
+    
+    setTasks(tasks.map(task => 
+      task.id === taskId 
+        ? { ...task, status_id: newStatusId, status_name: newStatus?.status_name || task.status_name }
+        : task
+    ));
+
+    try {
+      const response = await fetch('/api/update-task-status', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taskId, statusId: newStatusId })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        // Revertir si falla
+        setTasks(oldTasks);
+        toast.error('Failed to update task status');
+      } else {
+        toast.success('Task status updated successfully');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+      setTasks(oldTasks);
+      toast.error('Error updating task status');
+    }
   };
 
   // Componente para el ícono de ordenamiento
@@ -331,9 +389,29 @@ function ProductListContent() {
                   <div className="text-sm text-gray-600">{task.phase_name}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status_name)}`}>
-                    {task.status_name}
-                  </span>
+                  <div className="relative" onClick={(e) => e.stopPropagation()}>
+                    <select
+                      value={task.status_id}
+                      onChange={(e) => handleStatusChange(task.id, parseInt(e.target.value), e as any)}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none pr-8 ${getStatusColor(task.status_name)}`}
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                        backgroundPosition: 'right 0.5rem center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '1.25em 1.25em'
+                      }}
+                    >
+                      {statuses.map((status) => (
+                        <option 
+                          key={status.status_id} 
+                          value={status.status_id}
+                          className="bg-white text-gray-900 py-2"
+                        >
+                          {status.status_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-600">{task.org_name || 'N/A'}</div>
