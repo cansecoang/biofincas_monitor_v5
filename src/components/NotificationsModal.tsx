@@ -148,11 +148,11 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
 
   return (
     <div 
-      className="fixed inset-0  z-[200] flex items-start justify-end pt-[67px] py-4 pl-4 pr-6"
+      className="fixed inset-0 z-[200] flex items-start justify-end p-4"
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[calc(100vh-5rem)] flex flex-col"
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-md h-[calc(100vh-2rem)] flex flex-col mt-16"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -167,23 +167,25 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
         </div>
 
         {/* Categories Tabs */}
-        <div className="flex gap-4 px-6 border-b border-gray-200">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`pb-3 px-2 text-sm font-medium whitespace-nowrap transition-colors relative ${
-                activeCategory === category
-                  ? 'text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {category} ({getCategoryCount(category)})
-              {activeCategory === category && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
-              )}
-            </button>
-          ))}
+        <div className="overflow-x-auto border-b border-gray-200 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <div className="flex gap-4 px-6 min-w-max">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`pb-3 px-2 text-sm font-medium whitespace-nowrap transition-colors relative ${
+                  activeCategory === category
+                    ? 'text-gray-900'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {category} ({getCategoryCount(category)})
+                {activeCategory === category && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Notifications List */}
