@@ -1,3 +1,14 @@
+Comparación con el manejo tradicional (hojas de cálculo)
+-------------------------------------------------------
+Es importante destacar que, de continuar gestionando la información mediante hojas de cálculo, el proceso seguiría siendo tedioso, propenso a errores y difícil de escalar:
+
+- **Fragmentación de la información:** Los datos se dispersan en múltiples archivos, dificultando la consolidación y el acceso oportuno.
+- **Riesgo de errores:** La manipulación manual aumenta la probabilidad de inconsistencias y pérdidas de información.
+- **Falta de trazabilidad:** Es complejo auditar cambios o identificar responsables en hojas compartidas.
+- **Colaboración limitada:** El trabajo simultáneo puede generar conflictos y versiones desactualizadas.
+- **Dificultad para generar reportes:** La obtención de indicadores y reportes requiere procesos manuales y repetitivos.
+
+Con BioFincas Monitor, todos estos desafíos se resuelven mediante una plataforma centralizada, segura y automatizada, optimizando el tiempo y la calidad de la gestión.
 Presentación Proyecto BioFincas Monitor
 ========================================
 
@@ -33,6 +44,22 @@ Próximos pasos
 Agradecimientos
 ---------------
 Este proyecto es el resultado del trabajo colaborativo entre equipos técnicos, gestores y usuarios de campo. Agradecemos el compromiso y la visión de todos los involucrados, y confiamos en que BioFincas Monitor será una herramienta fundamental para el éxito de nuestros proyectos.
+
+
+
+Tour guiado por la plataforma (Schedule)
+---------------------------------------
+A continuación, proponemos un recorrido general para repasar las funcionalidades principales de BioFincas Monitor:
+
+1. **Inicio y autenticación:** Acceso seguro mediante usuario y contraseña.
+2. **Panel de control (Dashboard):** Visualización de indicadores clave y métricas globales del sistema.
+3. **Gestión de productos y tareas:** Registro, edición y seguimiento de productos, tareas y fases de los proyectos.
+4. **Notificaciones y alertas:** Recepción de notificaciones automáticas sobre tareas, hitos y cambios relevantes.
+5. **Indicadores y reportes:** Consulta de indicadores de desempeño y generación de reportes automáticos.
+6. **Control de acceso y roles:** Gestión de permisos y roles de usuario para garantizar la seguridad y confidencialidad de la información.
+7. **Soporte y feedback:** Acceso a soporte técnico y canal para sugerencias de mejora.
+
+Este tour puede adaptarse según las necesidades de cada grupo de usuarios y permite conocer de manera integral las capacidades de la plataforma.
 
 Quedamos atentos a sus comentarios y sugerencias.
 
