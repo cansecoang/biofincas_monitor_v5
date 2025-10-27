@@ -10,9 +10,11 @@ import TaskDetailModal from '@/components/TaskDetailModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 const productTabs = [
+  { id: 'matrix', label: 'Matrix', href: '/products/matrix' },
   { id: 'list', label: 'List', href: '/products/list' },
   { id: 'gantt', label: 'Gantt', href: '/products/gantt' },
   { id: 'metrics', label: 'Metrics', href: '/products/metrics' },
+  
 ];
 
 interface Workpackage {
@@ -210,7 +212,7 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
         <div className="max-w-2xl">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-gray-900 mb-2 break-words line-clamp-2 overflow-y-auto max-h-[4.5rem]">{selectedProductName}</h1>
-            {selectedProduct && (
+            {selectedProduct && pathname !== '/products/matrix' && (
               <button
                 onClick={() => setIsDetailModalOpen(true)}
                 className="p-1 hover:bg-gray-100 rounded-full transition-colors mb-2"
@@ -223,7 +225,9 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
             )}
           </div>
           <p className="text-gray-600 text-sm">
-            {selectedProductData ? (
+            {pathname === '/products/matrix' ? (
+              'Select an output to view the product matrix'
+            ) : selectedProductData ? (
               <>
                 <span className="font-bold">Country:</span> {selectedProductData.country_name || 'N/A'} • 
                 <span className="font-bold ml-2">Owner:</span> {selectedProductData.product_owner_name || 'N/A'} • 
@@ -238,50 +242,55 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
         {/* Dropdowns Section */}
         <div className="flex gap-3 pr-6">
         
-          {/*Botón agregar tarea */}
-          <div className="relative">
-            {selectedProduct ? (
-              <button
-                onClick={() => {
-                  const currentUrl = window.location.pathname + window.location.search;
-                  router.push(`/create/task?productId=${selectedProduct}&returnUrl=${encodeURIComponent(currentUrl)}`);
-                }}
-                className="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-colors inline-block"
-              >
-                + Add Task
-              </button>
-            ) : (
-              <button
-                disabled
-                className="bg-gray-300 text-gray-500 rounded-full px-4 py-2 text-sm font-medium cursor-not-allowed inline-block"
-                title="Select a product first"
-              >
-                + Add Task
-              </button>
-            )}
-          </div>
-          {/* Workpackage Dropdown */}
-          <div className="relative w-36">
-            <select 
-              value={selectedWorkpackage}
-              onChange={handleWorkpackageChange}
-              className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer truncate"
-            >
-              <option value="">Workpackage</option>
-              {workpackages.map((wp) => (
-                <option key={wp.workpackage_id} value={wp.workpackage_id}>
-                  {wp.workpackage_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+          {/* Add Task Button - hidden on matrix route */}
+          {pathname !== '/products/matrix' && (
+            <div className="relative">
+              {selectedProduct ? (
+                <button
+                  onClick={() => {
+                    const currentUrl = window.location.pathname + window.location.search;
+                    router.push(`/create/task?productId=${selectedProduct}&returnUrl=${encodeURIComponent(currentUrl)}`);
+                  }}
+                  className="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-colors inline-block"
+                >
+                  + Add Task
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="bg-gray-300 text-gray-500 rounded-full px-4 py-2 text-sm font-medium cursor-not-allowed inline-block"
+                  title="Select a product first"
+                >
+                  + Add Task
+                </button>
+              )}
             </div>
-          </div>
+          )}
 
-          {/* Output Dropdown */}
+          {/* Workpackage Dropdown - hidden on matrix route */}
+          {pathname !== '/products/matrix' && (
+            <div className="relative w-36">
+              <select 
+                value={selectedWorkpackage}
+                onChange={handleWorkpackageChange}
+                className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer truncate"
+              >
+                <option value="">Workpackage</option>
+                {workpackages.map((wp) => (
+                  <option key={wp.workpackage_id} value={wp.workpackage_id}>
+                    {wp.workpackage_name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          )}
+
+          {/* Output Dropdown - always visible */}
           <div className="relative w-36">
             <select 
               value={selectedOutput}
@@ -302,26 +311,28 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          {/* Product Dropdown */}
-          <div className="relative w-36">
-            <select 
-              value={selectedProduct}
-              onChange={handleProductChange}
-              className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer truncate"
-            >
-              <option value="">Product</option>
-              {products.map((product) => (
-                <option key={product.product_id} value={product.product_id}>
-                  {product.product_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+          {/* Product Dropdown - hidden on matrix route */}
+          {pathname !== '/products/matrix' && (
+            <div className="relative w-36">
+              <select 
+                value={selectedProduct}
+                onChange={handleProductChange}
+                className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer truncate"
+              >
+                <option value="">Product</option>
+                {products.map((product) => (
+                  <option key={product.product_id} value={product.product_id}>
+                    {product.product_name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       {children}
