@@ -1,9 +1,50 @@
 "use client"
 
 import { useState } from 'react';
-import { ProductDetailModal } from "@/components/product-detail-modal";
-import { useProductMatrix } from "@/contexts/ProductMatrixContext";
-import { TableSkeleton } from "@/components/loading-states";
+import ProductDetailModal from "@/components/ProductDetailModal";
+
+// Simple skeleton component for the matrix
+function MatrixSkeleton() {
+  return (
+    <div className="bg-white rounded-lg border overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left border-b">
+                <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+              </th>
+              {[...Array(4)].map((_, i) => (
+                <th key={i} className="px-4 py-3 text-left border-b min-w-[200px]">
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(6)].map((_, rowIndex) => (
+              <tr key={rowIndex}>
+                <td className="px-4 py-3 border-b">
+                  <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                </td>
+                {[...Array(4)].map((_, cellIndex) => (
+                  <td key={cellIndex} className="px-4 py-3 border-b">
+                    <div className="space-y-2">
+                      <div className="h-20 bg-gray-100 rounded animate-pulse"></div>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 interface Country {
   id: number;
@@ -32,48 +73,43 @@ interface MatrixCell {
   products: Product[];
 }
 
-interface ProductInfo {
-  id: string;
-  name: string;
-  objective?: string;
-  deliverable?: string;
-  deliveryDate?: string;
-  workPackageId: string;
-  workPackageName?: string;
-  primaryOrganization?: string;
-  country?: string;
+interface MatrixData {
+  indicators: Indicator[];
+  matrix: (Country | MatrixCell)[][];
+  totalProducts: number;
 }
 
-export function ProductMatrix() {
+interface ProductMatrixProps {
+  matrixData: MatrixData | null;
+  isLoadingMatrix: boolean;
+}
+
+export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProps) {
   // Estados para el modal de detalles del producto
-  const [selectedProductForModal, setSelectedProductForModal] = useState<ProductInfo | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // Obtener datos del contexto
-  const {
-    matrixData,
-    isLoadingMatrix,
-  } = useProductMatrix();
+
+  // Log when component receives data
+  console.log('🎨 ProductMatrix render:', {
+    hasMatrixData: !!matrixData,
+    isLoading: isLoadingMatrix,
+    indicatorsCount: matrixData?.indicators?.length || 0,
+    matrixRows: matrixData?.matrix?.length || 0,
+    totalProducts: matrixData?.totalProducts || 0
+  });
 
   // Handler para abrir modal de detalles del producto
-  const handleProductClick = async (productId: number) => {
-    try {
-      const response = await fetch(`/api/product-full-details?productId=${productId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedProductForModal(data.product);
-        setIsModalOpen(true);
-      }
-    } catch (error) {
-      console.error('Error fetching product details:', error);
-    }
+  const handleProductClick = (productId: number) => {
+    console.log('🖱️ Product clicked:', productId);
+    setSelectedProductId(productId.toString());
+    setIsModalOpen(true);
   };
 
   return (
     <div className="space-y-6">
       {/* Matrix Table */}
       {isLoadingMatrix && (
-        <TableSkeleton rows={8} columns={6} />
+        <MatrixSkeleton />
       )}
 
       {matrixData && !isLoadingMatrix && (
@@ -85,23 +121,27 @@ export function ProductMatrix() {
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">
                     Country
                   </th>
-                  {matrixData.indicators.map((indicator) => (
-                    <th key={indicator.id} className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b min-w-[200px]">
-                      <div>
-                        <div className="font-semibold">{indicator.code}</div>
-                        <div className="text-xs text-gray-600 font-normal">
-                          {indicator.name}
+                  {matrixData.indicators.map((indicator: Indicator) => {
+                    console.log('📊 Rendering indicator header:', indicator.code);
+                    return (
+                      <th key={indicator.id} className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b min-w-[200px]">
+                        <div>
+                          <div className="font-semibold">{indicator.code}</div>
+                          <div className="text-xs text-gray-600 font-normal">
+                            {indicator.name}
+                          </div>
                         </div>
-                      </div>
-                    </th>
-                  ))}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
-                {matrixData.matrix.map((row, rowIndex) => {
+                {matrixData.matrix.map((row: (Country | MatrixCell)[], rowIndex: number) => {
                   const country = row[0] as Country;
                   const cells = row.slice(1) as MatrixCell[];
                   
+                  console.log(`🌍 Rendering row ${rowIndex}:`, country.name, 'with', cells.length, 'cells');
                   return (
                     <tr key={`country-${country.id}-${rowIndex}`} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium text-gray-900 border-b bg-gray-25">
@@ -166,24 +206,22 @@ export function ProductMatrix() {
 
 
       {/* Product Detail Modal */}
-      {selectedProductForModal && (
-        <ProductDetailModal 
-          product={selectedProductForModal}
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedProductForModal(null);
-          }}
-          onEdit={() => {
-            // No implementamos edición desde la matriz por ahora
-            console.log('Edit from matrix not implemented');
-          }}
-          onDelete={() => {
-            // No implementamos eliminación desde la matriz por ahora
-            console.log('Delete from matrix not implemented');
-          }}
-        />
-      )}
+      <ProductDetailModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedProductId('');
+        }}
+        productId={selectedProductId}
+        onEdit={() => {
+          // Edit functionality can be implemented if needed
+          console.log('Edit from matrix not implemented');
+        }}
+        onDelete={() => {
+          // Delete functionality can be implemented if needed
+          console.log('Delete from matrix not implemented');
+        }}
+      />
     </div>
   );
 }
