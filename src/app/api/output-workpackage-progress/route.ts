@@ -14,13 +14,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Query para obtener indicadores con su progreso basado en tareas completadas
+    // Incluye indicadores sin productos asignados
     const query = `
-      WITH indicator_stats AS (
+      WITH all_indicators AS (
         SELECT 
           i.indicator_id,
           i.indicator_code,
           i.indicator_name,
-          i.workpackage_id,
+          i.workpackage_id
+        FROM indicators i
+        WHERE CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) = $1
+      ),
+      indicator_stats AS (
+        SELECT 
+          ai.indicator_id,
+          ai.indicator_code,
+          ai.indicator_name,
+          ai.workpackage_id,
           p.product_id,
           p.product_name,
           COUNT(t.task_id) as total_tasks,
@@ -29,13 +39,12 @@ export async function GET(request: NextRequest) {
             WHEN COUNT(t.task_id) = 0 THEN 0
             ELSE ROUND((COUNT(CASE WHEN s.status_name IN ('Completed', 'Finalizado', 'Done') THEN 1 END)::numeric / COUNT(t.task_id)::numeric) * 100, 0)
           END as product_completion_percentage
-        FROM indicators i
-        INNER JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
-        INNER JOIN products p ON pi.product_id = p.product_id
+        FROM all_indicators ai
+        LEFT JOIN product_indicators pi ON ai.indicator_id = pi.indicator_id
+        LEFT JOIN products p ON pi.product_id = p.product_id
         LEFT JOIN tasks t ON p.product_id = t.product_id
         LEFT JOIN status s ON t.status_id = s.status_id
-        WHERE CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) = $1
-        GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.workpackage_id, p.product_id, p.product_name
+        GROUP BY ai.indicator_id, ai.indicator_code, ai.indicator_name, ai.workpackage_id, p.product_id, p.product_name
       ),
       indicator_performance AS (
         SELECT 
@@ -43,8 +52,8 @@ export async function GET(request: NextRequest) {
           indicator_code,
           indicator_name,
           workpackage_id,
-          COUNT(DISTINCT product_id) as assigned_products_count,
-          ROUND(AVG(product_completion_percentage), 0) as completion_percentage
+          COUNT(DISTINCT product_id) FILTER (WHERE product_id IS NOT NULL) as assigned_products_count,
+          COALESCE(ROUND(AVG(product_completion_percentage) FILTER (WHERE product_id IS NOT NULL), 0), 0) as completion_percentage
         FROM indicator_stats
         GROUP BY indicator_id, indicator_code, indicator_name, workpackage_id
       )
