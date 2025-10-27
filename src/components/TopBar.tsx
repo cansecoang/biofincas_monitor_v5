@@ -7,6 +7,8 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useTabsContext } from '@/contexts/TabsContext';
 import { useState, useRef, useEffect, Suspense } from 'react';
 import NotificationsModal from '@/components/NotificationsModal';
+import IndicatorDetailModal from '@/components/IndicatorDetailModal';
+import { IndicatorPerformance } from '@/types/indicators';
 
 function TopBarContent() {
   const pathname = usePathname();
@@ -16,10 +18,12 @@ function TopBarContent() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{
-    products: Array<{ product_id: number; product_name: string }>;
-    indicators: Array<{ indicator_id: number; indicator_code: string; indicator_name: string }>;
+    products: Array<{ product_id: number; product_name: string; country_name?: string }>;
+    indicators: Array<{ indicator_id: number; indicator_code: string; indicator_name: string; workpackage_name?: string }>;
   }>({ products: [], indicators: [] });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selectedIndicator, setSelectedIndicator] = useState<IndicatorPerformance | undefined>(undefined);
+  const [isIndicatorModalOpen, setIsIndicatorModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -87,6 +91,22 @@ function TopBarContent() {
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
+
+  // Función para obtener detalles completos del indicador por indicator_code
+  const handleIndicatorClick = async (indicatorCode: string) => {
+    try {
+      const res = await fetch(`/api/indicator-detail?indicator_code=${encodeURIComponent(indicatorCode)}`);
+      const data = await res.json();
+      if (data.success && data.indicator) {
+        setSelectedIndicator(data.indicator);
+        setIsIndicatorModalOpen(true);
+        setSearchQuery('');
+        setIsSearchOpen(false);
+      }
+    } catch (error) {
+      console.error('Error fetching indicator details:', error);
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-gray-50 z-50">
@@ -185,7 +205,7 @@ function TopBarContent() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-900 truncate">{product.product_name}</p>
-                          <p className="text-xs text-gray-500">Product ID: {product.product_id}</p>
+                          <p className="text-xs text-gray-500">{product.country_name}</p>
                         </div>
                       </Link>
                     ))}
@@ -199,27 +219,23 @@ function TopBarContent() {
                       Indicators ({searchResults.indicators.length})
                     </div>
                     {searchResults.indicators.map((indicator) => (
-                      <Link
+                      <button
                         key={indicator.indicator_id}
-                        href={`/indicators/overview?indicatorId=${indicator.indicator_id}`}
-                        onClick={() => {
-                          setSearchQuery('');
-                          setIsSearchOpen(false);
-                        }}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 transition-colors cursor-pointer"
+                        onClick={() => handleIndicatorClick(indicator.indicator_code)}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 transition-colors cursor-pointer"
                       >
                         <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
                           <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 text-left">
                           <p className="font-medium text-gray-900 truncate">
-                            <span className="text-green-600 font-semibold">{indicator.indicator_code}</span> - {indicator.indicator_name}
+                            <span className="text-green-600 font-semibold">META {indicator.indicator_code}</span>
                           </p>
-                          <p className="text-xs text-gray-500">ID: {indicator.indicator_id}</p>
+                          <p className="text-xs text-gray-500">{indicator.workpackage_name}</p>
                         </div>
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -309,6 +325,16 @@ function TopBarContent() {
       <NotificationsModal 
         isOpen={isNotificationsOpen} 
         onClose={() => setIsNotificationsOpen(false)} 
+      />
+
+      {/* Indicator Detail Modal */}
+      <IndicatorDetailModal
+        open={isIndicatorModalOpen}
+        onClose={() => setIsIndicatorModalOpen(false)}
+        indicator={selectedIndicator}
+        onProductClick={(productId) => {
+          // Esta función ya no es necesaria porque el modal maneja la navegación internamente
+        }}
       />
     </header>
   );
