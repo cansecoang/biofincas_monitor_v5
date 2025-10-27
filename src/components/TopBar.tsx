@@ -24,8 +24,14 @@ function TopBarContent() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedIndicator, setSelectedIndicator] = useState<IndicatorPerformance | undefined>(undefined);
   const [isIndicatorModalOpen, setIsIndicatorModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -132,7 +138,7 @@ function TopBarContent() {
           </Link>
 
           {/* Tabs Section - Rendered dynamically */}
-      {tabs.length > 0 && (
+      {mounted && tabs.length > 0 && (
         <div className="border-t border-gray-100">
           <div className="flex items-center gap-1 px-6">
             {tabs.map((tab) => {
