@@ -7,9 +7,8 @@ import TabsLayout from '@/components/TabsLayout';
 // Tabs específicas para Indicators
 const indicatorTabs = [
   { id: 'overview', label: 'Overview', href: '/indicators/overview' },
-  { id: 'performance', label: 'Performance', href: '/indicators/performance' },
-  { id: 'trends', label: 'Trends', href: '/indicators/trends' },
-  { id: 'reports', label: 'Reports', href: '/indicators/reports' },
+  { id: 'output', label: 'Output', href: '/indicators/output' },
+  { id: 'workpackage', label: 'Workpackage', href: '/indicators/workpackage' },
 ];
 
 // Interfaces
@@ -36,17 +35,13 @@ const pageHeaders: Record<string, { title: string; subtitle: string }> = {
     title: 'Indicators Overview',
     subtitle: 'Key performance indicators and metrics dashboard'
   },
-  '/indicators/performance': {
-    title: 'Performance Metrics',
-    subtitle: 'Detailed performance analysis and trends'
+  '/indicators/output': {
+    title: 'Output Indicators',
+    subtitle: 'View indicators organized by output'
   },
-  '/indicators/trends': {
-    title: 'Indicator Trends',
-    subtitle: 'Historical trends and forecasting'
-  },
-  '/indicators/reports': {
-    title: 'Indicator Reports',
-    subtitle: 'Generate and export detailed reports'
+  '/indicators/workpackage': {
+    title: 'Workpackage Indicators',
+    subtitle: 'View indicators organized by work package'
   }
 };
 

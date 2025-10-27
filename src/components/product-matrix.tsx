@@ -122,9 +122,8 @@ export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProp
                     return (
                       <th key={indicator.id} className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b min-w-[200px]">
                         <div>
-                          <div className="font-semibold">{indicator.code}</div>
-                          <div className="text-xs text-gray-600 font-normal">
-                            {indicator.name}
+                          <div className="font-semibold">
+                            META {indicator.code}
                           </div>
                         </div>
                       </th>
@@ -157,20 +156,24 @@ export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProp
                                     {product.name}
                                   </div>
                                   <div className="space-y-1">
+                                    <div className="flex items-center text-xs text-gray-600">
+                                      <span className="font-bold mr-1">Country:</span>
+                                      <span>{country.name}</span>
+                                    </div>
+                                    {product.productOwnerName && (
+                                      <div className="flex items-center text-xs text-gray-600">
+                                        <span className="font-bold mr-1">Owner:</span>
+                                        <span className="truncate">{product.productOwnerName}</span>
+                                      </div>
+                                    )}
                                     {product.deliveryDate && (
                                       <div className="flex items-center text-xs text-gray-600">
-                                        <span className="font-medium mr-1">📅 Delivery:</span>
+                                        <span className="font-bold mr-1">Delivery:</span>
                                         <span>{new Date(product.deliveryDate).toLocaleDateString('en-US', {
                                           year: 'numeric',
                                           month: 'short',
                                           day: 'numeric'
                                         })}</span>
-                                      </div>
-                                    )}
-                                    {product.productOwnerName && (
-                                      <div className="flex items-center text-xs text-gray-600">
-                                        <span className="font-medium mr-1">👤 Owner:</span>
-                                        <span className="truncate">{product.productOwnerName}</span>
                                       </div>
                                     )}
                                   </div>
