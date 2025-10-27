@@ -3,7 +3,10 @@ export interface IndicatorPerformance {
   indicator_code: string;
   indicator_name: string;
   indicator_description: string;
+  workpackage_id: number;
   workpackage_name: string;
+  output_number: number;
+  output_name: string;
   assigned_products_count: number;
   assigned_products: {
     product_id: number;

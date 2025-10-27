@@ -40,6 +40,10 @@ export default function IndicatorDetailModal({ open, onClose, indicator, onProdu
       code: indicator.indicator_code,
       name: indicator.indicator_name,
       description: indicator.indicator_description || 'Sin descripción disponible',
+      workpackage_id: indicator.workpackage_id,
+      workpackage_name: indicator.workpackage_name,
+      output_number: indicator.output_number,
+      output_name: indicator.output_name,
     },
     metrics: {
       completion: indicator.completion_percentage,
@@ -50,6 +54,10 @@ export default function IndicatorDetailModal({ open, onClose, indicator, onProdu
     products: indicator.assigned_products,
     status: indicator.status_distribution,
   };
+
+  console.log('🔍 MODAL - Indicator completo:', indicator);
+  console.log('🔍 MODAL - output_number:', indicator.output_number, 'tipo:', typeof indicator.output_number);
+  console.log('🔍 MODAL - output_name:', indicator.output_name);
 
   return (
     <>
@@ -110,6 +118,18 @@ export default function IndicatorDetailModal({ open, onClose, indicator, onProdu
                 <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
                   <span className="text-sm text-gray-600 font-medium">Descripción</span>
                   <span className="text-sm text-gray-900">{indicatorData.general.description}</span>
+                </div>
+                <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
+                  <span className="text-sm text-gray-600 font-medium">Work Package</span>
+                  <span className="text-sm text-gray-900">{indicatorData.general.workpackage_name}</span>
+                </div>
+                <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
+                  <span className="text-sm text-gray-600 font-medium">Output</span>
+                  <span className="text-sm text-gray-900">
+                    {indicatorData.general.output_number && indicatorData.general.output_number > 0 
+                      ? `${indicatorData.general.output_number}`
+                      : 'Sin Output asignado'}
+                  </span>
                 </div>
               </div>
             </section>

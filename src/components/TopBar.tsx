@@ -97,6 +97,8 @@ function TopBarContent() {
     try {
       const res = await fetch(`/api/indicator-detail?indicator_code=${encodeURIComponent(indicatorCode)}`);
       const data = await res.json();
+      console.log('🔍 TOPBAR - API Response:', data);
+      console.log('🔍 TOPBAR - Indicator data:', data.indicator);
       if (data.success && data.indicator) {
         setSelectedIndicator(data.indicator);
         setIsIndicatorModalOpen(true);

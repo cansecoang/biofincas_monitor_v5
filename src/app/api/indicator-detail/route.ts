@@ -9,10 +9,16 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'indicator_code is required' }, { status: 400 });
     }
 
+    // DEBUG: Primero consultar solo la tabla indicators
+    const debugQuery = `SELECT * FROM indicators WHERE indicator_code = $1`;
+    const debugResult = await pool.query(debugQuery, [indicatorCode]);
+    console.log('🔍 DEBUG - Indicator raw data:', debugResult.rows[0]);
+
     // Buscar el indicador por indicator_code
     const indicatorQuery = `
       SELECT i.indicator_id, i.indicator_code, i.indicator_name, COALESCE(i.indicator_description, '') as indicator_description,
              i.workpackage_id, COALESCE(wp.workpackage_name, 'Sin WP') as workpackage_name,
+             i.output_number, COALESCE(o.output_name, 'Sin Output') as output_name,
              COUNT(DISTINCT pi.product_id) as assigned_products_count,
              COUNT(t.task_id) as total_tasks,
              COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) as completed_tasks,
@@ -20,15 +26,17 @@ export async function GET(request: Request) {
              ROUND((COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) * 100.0 / NULLIF(COUNT(t.task_id), 0)), 1) as completion_percentage
       FROM indicators i
       LEFT JOIN workpackages wp ON i.workpackage_id = wp.workpackage_id
+      LEFT JOIN outputs o ON i.output_number = o.output_id
       LEFT JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
       LEFT JOIN products p ON pi.product_id = p.product_id
       LEFT JOIN tasks t ON p.product_id = t.product_id
       LEFT JOIN status s ON t.status_id = s.status_id
       WHERE i.indicator_code = $1
-      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.workpackage_id, wp.workpackage_name
+      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.workpackage_id, wp.workpackage_name, i.output_number, o.output_name
       LIMIT 1
     `;
     const indicatorResult = await pool.query(indicatorQuery, [indicatorCode]);
+    console.log('🔍 DEBUG - Query result:', indicatorResult.rows[0]);
     if (indicatorResult.rows.length === 0) {
       return NextResponse.json({ error: 'Indicator not found' }, { status: 404 });
     }
@@ -66,7 +74,10 @@ export async function GET(request: Request) {
       indicator_code: row.indicator_code,
       indicator_name: row.indicator_name,
       indicator_description: row.indicator_description,
+      workpackage_id: row.workpackage_id,
       workpackage_name: row.workpackage_name,
+      output_number: parseInt(row.output_number) || 0,
+      output_name: row.output_name || 'Sin Output',
       assigned_products_count: parseInt(row.assigned_products_count) || 0,
       assigned_products: productsResult.rows,
       total_tasks: parseInt(row.total_tasks) || 0,
@@ -80,6 +91,8 @@ export async function GET(request: Request) {
                          parseFloat(row.completion_percentage) >= 75 ? 'good' :
                          parseFloat(row.completion_percentage) >= 50 ? 'warning' : 'critical'
     };
+    
+    console.log('📦 Final indicator object:', indicator);
 
     return NextResponse.json({ success: true, indicator });
   } catch (error) {

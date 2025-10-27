@@ -38,6 +38,7 @@ export async function GET(request: Request) {
         i.indicator_name,
         COALESCE(i.indicator_description, '') as indicator_description,
         i.output_number,
+        COALESCE(o.output_name, 'Sin Output') as output_name,
         i.workpackage_id,
         COALESCE(wp.workpackage_name, 'Sin WP') as workpackage_name,
         COUNT(DISTINCT pi.product_id) as assigned_products_count,
@@ -50,12 +51,13 @@ export async function GET(request: Request) {
         ) as completion_percentage
       FROM indicators i
       LEFT JOIN workpackages wp ON i.workpackage_id = wp.workpackage_id
+      LEFT JOIN outputs o ON i.output_number = o.output_id
       LEFT JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
       LEFT JOIN products p ON pi.product_id = p.product_id ${productWhereConditions.replace('AND', 'AND')}
       LEFT JOIN tasks t ON p.product_id = t.product_id
       LEFT JOIN status s ON t.status_id = s.status_id
       WHERE i.output_number = $1 ${indicatorWhereConditions}
-      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number, i.workpackage_id, wp.workpackage_name
+      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number, o.output_name, i.workpackage_id, wp.workpackage_name
       ORDER BY 
         -- Ordenamiento natural: primero por la parte numérica antes del punto
         CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER),
@@ -137,7 +139,10 @@ export async function GET(request: Request) {
         indicator_code: row.indicator_code,
         indicator_name: row.indicator_name,
         indicator_description: row.indicator_description,
+        workpackage_id: row.workpackage_id,
         workpackage_name: row.workpackage_name,
+        output_number: parseInt(row.output_number) || 0,
+        output_name: row.output_name || 'Sin Output',
         assigned_products_count: parseInt(row.assigned_products_count) || 0,
         assigned_products: productsResult.rows,
         total_tasks: parseInt(row.total_tasks) || 0,
