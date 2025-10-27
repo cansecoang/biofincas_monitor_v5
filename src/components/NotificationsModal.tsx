@@ -6,13 +6,16 @@ import NotificationCard from '@/components/ui/NotificationCard';
 
 interface Notification {
   id: string;
+  task_id: number;
+  product_id: number;
   category: 'Oro Verde' | 'User' | 'Communication' | 'Gender';
-  date: string;
-  time: string;
-  country: string;
-  productOwner: string;
-  taskTitle: string;
-  productTitle: string;
+  category_key: string;
+  checkin_date: string;
+  task_name: string;
+  product_name: string;
+  country_name: string;
+  product_owner_name: string;
+  responsable_name?: string;
 }
 
 interface NotificationsModalProps {
@@ -20,66 +23,38 @@ interface NotificationsModalProps {
   onClose: () => void;
 }
 
-// Datos de ejemplo - reemplazar con datos reales
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    category: 'Communication',
-    date: 'fri, 31 oct',
-    time: '18:00',
-    country: 'Guatemala',
-    productOwner: 'Oro Verde',
-    taskTitle: 'Implementation in the field of the producers survey',
-    productTitle: 'Survey of coffee producers in Guatemala',
-  },
-  {
-    id: '2',
-    category: 'User',
-    date: 'fri, 31 oct',
-    time: '18:00',
-    country: 'Guatemala',
-    productOwner: 'Oro Verde',
-    taskTitle: 'Implementation in the field of the producers survey',
-    productTitle: 'Survey of coffee producers in Guatemala',
-  },
-  {
-    id: '3',
-    category: 'Gender',
-    date: 'fri, 31 oct',
-    time: '18:00',
-    country: 'Guatemala',
-    productOwner: 'Oro Verde',
-    taskTitle: 'Implementation in the field of the producers survey',
-    productTitle: 'Survey of coffee producers in Guatemala',
-  },
-  {
-    id: '4',
-    category: 'Oro Verde',
-    date: 'fri, 31 oct',
-    time: '18:00',
-    country: 'Guatemala',
-    productOwner: 'Oro Verde',
-    taskTitle: 'Implementation in the field of the producers survey',
-    productTitle: 'Survey of coffee producers in Guatemala',
-  },
-  {
-    id: '5',
-    category: 'Communication',
-    date: 'fri, 31 oct',
-    time: '18:00',
-    country: 'Guatemala',
-    productOwner: 'Oro Verde',
-    taskTitle: 'Implementation in the field of the producers survey',
-    productTitle: 'Survey of coffee producers in Guatemala',
-  },
-];
-
-const categories = ['All', 'Oro Verde', 'Gender', 'User'] as const;
-
+const categories = ['All', 'Oro Verde', 'User', 'Communication', 'Gender'] as const;
 type Category = typeof categories[number];
 
 export default function NotificationsModal({ isOpen, onClose }: NotificationsModalProps) {
   const [activeCategory, setActiveCategory] = useState<Category>('All');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch notifications cuando el modal se abre
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen]);
+
+  const fetchNotifications = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/checkin-notifications');
+      const data = await response.json();
+      
+      if (data.success) {
+        setNotifications(data.notifications);
+      } else {
+        console.error('Error fetching notifications:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Deshabilitar scroll en el body cuando el modal está abierto
   useEffect(() => {
@@ -99,13 +74,29 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
 
   // Filtrar notificaciones según la categoría activa
   const filteredNotifications = activeCategory === 'All' 
-    ? mockNotifications 
-    : mockNotifications.filter(n => n.category === activeCategory);
+    ? notifications 
+    : notifications.filter(n => n.category === activeCategory);
 
   // Contar notificaciones por categoría
   const getCategoryCount = (cat: Category) => {
-    if (cat === 'All') return mockNotifications.length;
-    return mockNotifications.filter(n => n.category === cat).length;
+    if (cat === 'All') return notifications.length;
+    return notifications.filter(n => n.category === cat).length;
+  };
+
+  // Formatear fecha y hora
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      day: 'numeric', 
+      month: 'short' 
+    }).toLowerCase();
+    const formattedTime = date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false
+    });
+    return { date: formattedDate, time: formattedTime };
   };
 
   return (
@@ -150,23 +141,32 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
 
         {/* Notifications List */}
         <div className="flex-1 overflow-y-auto p-6 space-y-3">
-          {filteredNotifications.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+              <p className="mt-4 text-gray-500">Loading notifications...</p>
+            </div>
+          ) : filteredNotifications.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               No notifications in this category
             </div>
           ) : (
-            filteredNotifications.map((notification) => (
-              <NotificationCard
-                key={notification.id}
-                category={notification.category}
-                date={notification.date}
-                time={notification.time}
-                country={notification.country}
-                productOwner={notification.productOwner}
-                taskTitle={notification.taskTitle}
-                productTitle={notification.productTitle}
-              />
-            ))
+            filteredNotifications.map((notification) => {
+              const { date, time } = formatDateTime(notification.checkin_date);
+              return (
+                <NotificationCard
+                  key={notification.id}
+                  category={notification.category}
+                  date={date}
+                  time={time}
+                  country={notification.country_name || 'N/A'}
+                  productOwner={notification.product_owner_name || 'N/A'}
+                  taskTitle={notification.task_name}
+                  productTitle={notification.product_name}
+                  productId={notification.product_id}
+                />
+              );
+            })
           )}
         </div>
       </div>

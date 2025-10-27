@@ -1,3 +1,7 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+
 interface NotificationCardProps {
   category: 'Oro Verde' | 'User' | 'Communication' | 'Gender';
   date: string;
@@ -6,6 +10,7 @@ interface NotificationCardProps {
   productOwner: string;
   taskTitle: string;
   productTitle: string;
+  productId: number;
 }
 
 // Configuración de colores por categoría
@@ -40,8 +45,14 @@ export default function NotificationCard({
   productOwner,
   taskTitle,
   productTitle,
+  productId,
 }: NotificationCardProps) {
   const colors = categoryColors[category];
+  const router = useRouter();
+
+  const handleViewProduct = () => {
+    router.push(`/products/list?productId=${productId}`);
+  };
 
   return (
     <div className={`${colors.bg} rounded-3xl pb-4 shadow-sm border leading-tight border-gray-200 px-3 py-2 space-y-2.5`}>
@@ -79,6 +90,7 @@ export default function NotificationCard({
 
         {/* View Product Button */}
         <button
+          onClick={handleViewProduct}
           className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${colors.button}`}
         >
           View Product
