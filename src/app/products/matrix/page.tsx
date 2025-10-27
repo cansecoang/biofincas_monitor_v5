@@ -48,20 +48,53 @@ export default function MatrixPage() {
 function MatrixContent() {
   const searchParams = useSearchParams();
   const [selectedOutput, setSelectedOutput] = useState<string | null>(null);
+  const [selectedWorkpackage, setSelectedWorkpackage] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [matrixData, setMatrixData] = useState<MatrixData | null>(null);
   const [isLoadingMatrix, setIsLoadingMatrix] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Read output parameter from URL
+  // Read parameters from URL
   useEffect(() => {
     const urlOutput = searchParams.get('outputId');
+    const urlWorkpackage = searchParams.get('workpackageId');
+    const urlCountry = searchParams.get('countryId');
+    
     setSelectedOutput(urlOutput);
+    setSelectedWorkpackage(urlWorkpackage);
+    setSelectedCountry(urlCountry);
   }, [searchParams]);
 
-  // Fetch matrix data when output is selected
+  // Fetch matrix data when any filter changes
   useEffect(() => {
-    if (!selectedOutput) {
-      setMatrixData(null);
+    // Only fetch if at least one filter is selected
+    if (!selectedOutput && !selectedWorkpackage && !selectedCountry) {
+      // Fetch all data when no filters are selected
+      const fetchAllData = async () => {
+        setIsLoadingMatrix(true);
+        setError(null);
+        
+        try {
+          console.log('🔍 Fetching all matrix data (no filters)');
+          const response = await fetch('/api/product-matrix');
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch matrix data');
+          }
+          
+          const data = await response.json();
+          console.log('📦 Raw API Response:', data);
+          setMatrixData(data);
+          console.log('✅ Matrix data set successfully');
+        } catch (err) {
+          console.error('❌ Error fetching matrix data:', err);
+          setError('Failed to load matrix data. Please try again.');
+        } finally {
+          setIsLoadingMatrix(false);
+        }
+      };
+      
+      fetchAllData();
       return;
     }
 
@@ -70,8 +103,16 @@ function MatrixContent() {
       setError(null);
       
       try {
-        console.log(`🔍 Fetching matrix for output: ${selectedOutput}`);
-        const response = await fetch(`/api/product-matrix?outputId=${selectedOutput}`);
+        // Build URL with filters
+        const params = new URLSearchParams();
+        if (selectedOutput) params.set('outputId', selectedOutput);
+        if (selectedWorkpackage) params.set('workpackageId', selectedWorkpackage);
+        if (selectedCountry) params.set('countryId', selectedCountry);
+        
+        const url = `/api/product-matrix?${params.toString()}`;
+        
+        console.log(`🔍 Fetching matrix:`, { selectedOutput, selectedWorkpackage, selectedCountry });
+        const response = await fetch(url);
         
         console.log(`📡 Response status: ${response.status}`);
         console.log(`📡 Response ok: ${response.ok}`);
@@ -103,23 +144,12 @@ function MatrixContent() {
     };
 
     fetchMatrixData();
-  }, [selectedOutput]);
+  }, [selectedOutput, selectedWorkpackage, selectedCountry]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-full mx-auto">
-        {!selectedOutput ? (
-          // No output selected state
-          <div className="bg-white rounded-2xl shadow p-12">
-            <div className="text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-              </svg>
-              <h3 className="mt-4 text-lg font-medium text-gray-900">No Output Selected</h3>
-              <p className="mt-2 text-gray-500">Please select an output from the dropdown above to view the product matrix.</p>
-            </div>
-          </div>
-        ) : error ? (
+        {error ? (
           // Error state
           <div className="bg-white rounded-2xl shadow p-12">
             <div className="text-center">
