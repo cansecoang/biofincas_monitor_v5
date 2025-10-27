@@ -23,7 +23,9 @@ export async function GET(request: NextRequest) {
         CAST(SPLIT_PART(indicator_code, '.', 1) AS INTEGER) as "outputNumber"
       FROM indicators
       WHERE CAST(SPLIT_PART(indicator_code, '.', 1) AS INTEGER) = $1
-      ORDER BY indicator_code
+      ORDER BY 
+        CAST(SPLIT_PART(indicator_code, '.', 1) AS INTEGER),
+        CAST(SPLIT_PART(indicator_code, '.', 2) AS INTEGER)
     `;
     const indicatorsResult = await pool.query(indicatorsQuery, [outputId]);
     const indicators = indicatorsResult.rows;
