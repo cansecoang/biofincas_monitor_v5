@@ -221,20 +221,11 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
               ) : (
                 selectedProductName
               )}
+            
             </h1>
-            {selectedProduct && pathname !== '/products/matrix' && (
-              <button
-                onClick={() => setIsDetailModalOpen(true)}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors mb-2"
-                title="View product details"
-              >
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
-            )}
+
           </div>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-base">
             {pathname === '/products/matrix' ? (
               selectedOutput ? (
                 'Products organized by country and indicator'
@@ -242,15 +233,27 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
                 'Select an output to view the product matrix'
               )
             ) : selectedProductData ? (
-              <>
+              <span className="flex items-center gap-1">
                 <span className="font-bold">Country:</span> {selectedProductData.country_name || 'N/A'} • 
                 <span className="font-bold ml-2">Owner:</span> {selectedProductData.product_owner_name || 'N/A'} • 
                 <span className="font-bold ml-2">Delivery:</span> {formatDate(selectedProductData.delivery_date)}
-              </>
+                {selectedProduct && pathname !== '/products/matrix' && (
+                  <button
+                    onClick={() => setIsDetailModalOpen(true)}
+                    className="ml-1 hover:bg-gray-100 rounded-full px-1.5 transition-colors"
+                    title="View product details"
+                  >
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+                )}
+              </span>
             ) : (
               'Select a product to view details'
             )}
           </p>
+          
         </div>
 
         {/* Dropdowns Section */}
@@ -278,7 +281,9 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
                   + Add Task
                 </button>
               )}
+              
             </div>
+            
           )}
 
           {/* Workpackage Dropdown - hidden on matrix route */}
