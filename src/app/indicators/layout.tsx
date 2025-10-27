@@ -139,7 +139,7 @@ function IndicatorsLayoutContent({ children }: { children: ReactNode }) {
 
         {/* Dropdowns Section */}
         <div className="flex gap-3 pr-6">
-          {/* Output Dropdown */}
+          {/* Output Dropdown - siempre visible */}
           <div className="relative w-36">
             <select 
               value={selectedOutput}
@@ -160,50 +160,53 @@ function IndicatorsLayoutContent({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          {/* Workpackage Dropdown */}
-          <div className="relative w-36">
-            <select 
-              value={selectedWorkpackage}
-              onChange={handleWorkpackageChange}
-              className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
-            >
-              <option value="">Workpackage</option>
-              <option value="all">Todos</option>
-              {workpackages.map((wp) => (
-                <option key={wp.workpackage_id} value={wp.workpackage_id}>
-                  {wp.workpackage_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+          {/* Workpackage Dropdown - oculto en /indicators/output */}
+          {pathname !== '/indicators/output' && (
+            <div className="relative w-36">
+              <select 
+                value={selectedWorkpackage}
+                onChange={handleWorkpackageChange}
+                className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
+              >
+                <option value="">Workpackage</option>
+                <option value="all">Todos</option>
+                {workpackages.map((wp) => (
+                  <option key={wp.workpackage_id} value={wp.workpackage_id}>
+                    {wp.workpackage_name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Countries Dropdown */}
-          <div className="relative w-36">
-            <select 
-              value={selectedCountry}
-              onChange={handleCountryChange}
-              className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
-            >
-              <option value="">Country</option>
-              <option value="all">Todos</option>
-              {countries.map((country) => (
-                <option key={country.country_id} value={country.country_id}>
-                  {country.country_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+          {/* Countries Dropdown - oculto en /indicators/output */}
+          {pathname !== '/indicators/output' && (
+            <div className="relative w-36">
+              <select 
+                value={selectedCountry}
+                onChange={handleCountryChange}
+                className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
+              >
+                <option value="">Country</option>
+                <option value="all">Todos</option>
+                {countries.map((country) => (
+                  <option key={country.country_id} value={country.country_id}>
+                    {country.country_name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
-          </div>
-          
+          )}
         </div>
       </div>
       {children}
