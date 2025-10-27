@@ -58,8 +58,8 @@ export default function OutputIndicatorsPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      
+    <div className="bg-white rounded-2xl shadow p-12">
+        
     </div>
   );
 }
