@@ -407,13 +407,19 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   Task Description <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <textarea
                   value={formData.taskDescription}
                   onChange={(e) => updateFormData('taskDescription', e.target.value)}
                   placeholder="Task Description"
                   required
-                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
+                  rows={3}
+                  className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600 resize-none overflow-hidden"
+                  style={{ minHeight: '48px' }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
+                    target.style.height = target.scrollHeight + 'px';
+                  }}
                 />
               </div>
             </div>
