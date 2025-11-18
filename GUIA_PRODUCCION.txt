@@ -1,0 +1,2941 @@
+# GUÍA COMPLETA PARA LLEVAR BIOFINCAS MONITOR A PRODUCCIÓN
+
+Fecha: 29 de Noviembre de 2025
+Versión: 1.0
+
+================================================================================
+RESUMEN EJECUTIVO
+================================================================================
+
+BioFincas Monitor es una plataforma web de gestión y monitoreo de proyectos 
+agrícolas, construida con Next.js 15.1.3, React 19, PostgreSQL y Tailwind CSS. 
+Esta guía detalla todas las consideraciones, tiempos estimados y descripción de 
+tareas necesarias para llevar la aplicación a un entorno de producción.
+
+Tiempo total estimado para llevar a producción: 40-50 horas
+
+================================================================================
+1. VERIFICACIÓN DE PREREQUISITOS (3-4 horas)
+================================================================================
+
+1.1 ANÁLISIS DE DEPENDENCIAS Y SEGURIDAD
+   - Tiempo: 2 horas
+   - Descripción:
+     * Auditar todas las dependencias con `npm audit`
+     * Verificar vulnerabilidades conocidas (CVEs) en paquetes npm
+     * Actualizar paquetes a versiones estables y compatibles
+     * Revisar la compatibilidad entre dependencias principales:
+       - Next.js 15.1.3 con React 19
+       - PostgreSQL client (pg) versión 8.16.3
+       - Tailwind CSS 3.4.18
+       - D3, Recharts para visualizaciones
+     * Evaluar dependencias opcionales y remover si no se usan
+   - Archivos clave:
+     * package.json
+     * package-lock.json
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Ejecutar auditoría de dependencias:
+        ```bash
+        npm audit
+        npm audit --json > audit-report.json
+        ```
+     
+     2. Revisar vulnerabilidades críticas:
+        - Abrir audit-report.json
+        - Buscar "severity": "critical" o "high"
+        - Documentar CVEs encontradas
+     
+     3. Actualizar paquetes vulnerables:
+        ```bash
+        npm update [package-name]@[version]
+        npm audit fix  # Intento automático
+        npm audit fix --force  # Fuerza actualización (cuidado)
+        ```
+     
+     4. Validar compatibilidad:
+        ```bash
+        npm run build  # Verificar que aún compila
+        npm test      # Ejecutar tests
+        ```
+     
+     5. Eliminar dependencias innecesarias:
+        ```bash
+        npm ls  # Listar todos los paquetes
+        npm prune  # Remover dependencias no usadas
+        ```
+     
+     6. Generar reporte final:
+        ```bash
+        npm audit --audit-level=moderate > final-audit.txt
+        ```
+        Documentar en un archivo SECURITY_AUDIT.md
+
+1.2 VALIDACIÓN DEL CÓDIGO FUENTE
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Ejecutar linter con `npm run lint` para verificar código TypeScript
+     * Revisar errores de tipo en tsconfig.json
+     * Validar que no haya warnings o errores de compilación
+     * Revisar código obsoleto o comentarios de desarrollo
+     * Verificar que no haya variables de depuración o logs innecesarios
+   - Archivos clave:
+     * tsconfig.json
+     * next.config.ts
+     * .eslintrc.json (si existe)
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Ejecutar linter:
+        ```bash
+        npm run lint
+        npm run lint -- --fix  # Arreglar automáticamente
+        ```
+     
+     2. Verificar compilación de TypeScript:
+        ```bash
+        npx tsc --noEmit  # Verificar tipos sin generar JS
+        ```
+     
+     3. Buscar código de desarrollo:
+        ```bash
+        grep -r "console\.log" src/ --include="*.ts" --include="*.tsx"
+        grep -r "TODO\|FIXME\|HACK" src/ --include="*.ts" --include="*.tsx"
+        grep -r "debugger" src/ --include="*.ts" --include="*.tsx"
+        ```
+     
+     4. Remover logs de desarrollo en archivos encontrados
+     
+     5. Compilar proyecto:
+        ```bash
+        npm run build
+        ```
+
+1.3 VERIFICACIÓN DE CONFIGURACIÓN
+   - Tiempo: 1 hora
+   - Descripción:
+     * Validar que la configuración de Next.js sea óptima
+     * Revisar Image Optimization settings
+     * Verificar que los path aliases (@/*) funcionen correctamente
+     * Validar configuración de Turbopack para compilación rápida
+     * Revisar headers de seguridad (CORS, CSP, etc.)
+   - Archivos clave:
+     * next.config.ts
+     * middleware.ts (si existe)
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Actualizar next.config.ts con optimizaciones:
+        ```typescript
+        const nextConfig: NextConfig = {
+          images: { formats: ['image/avif', 'image/webp'], unoptimized: false },
+          compress: true,
+          productionBrowserSourceMaps: false,
+          swcMinify: true,
+          headers: async () => [{
+            source: '/:path*',
+            headers: [
+              { key: 'X-Content-Type-Options', value: 'nosniff' },
+              { key: 'X-Frame-Options', value: 'DENY' },
+              { key: 'X-XSS-Protection', value: '1; mode=block' },
+            ],
+          }],
+        };
+        ```
+     
+     2. Validar path aliases en tsconfig.json funcionan:
+        ```bash
+        npm run build
+        ```
+     
+     3. Revisar middleware.ts para que esté protegiendo rutas
+     
+     4. Validar configuración de Tailwind en tailwind.config.ts
+
+================================================================================
+2. GESTIÓN DE VARIABLES DE ENTORNO (4-5 horas)
+================================================================================
+
+2.1 DEFINICIÓN Y DOCUMENTACIÓN DE VARIABLES
+   - Tiempo: 2 horas
+   - Descripción:
+     * Documentar todas las variables de entorno necesarias:
+       - DATABASE_URL: Conexión a PostgreSQL (Prisma Accelerate en prod)
+       - POSTGRES_URL: Conexión directa para fallback
+       - NEXT_PUBLIC_API_URL: URL de la API en producción
+       - SESSION_SECRET: Clave para encriptación de sesiones
+       - JWT_SECRET: Clave para tokens JWT (si aplica)
+     * Crear archivo .env.production con valores seguros
+     * Generar .env.example con placeholders seguros
+     * Documentar en README cómo configurar cada variable
+   - Archivos a crear/modificar:
+     * .env.production
+     * .env.example (actualizar)
+     * README.md (sección de configuración)
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Actualizar .env.example:
+        ```
+        # Database
+        DATABASE_URL="postgresql://user:password@host:5432/database"
+        POSTGRES_URL="postgresql://user:password@host:5432/database"
+        
+        # API Configuration
+        NEXT_PUBLIC_API_URL="https://api.yourdomain.com"
+        
+        # Security
+        SESSION_SECRET="your-secret-key-min-32-chars-long"
+        JWT_SECRET="your-jwt-secret-key-min-32-chars-long"
+        
+        # Node Environment
+        NODE_ENV="production"
+        ```
+     
+     2. Generar secretos seguros:
+        ```bash
+        node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+        ```
+        Usar output para SESSION_SECRET y JWT_SECRET
+     
+     3. Crear .env.production con valores reales (NO comitear)
+     
+     4. Documentar en README.md sección "Environment Configuration"
+     
+     5. Crear ENVIRONMENT_VARIABLES.md con explicación de cada variable
+
+2.2 SEGURIDAD DE SECRETS Y CREDENCIALES
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * NUNCA comitear .env con credenciales reales
+     * Implementar rotación periódica de secretos (cada 3 meses)
+     * Usar gestores de secretos como:
+       - Vercel Secrets (si se despliega en Vercel)
+       - AWS Secrets Manager (si está en AWS)
+       - HashiCorp Vault (si es infraestructura corporativa)
+     * Documentar procedimiento de rotación de credenciales
+     * Crear plan de recuperación si se compromete un secret
+   - Consideraciones de seguridad:
+     * Los secrets deben tener permisos mínimos necesarios
+     * Usar conexiones SSL para bases de datos
+     * Implementar auditoría de acceso a secretos
+     * Crear alertas si se accede a secrets de forma anómala
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Agregar .env al .gitignore (si no está):
+        ```bash
+        echo ".env.local" >> .gitignore
+        echo ".env.production" >> .gitignore
+        ```
+     
+     2. Para Vercel: Configurar secrets en dashboard:
+        - Ir a Project Settings → Environment Variables
+        - Agregar cada variable con su valor
+        - Seleccionar ambientes (Development, Preview, Production)
+     
+     3. Para AWS: Usar AWS Secrets Manager:
+        ```bash
+        aws secretsmanager create-secret \
+          --name biofincas/prod/database \
+          --secret-string '{"url":"..."}'
+        ```
+     
+     4. Crear procedimiento de rotación:
+        - Crear documento: SECRET_ROTATION_PROCEDURE.md
+        - Definir frecuencia: cada 90 días
+        - Documentar pasos: generar nuevo secret, actualizar, validar
+     
+     5. Configurar alertas en el platform (Vercel/AWS)
+        para acceso a secretos
+
+2.3 CONFIGURACIÓN DE BASE DE DATOS EN PRODUCCIÓN
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Migrar base de datos a servidor de producción:
+       - Opción A: PostgreSQL en Render, Railway, o similar
+       - Opción B: AWS RDS para mayor disponibilidad
+       - Opción C: Google Cloud SQL
+     * Configurar backups automáticos (diarios)
+     * Implementar plan de recuperación ante desastres (DR)
+     * Configurar réplicas de lectura para escalabilidad
+     * Validar que la base de datos tenga los esquemas necesarios:
+       - roles, users, user_sessions, audit_logs
+       - products, tasks, phases
+       - indicators, outputs, work_packages
+     * Ejecutar migraciones de datos si hay esquema anterior
+   - Archivos a revisar:
+     * src/lib/db.ts (configuración de conexión)
+     * src/app/api/setup-rbac/route.ts (schema RBAC)
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Crear base de datos en plataforma elegida (ej: Render):
+        ```bash
+        # Render proporciona DATABASE_URL y POSTGRES_URL
+        # Copiar y guardar en gestor de secretos
+        ```
+     
+     2. Probar conexión:
+        ```bash
+        npm install pg
+        node -e "
+          const Pool = require('pg').Pool;
+          const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+          pool.query('SELECT NOW()', (err, res) => {
+            if (err) console.error(err);
+            else console.log('Connection successful:', res.rows[0]);
+            process.exit();
+          });
+        "
+        ```
+     
+     3. Ejecutar setup de RBAC:
+        ```bash
+        curl -X POST https://yourdomain.com/api/setup-rbac
+        # O ejecutar localmente contra prod DB
+        ```
+     
+     4. Configurar backups automáticos en el platform
+     
+     5. Crear índices en base de datos:
+        ```sql
+        CREATE INDEX idx_product_id ON tasks(product_id);
+        CREATE INDEX idx_task_id ON tasks(id);
+        CREATE INDEX idx_user_id ON users(id);
+        CREATE INDEX idx_status_id ON tasks(status_id);
+        CREATE INDEX idx_created_at ON tasks(created_at);
+        ```
+     
+     6. Validar estructura de tablas:
+        ```bash
+        curl -X GET https://yourdomain.com/api/table-structure
+        ```
+
+================================================================================
+3. OPTIMIZACIÓN DE PERFORMANCE (6-8 horas)
+================================================================================
+
+3.1 OPTIMIZACIÓN DE BUNDLE Y CÓDIGO
+   - Tiempo: 2-3 horas
+   - Descripción:
+     * Analizar tamaño del bundle con `npm run build`
+     * Implementar code splitting automático de Next.js
+     * Lazy loading de componentes pesados (Gantt, gráficos, modales)
+     * Optimizar imports - evitar importar librerías completas
+     * Revisar y remover dead code
+     * Implementar dynamic imports para rutas no críticas
+     * Validar que los assets estáticos no excedan 50MB
+   - Herramientas recomendadas:
+     * next/bundle-analyzer
+     * webpack-bundle-analyzer
+   - Objetivos:
+     * Bundle de JavaScript < 500KB (comprimido)
+     * First Contentful Paint < 1.5s
+     * Lighthouse score > 80
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Instalar bundle analyzer:
+        ```bash
+        npm install --save-dev @next/bundle-analyzer
+        ```
+     
+     2. Actualizar next.config.ts:
+        ```typescript
+        const withBundleAnalyzer = require('@next/bundle-analyzer')({
+          enabled: process.env.ANALYZE === 'true',
+        });
+        module.exports = withBundleAnalyzer(nextConfig);
+        ```
+     
+     3. Analizar bundle:
+        ```bash
+        ANALYZE=true npm run build
+        ```
+        Esto genera archivos .html para visualizar
+     
+     4. Implementar dynamic imports para componentes pesados:
+        ```typescript
+        import dynamic from 'next/dynamic';
+        const GanttChart = dynamic(() => import('@/components/gantt-chart'), {
+          loading: () => <p>Cargando...</p>,
+          ssr: false,
+        });
+        ```
+     
+     5. Remover imports no usados (dead code):
+        ```bash
+        grep -r "import" src/ | grep -v "from" | grep -v "="
+        ```
+     
+     6. Verificar tamaño final:
+        ```bash
+        npm run build
+        # Revisar .next/static/chunks
+        ```
+        Objetivo: main bundle < 500KB
+
+3.2 OPTIMIZACIÓN DE IMÁGENES Y ASSETS
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Usar componente <Image> de Next.js para todas las imágenes
+     * Implementar lazy loading de imágenes
+     * Optimizar formatos: WebP para navegadores modernos
+     * Configurar srcset para responsive images
+     * Comprimir imágenes antes de deployar
+     * Usar CDN para servir assets estáticos
+     * Validar que las imágenes tengan dimensiones correctas
+   - Consideraciones:
+     * Máximo 200KB por imagen
+     * Usar AVIF o WebP cuando sea posible
+     * Implementar blur placeholder para UX
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Usar componente Image de Next.js:
+        ```typescript
+        import Image from 'next/image';
+        
+        <Image
+          src="/products/sample.jpg"
+          alt="Product"
+          width={400}
+          height={300}
+          placeholder="blur"
+          blurDataURL="data:image/..."
+          priority={false}
+        />
+        ```
+     
+     2. Comprimir imágenes antes de subir:
+        ```bash
+        # Instalar imagemin
+        npm install --save-dev imagemin imagemin-mozjpeg imagemin-pngquant
+        
+        # Script de compresión (en package.json):
+        "compress-images": "imagemin public/**/*.{jpg,png} --out-dir=public"
+        ```
+     
+     3. Configurar próxima generación de formatos en next.config.ts:
+        ```typescript
+        images: {
+          formats: ['image/avif', 'image/webp'],
+          unoptimized: false,
+        }
+        ```
+     
+     4. Validar tamaño de imágenes:
+        ```bash
+        find public -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) \
+          -exec ls -lh {} \; | awk '{print $5, $9}'
+        ```
+
+3.3 OPTIMIZACIÓN DE BASE DE DATOS
+   - Tiempo: 2-3 horas
+   - Descripción:
+     * Crear índices en columnas frecuentemente consultadas:
+       - product_id, task_id, status_id, user_id
+       - created_at, updated_at para filtros por fecha
+     * Implementar paginación en listados (máximo 50 registros por página)
+     * Usar prepared statements para prevenir SQL injection
+     * Implementar caché en memoria para datos que no cambian frecuentemente:
+       - Roles y permisos (5 minutos)
+       - Países y organizaciones (1 hora)
+       - Usuarios (30 minutos)
+     * Validar que las queries no hagan N+1
+     * Implementar connection pooling en PostgreSQL
+   - Configuración recomendada:
+     * Pool size: 20-30 conexiones
+     * Connection timeout: 5000ms
+     * Idle timeout: 30000ms
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Crear índices en PostgreSQL:
+        ```sql
+        CREATE INDEX idx_product_id ON tasks(product_id);
+        CREATE INDEX idx_task_id ON tasks(id);
+        CREATE INDEX idx_status_id ON tasks(status_id);
+        CREATE INDEX idx_user_id ON users(id);
+        CREATE INDEX idx_created_at ON tasks(created_at);
+        CREATE INDEX idx_updated_at ON tasks(updated_at);
+        
+        -- Índices compuestos para queries frecuentes
+        CREATE INDEX idx_product_status ON tasks(product_id, status_id);
+        ```
+     
+     2. Implementar paginación en API:
+        ```typescript
+        // src/app/api/products/route.ts
+        const limit = 50;
+        const offset = (page - 1) * limit;
+        const result = await db.query(
+          'SELECT * FROM products LIMIT $1 OFFSET $2',
+          [limit, offset]
+        );
+        ```
+     
+     3. Configurar connection pooling en src/lib/db.ts:
+        ```typescript
+        const pool = new Pool({
+          connectionString: process.env.DATABASE_URL,
+          max: 20,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 5000,
+        });
+        ```
+     
+     4. Implementar caché con Redis (opcional):
+        ```bash
+        npm install redis
+        ```
+        Crear src/lib/cache.ts con wrapper de Redis
+
+3.4 OPTIMIZACIÓN DE RED Y CDN
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Implementar compresión gzip en responses (Next.js por defecto)
+     * Activar compression Brotli para mejor ratio
+     * Implementar HTTP/2 o HTTP/3
+     * Usar CDN para assets estáticos (Vercel CDN, Cloudflare, AWS CloudFront)
+     * Configurar cache headers apropiados:
+       - Assets estáticos: 1 año (cache agresivo)
+       - HTML: no-cache, must-revalidate
+       - API responses: según su naturaleza
+     * Implementar HSTS (HTTP Strict Transport Security)
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Configurar headers de caché en next.config.ts:
+        ```typescript
+        headers: async () => [
+          {
+            source: '/api/:path*',
+            headers: [
+              { key: 'Cache-Control', value: 'public, s-maxage=60' },
+            ],
+          },
+          {
+            source: '/_next/static/:path*',
+            headers: [
+              { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+            ],
+          },
+        ],
+        ```
+     
+     2. Implementar Brotli compression:
+        - En Vercel: automático
+        - En AWS CloudFront: habilitar en distribution
+        - En self-hosted: configurar nginx/apache
+     
+     3. Configurar HSTS:
+        ```typescript
+        headers: async () => [{
+          source: '/:path*',
+          headers: [{
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload'
+          }],
+        }],
+        ```
+     
+     4. Si usa Vercel: CDN automático
+        Si usa CloudFront:
+        ```bash
+        # Configurar en AWS CloudFront distribution
+        # Enable compression: Yes
+        # Viewer protocol policy: Redirect HTTP to HTTPS
+        ```
+     
+     5. Validar compresión:
+        ```bash
+        curl -I -H "Accept-Encoding: gzip" https://yourdomain.com
+        # Verificar que Content-Encoding: gzip está en respuesta
+        ```
+
+================================================================================
+4. SEGURIDAD (10-12 horas)
+================================================================================
+
+4.1 AUTENTICACIÓN Y AUTORIZACIÓN
+   - Tiempo: 2-3 horas
+   - Descripción:
+     * Validar que bcrypt está siendo usado para hashing de contraseñas
+     * Implementar política de contraseñas fuerte:
+       - Mínimo 12 caracteres
+       - Combinación de mayúsculas, minúsculas, números y símbolos
+       - No permitir contraseñas comunes
+     * Implementar rate limiting en login:
+       - Máximo 5 intentos fallidos por IP en 15 minutos
+       - Bloquear temporalmente después de ciertos intentos
+     * Configurar sesiones seguras:
+       - HTTP only cookies
+       - Secure flag (solo HTTPS)
+       - SameSite = Strict
+       - Expiración: 7 días máximo
+     * Implementar 2FA (Two-Factor Authentication) opcional
+     * Validar que el RBAC está correctamente configurado:
+       - admin, manager, user, viewer
+       - Permisos granulares por recurso
+   - Archivos a revisar:
+     * src/app/api/auth/login/route.ts
+     * src/middleware.ts
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Verificar bcrypt en login route:
+        ```typescript
+        // src/app/api/auth/login/route.ts
+        import bcrypt from 'bcryptjs';
+        
+        const isValidPassword = await bcrypt.compare(
+          providedPassword,
+          storedHash
+        );
+        ```
+     
+     2. Validar política de contraseñas:
+        ```typescript
+        // Crear src/lib/password-validation.ts
+        const validatePassword = (password: string): string[] => {
+          const errors = [];
+          if (password.length < 12) errors.push('Min 12 chars');
+          if (!/[A-Z]/.test(password)) errors.push('Uppercase required');
+          if (!/[a-z]/.test(password)) errors.push('Lowercase required');
+          if (!/[0-9]/.test(password)) errors.push('Number required');
+          if (!/[!@#$%^&*]/.test(password)) errors.push('Symbol required');
+          return errors;
+        };
+        ```
+     
+     3. Implementar rate limiting:
+        ```bash
+        npm install express-rate-limit
+        ```
+        En src/app/api/auth/login/route.ts:
+        ```typescript
+        import rateLimit from 'express-rate-limit';
+        const limiter = rateLimit({
+          windowMs: 15 * 60 * 1000,
+          max: 5,
+          message: 'Too many login attempts',
+        });
+        ```
+     
+     4. Configurar sesiones seguras:
+        ```typescript
+        // En middleware.ts o route handler
+        response.cookies.set('session', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 7 * 24 * 60 * 60, // 7 días
+        });
+        ```
+     
+     5. Validar RBAC:
+        ```bash
+        curl -X GET https://yourdomain.com/api/users \
+          -H "Authorization: Bearer $TOKEN"
+        # Debe retornar 403 si usuario no tiene permiso
+        ```
+
+4.2 PROTECCIÓN CONTRA VULNERABILIDADES WEB
+   - Tiempo: 2-3 horas
+   - Descripción:
+     * Implementar CSRF tokens en formularios
+     * Validar y sanitizar todas las entradas del usuario
+     * Implementar rate limiting global:
+       - Máximo 1000 requests por IP por minuto
+       - Por endpoint específico según criticidad
+     * Prevenir XSS:
+       - Usar Content-Type: application/json en APIs
+       - Validar y escapar contenido renderizado
+       - Implementar CSP (Content Security Policy)
+     * Prevenir SQL Injection:
+       - Usar prepared statements (ya implementado con pg)
+       - Validar tipos de datos en inputs
+     * Validar tamaño de payloads:
+       - Máximo 10MB por request
+       - Máximo 1MB por field
+   - Headers de seguridad a agregar:
+     * X-Content-Type-Options: nosniff
+     * X-Frame-Options: DENY
+     * X-XSS-Protection: 1; mode=block
+     * Referrer-Policy: strict-origin-when-cross-origin
+     * Permissions-Policy: camera=(), microphone=(), geolocation=()
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Implementar CSP headers en next.config.ts:
+        ```typescript
+        // next.config.ts
+        const securityHeaders = [
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()'
+          }
+        ];
+        
+        module.exports = {
+          async headers() {
+            return [
+              {
+                source: '/:path*',
+                headers: securityHeaders,
+              }
+            ];
+          }
+        };
+        ```
+     
+     2. Implementar rate limiting:
+        ```bash
+        npm install express-rate-limit
+        ```
+        Crear src/lib/rate-limit.ts:
+        ```typescript
+        import rateLimit from 'express-rate-limit';
+        
+        export const loginLimiter = rateLimit({
+          windowMs: 15 * 60 * 1000, // 15 minutos
+          max: 5, // 5 intentos
+          message: 'Too many login attempts',
+          standardHeaders: true,
+          legacyHeaders: false,
+        });
+        
+        export const globalLimiter = rateLimit({
+          windowMs: 1 * 60 * 1000, // 1 minuto
+          max: 1000, // 1000 requests
+          skip: (req) => req.method === 'GET',
+        });
+        ```
+     
+     3. Aplicar CSRF protection:
+        ```bash
+        npm install csrf-csrf
+        ```
+        En middleware.ts:
+        ```typescript
+        import { doubleCsrfProtection } from 'csrf-csrf';
+        
+        export function middleware(request: NextRequest) {
+          // Validar CSRF en mutaciones
+          if (['POST', 'PUT', 'DELETE'].includes(request.method)) {
+            const csrfToken = request.headers.get('x-csrf-token');
+            if (!csrfToken) {
+              return new Response('CSRF token missing', { status: 403 });
+            }
+          }
+          return NextResponse.next();
+        }
+        ```
+     
+     4. Validar tamaño de payloads:
+        ```typescript
+        // Crear middleware en src/app/api/middleware.ts
+        const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
+        const MAX_FIELD_SIZE = 1 * 1024 * 1024; // 1MB
+        
+        export async function validatePayload(request: Request) {
+          const contentLength = request.headers.get('content-length');
+          if (contentLength && parseInt(contentLength) > MAX_BODY_SIZE) {
+            return new Response('Payload too large', { status: 413 });
+          }
+        }
+        ```
+     
+     5. Pruebas de seguridad:
+        ```bash
+        # Instalar herramienta de pruebas
+        npm install --save-dev snyk
+        
+        # Ejecutar análisis
+        npx snyk test
+        
+        # Encontrar vulnerabilidades en dependencias
+        npm audit
+        ```
+
+4.3 VALIDACIÓN Y SANITIZACIÓN DE DATOS
+   - Tiempo: 2-3 horas
+   - Descripción:
+     * Implementar validación en ambos lados (client y server)
+     * Usar librerías como zod o joi para validación de esquemas
+     * Sanitizar HTML si se permite entrada de usuarios
+     * Validar tipos MIME en uploads de archivos
+     * Implementar cuota de almacenamiento por usuario
+     * Validar que no se envíen datos sensibles al cliente (passwords, tokens)
+     * Implementar auditoría de cambios críticos
+   - Cambios críticos a auditar:
+     * Cambios de permiso
+     * Eliminación de recursos
+     * Cambios de usuarios
+     * Acceso a datos sensibles
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Instalar y configurar Zod para validación:
+        ```bash
+        npm install zod
+        ```
+        Crear src/lib/schemas.ts:
+        ```typescript
+        import { z } from 'zod';
+        
+        export const productSchema = z.object({
+          name: z.string().min(3).max(100),
+          description: z.string().max(1000).optional(),
+          status: z.enum(['active', 'inactive']),
+          metadata: z.record(z.string(), z.any()).optional(),
+        });
+        
+        export const taskSchema = z.object({
+          title: z.string().min(3).max(200),
+          product_id: z.number().int().positive(),
+          status_id: z.number().int().positive(),
+          assigned_to: z.string().email().optional(),
+        });
+        ```
+     
+     2. Aplicar validación en routes:
+        ```typescript
+        // src/app/api/add-product/route.ts
+        import { productSchema } from '@/lib/schemas';
+        
+        export async function POST(request: Request) {
+          try {
+            const data = await request.json();
+            const validated = productSchema.parse(data);
+            // ... resto de código
+          } catch (error) {
+            if (error instanceof z.ZodError) {
+              return Response.json({ errors: error.errors }, { status: 400 });
+            }
+          }
+        }
+        ```
+     
+     3. Sanitizar HTML:
+        ```bash
+        npm install isomorphic-dompurify
+        ```
+        ```typescript
+        import { sanitize } from 'isomorphic-dompurify';
+        
+        const cleanDescription = sanitize(userInput);
+        // Nunca confiar en datos del usuario sin sanitizar
+        ```
+     
+     4. Validar uploads de archivos:
+        ```typescript
+        const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        
+        export async function handleFileUpload(file: File) {
+          if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+            throw new Error('Invalid file type');
+          }
+          if (file.size > MAX_FILE_SIZE) {
+            throw new Error('File too large');
+          }
+          // ... procesar archivo
+        }
+        ```
+     
+     5. Implementar auditoría:
+        ```sql
+        -- Crear tabla de auditoría
+        CREATE TABLE audit_logs (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id),
+          action VARCHAR(100),
+          resource_type VARCHAR(100),
+          resource_id INTEGER,
+          old_values JSONB,
+          new_values JSONB,
+          timestamp TIMESTAMP DEFAULT NOW()
+        );
+        
+        CREATE INDEX idx_audit_user ON audit_logs(user_id);
+        CREATE INDEX idx_audit_timestamp ON audit_logs(timestamp);
+        ```
+        ```typescript
+        // Función para auditar cambios
+        async function auditChange(
+          userId: number,
+          action: string,
+          resourceType: string,
+          resourceId: number,
+          oldValues: any,
+          newValues: any
+        ) {
+          await db.query(
+            `INSERT INTO audit_logs 
+             (user_id, action, resource_type, resource_id, old_values, new_values)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [userId, action, resourceType, resourceId, oldValues, newValues]
+          );
+        }
+        ```
+     
+     6. Nunca enviar datos sensibles:
+        ```typescript
+        // ❌ MAL - Nunca enviar passwords
+        const user = await db.query('SELECT * FROM users WHERE id = $1', [id]);
+        return Response.json(user.rows[0]);
+        
+        // ✅ BIEN - Excluir campos sensibles
+        const { password_hash, ...safeUser } = user.rows[0];
+        return Response.json(safeUser);
+        ```
+
+4.4 LOGGING Y MONITOREO DE SEGURIDAD
+   - Tiempo: 2 horas
+   - Descripción:
+     * Implementar logging de seguridad:
+       - Intentos de login fallidos
+       - Cambios de permisos
+       - Eliminaciones de recursos
+       - Acceso a APIs sensibles
+     * Almacenar logs en archivo o servicio centralizado:
+       - Opción A: ELK Stack (Elasticsearch, Logstash, Kibana)
+       - Opción B: Datadog, New Relic, Sentry
+       - Opción C: AWS CloudWatch, Google Cloud Logging
+     * Implementar alertas para eventos sospechosos:
+       - Múltiples intentos fallidos de login
+       - Acceso desde IP nuevas
+       - Cambios en roles críticos
+     * Rotación de logs:
+       - Máximo 30 GB por mes
+       - Retención: 90 días en hot storage, 1 año en archive
+   - Archivos a modificar:
+     * src/app/api/* (agregar logging)
+     * Crear servicio de logging centralizado
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Crear servicio de logging:
+        ```bash
+        npm install pino pino-pretty
+        ```
+        Crear src/lib/logger.ts:
+        ```typescript
+        import pino from 'pino';
+        
+        export const logger = pino({
+          level: process.env.LOG_LEVEL || 'info',
+          transport: {
+            target: 'pino-pretty',
+            options: {
+              colorize: true,
+              translateTime: 'SYS:standard',
+              ignore: 'pid,hostname'
+            }
+          }
+        });
+        
+        export function logSecurityEvent(
+          action: string,
+          userId: number,
+          details: any,
+          severity: 'low' | 'medium' | 'high' | 'critical'
+        ) {
+          logger[severity === 'critical' ? 'error' : 'warn']({
+            type: 'security_event',
+            action,
+            userId,
+            details,
+            timestamp: new Date().toISOString()
+          });
+        }
+        ```
+     
+     2. Registrar intentos de login fallidos:
+        ```typescript
+        // En src/app/api/auth/login/route.ts
+        import { logger, logSecurityEvent } from '@/lib/logger';
+        
+        export async function POST(request: Request) {
+          const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+          const { email, password } = await request.json();
+          
+          try {
+            const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+            
+            if (!user.rows.length || !await bcrypt.compare(password, user.rows[0].password_hash)) {
+              logSecurityEvent('login_failed', 0, { email, ip: clientIp }, 'medium');
+              return Response.json({ error: 'Invalid credentials' }, { status: 401 });
+            }
+            
+            logger.info({ action: 'login_success', userId: user.rows[0].id });
+          } catch (error) {
+            logSecurityEvent('login_error', 0, { email, error }, 'high');
+          }
+        }
+        ```
+     
+     3. Registrar cambios de permisos:
+        ```typescript
+        // Cada vez que se cambien permisos
+        logSecurityEvent(
+          'permission_changed',
+          adminId,
+          { userId: targetUserId, oldRole, newRole },
+          'high'
+        );
+        ```
+     
+     4. Configurar Sentry para tracking (opcional):
+        ```bash
+        npm install @sentry/nextjs
+        ```
+        Crear sentry.client.config.ts:
+        ```typescript
+        import * as Sentry from "@sentry/nextjs";
+        
+        Sentry.init({
+          dsn: process.env.SENTRY_DSN,
+          environment: process.env.NODE_ENV,
+          tracesSampleRate: 1.0,
+        });
+        ```
+     
+     5. Configurar AWS CloudWatch (si usa AWS):
+        ```bash
+        npm install aws-sdk winston-cloudwatch
+        ```
+        ```typescript
+        import CloudWatchTransport from 'winston-cloudwatch';
+        
+        const cloudwatchTransport = new CloudWatchTransport({
+          logGroupName: '/product-report/app',
+          logStreamName: `${process.env.NODE_ENV}`,
+          awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
+          awsRegion: process.env.AWS_REGION
+        });
+        ```
+     
+     6. Revisar logs regularmente:
+        ```bash
+        # Ver últimos 100 logs
+        tail -n 100 /var/log/product-report/app.log
+        
+        # Filtrar por errores
+        grep "ERROR" /var/log/product-report/app.log
+        
+        # Contar intentos fallidos de login
+        grep "login_failed" /var/log/product-report/app.log | wc -l
+        ```
+
+4.5 CUMPLIMIENTO DE REGULACIONES
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Validar cumplimiento de GDPR (si tiene usuarios europeos)
+     * Implementar política de privacidad
+     * Obtener consentimiento para cookies
+     * Implementar derecho al olvido (delete personal data)
+     * Implementar portabilidad de datos
+     * Documentar procesamiento de datos personales
+     * Si trata datos agrícolas sensibles:
+       - Implementar data classification (público, interno, confidencial)
+       - Encriptación de datos en tránsito y en reposo
+       - Backup encriptado
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Crear documento de Política de Privacidad:
+        Crear archivo public/PRIVACY.md o src/app/privacy/page.tsx:
+        ```markdown
+        # Política de Privacidad
+        
+        Última actualización: [FECHA]
+        
+        ## 1. Datos Recopilados
+        - Email
+        - Nombre y apellido
+        - Rol en la organización
+        - Datos de proyectos/tareas asociados
+        
+        ## 2. Propósito del Procesamiento
+        - Autenticación de usuarios
+        - Gestión de proyectos e indicadores
+        - Generación de reportes
+        - Comunicaciones sobre el sistema
+        
+        ## 3. Base Legal
+        - Consentimiento del usuario
+        - Contrato (si aplica)
+        - Interés legítimo
+        
+        ## 4. Derechos del Usuario (GDPR)
+        - Acceso a datos personales
+        - Rectificación de datos
+        - Derecho al olvido
+        - Portabilidad de datos
+        - Restricción de procesamiento
+        - Objeción
+        
+        ## 5. Seguridad de Datos
+        - Encriptación en tránsito (HTTPS)
+        - Encriptación en reposo
+        - Acceso restringido
+        - Backups regulares
+        
+        ## 6. Contacto
+        Responsable de datos: [EMAIL]
+        ```
+     
+     2. Implementar consentimiento de cookies:
+        ```bash
+        npm install js-cookie
+        ```
+        Crear src/components/CookieConsent.tsx:
+        ```typescript
+        'use client';
+        import { useState, useEffect } from 'react';
+        import Cookies from 'js-cookie';
+        
+        export function CookieConsent() {
+          const [show, setShow] = useState(false);
+        
+          useEffect(() => {
+            const consent = Cookies.get('cookie-consent');
+            if (!consent) setShow(true);
+          }, []);
+        
+          const handleConsent = () => {
+            Cookies.set('cookie-consent', 'accepted', { expires: 365 });
+            setShow(false);
+          };
+        
+          if (!show) return null;
+          
+          return (
+            <div className="fixed bottom-0 left-0 right-0 bg-black text-white p-4">
+              <p>Utilizamos cookies para mejorar tu experiencia.</p>
+              <button onClick={handleConsent}>Aceptar</button>
+            </div>
+          );
+        }
+        ```
+     
+     3. Implementar derecho al olvido (GDPR):
+        ```typescript
+        // src/app/api/users/delete/route.ts
+        export async function DELETE(request: Request) {
+          const { userId } = await request.json();
+          
+          try {
+            // Validar que el usuario solo puede borrar su propia data
+            const session = request.cookies.get('session');
+            if (session?.value !== userId) {
+              return Response.json({ error: 'Unauthorized' }, { status: 403 });
+            }
+            
+            // Borrar data del usuario
+            await db.query('DELETE FROM users WHERE id = $1', [userId]);
+            await db.query('DELETE FROM user_sessions WHERE user_id = $1', [userId]);
+            
+            // Anonimizar datos en audit logs
+            await db.query(
+              'UPDATE audit_logs SET user_id = NULL WHERE user_id = $1',
+              [userId]
+            );
+            
+            return Response.json({ message: 'User data deleted' });
+          } catch (error) {
+            return Response.json({ error: error.message }, { status: 500 });
+          }
+        }
+        ```
+     
+     4. Implementar portabilidad de datos:
+        ```typescript
+        // src/app/api/users/export/route.ts
+        export async function GET(request: Request) {
+          const { userId } = Object.fromEntries(new URL(request.url).searchParams);
+          
+          try {
+            const user = await db.query(
+              'SELECT * FROM users WHERE id = $1',
+              [userId]
+            );
+            
+            const data = {
+              user: user.rows[0],
+              timestamp: new Date().toISOString(),
+              format: 'JSON'
+            };
+            
+            return Response.json(data, {
+              headers: {
+                'Content-Disposition': 'attachment; filename="my-data.json"'
+              }
+            });
+          } catch (error) {
+            return Response.json({ error: error.message }, { status: 500 });
+          }
+        }
+        ```
+     
+     5. Implementar data classification:
+        Crear src/lib/data-classification.ts:
+        ```typescript
+        export enum DataClassification {
+          PUBLIC = 'public',
+          INTERNAL = 'internal',
+          CONFIDENTIAL = 'confidential',
+          SECRET = 'secret'
+        }
+        
+        export const classificationEncryption = {
+          [DataClassification.PUBLIC]: false,
+          [DataClassification.INTERNAL]: true,
+          [DataClassification.CONFIDENTIAL]: true,
+          [DataClassification.SECRET]: true
+        };
+        
+        export function validateAccess(
+          userRole: string,
+          classification: DataClassification
+        ): boolean {
+          const roleAccessMatrix = {
+            viewer: [DataClassification.PUBLIC],
+            user: [DataClassification.PUBLIC, DataClassification.INTERNAL],
+            manager: [DataClassification.PUBLIC, DataClassification.INTERNAL, DataClassification.CONFIDENTIAL],
+            admin: Object.values(DataClassification)
+          };
+          
+          return roleAccessMatrix[userRole]?.includes(classification) || false;
+        }
+        ```
+     
+     6. Encriptar datos sensibles:
+        ```bash
+        npm install crypto-js
+        ```
+        Crear src/lib/encryption.ts:
+        ```typescript
+        import crypto from 'crypto-js';
+        
+        const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default-key';
+        
+        export function encryptData(data: string): string {
+          return crypto.AES.encrypt(data, ENCRYPTION_KEY).toString();
+        }
+        
+        export function decryptData(encrypted: string): string {
+          return crypto.AES.decrypt(encrypted, ENCRYPTION_KEY).toString(crypto.enc.Utf8);
+        }
+        ```
+     
+     7. Validar cumplimiento:
+        ```bash
+        # Checklist GDPR
+        - [ ] Política de privacidad publicada
+        - [ ] Consentimiento de cookies implementado
+        - [ ] Derecho al olvido implementado
+        - [ ] Portabilidad de datos disponible
+        - [ ] Encriptación en tránsito (HTTPS)
+        - [ ] Encriptación en reposo
+        - [ ] Registro de actividades (audit logs)
+        - [ ] Evaluación de riesgos completada
+        ```
+
+================================================================================
+5. TESTING Y VALIDACIÓN (8-10 horas)
+================================================================================
+
+5.1 TESTING AUTOMÁTICO
+   - Tiempo: 3-4 horas
+   - Descripción:
+     * Implementar unit tests para funciones críticas:
+       - Validación de entrada
+       - Cálculos de indicadores
+       - Lógica de RBAC
+     * Implementar integration tests:
+       - Flujo de login
+       - CRUD de productos y tareas
+       - Generación de reportes
+       - Notificaciones
+     * Implementar e2e tests para casos de uso críticos:
+       - Login fallido/exitoso
+       - Crear producto
+       - Asignar tarea a usuario
+       - Ver notificaciones
+     * Cobertura mínima: 70% del código crítico
+     * Framework recomendado: Jest + React Testing Library
+   - Configuración:
+     * npm test (ejecutar tests)
+     * npm run test:coverage (cobertura)
+     * npm run test:watch (monitoreo)
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Instalar y configurar Jest:
+        ```bash
+        npm install --save-dev jest @testing-library/react @testing-library/jest-dom jest-environment-jsdom
+        ```
+        Crear jest.config.ts:
+        ```typescript
+        import type { Config } from 'jest';
+        
+        const config: Config = {
+          preset: 'ts-jest',
+          testEnvironment: 'jsdom',
+          roots: ['<rootDir>/src'],
+          testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
+          moduleNameMapper: {
+            '^@/(.*)$': '<rootDir>/src/$1',
+          },
+          collectCoverageFrom: [
+            'src/**/*.ts',
+            'src/**/*.tsx',
+            '!src/**/*.d.ts',
+            '!src/**/*.stories.tsx',
+          ],
+        };
+        
+        export default config;
+        ```
+     
+     2. Crear unit test para validación:
+        ```typescript
+        // src/lib/__tests__/password-validation.test.ts
+        import { validatePassword } from '@/lib/password-validation';
+        
+        describe('validatePassword', () => {
+          it('should reject password < 12 chars', () => {
+            const errors = validatePassword('Short123!');
+            expect(errors).toContain('Min 12 chars');
+          });
+          
+          it('should require uppercase', () => {
+            const errors = validatePassword('lowercase123!');
+            expect(errors).toContain('Uppercase required');
+          });
+          
+          it('should pass valid password', () => {
+            const errors = validatePassword('ValidPass123!');
+            expect(errors).toHaveLength(0);
+          });
+        });
+        ```
+     
+     3. Crear integration test para login:
+        ```typescript
+        // src/app/api/auth/__tests__/login.test.ts
+        import { POST } from '../login/route';
+        
+        describe('POST /api/auth/login', () => {
+          it('should return 401 for invalid credentials', async () => {
+            const request = new Request('http://localhost/api/auth/login', {
+              method: 'POST',
+              body: JSON.stringify({
+                email: 'test@example.com',
+                password: 'wrongpassword'
+              })
+            });
+            
+            const response = await POST(request);
+            expect(response.status).toBe(401);
+          });
+          
+          it('should return session for valid credentials', async () => {
+            const request = new Request('http://localhost/api/auth/login', {
+              method: 'POST',
+              body: JSON.stringify({
+                email: 'admin@example.com',
+                password: 'correctpassword'
+              })
+            });
+            
+            const response = await POST(request);
+            expect(response.status).toBe(200);
+            const data = await response.json();
+            expect(data).toHaveProperty('token');
+          });
+        });
+        ```
+     
+     4. Crear e2e test con Playwright:
+        ```bash
+        npm install --save-dev @playwright/test
+        ```
+        Crear tests/auth.spec.ts:
+        ```typescript
+        import { test, expect } from '@playwright/test';
+        
+        test('login flow', async ({ page }) => {
+          await page.goto('http://localhost:3000/login');
+          
+          // Ingresar credenciales
+          await page.fill('input[type="email"]', 'admin@example.com');
+          await page.fill('input[type="password"]', 'oroverde2025?');
+          
+          // Click login
+          await page.click('button:has-text("Login")');
+          
+          // Esperar redirección
+          await page.waitForNavigation();
+          expect(page.url()).toBe('http://localhost:3000/');
+        });
+        ```
+     
+     5. Ejecutar tests:
+        ```bash
+        npm test                    # Ejecutar todos
+        npm test -- --coverage      # Con cobertura
+        npm test -- --watch         # Modo watch
+        npm test -- auth.test.ts    # Archivo específico
+        ```
+     
+     6. Configurar coverage reporting:
+        ```bash
+        npm run test:coverage
+        # Genera reporte en coverage/lcov-report/index.html
+        open coverage/lcov-report/index.html
+        ```
+
+5.2 TESTING DE PERFORMANCE
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Hacer load testing con herramientas como:
+       - K6
+       - Apache JMeter
+       - Locust
+     * Simular 100, 500, 1000 usuarios simultáneos
+     * Validar tiempos de respuesta < 500ms en p95
+     * Validar que la base de datos puede manejar la carga
+     * Identificar cuellos de botella
+     * Documentar resultados y límites de escalabilidad
+   - Criterios de aceptación:
+     * < 50ms para operaciones de lectura
+     * < 200ms para operaciones de escritura
+     * Error rate < 0.1%
+     * P95 response time < 500ms
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Instalar K6:
+        ```bash
+        # En Windows con Chocolatey
+        choco install k6
+        
+        # En macOS
+        brew install k6
+        
+        # Verificar instalación
+        k6 version
+        ```
+     
+     2. Crear script de test:
+        ```javascript
+        // tests/load-test.js
+        import http from 'k6/http';
+        import { check } from 'k6';
+        import { Rate } from 'k6/metrics';
+        
+        const errorRate = new Rate('errors');
+        
+        export const options = {
+          stages: [
+            { duration: '2m', target: 100 },   // Ramp-up
+            { duration: '5m', target: 100 },   // Mantener 100 usuarios
+            { duration: '2m', target: 500 },   // Escalar a 500
+            { duration: '5m', target: 500 },   // Mantener 500
+            { duration: '2m', target: 0 },     // Ramp-down
+          ],
+          thresholds: {
+            http_req_duration: ['p(95)<500'],  // 95% < 500ms
+            http_req_failed: ['rate<0.1'],      // < 0.1% errores
+          },
+        };
+        
+        export default function () {
+          // Test GET /api/dashboard-stats
+          const res1 = http.get('https://yourdomain.com/api/dashboard-stats');
+          check(res1, {
+            'Dashboard status is 200': (r) => r.status === 200,
+            'Response time < 500ms': (r) => r.timings.duration < 500,
+          }) || errorRate.add(1);
+          
+          // Test GET /api/products
+          const res2 = http.get('https://yourdomain.com/api/products');
+          check(res2, {
+            'Products status is 200': (r) => r.status === 200,
+          }) || errorRate.add(1);
+        }
+        ```
+     
+     3. Ejecutar prueba de carga:
+        ```bash
+        k6 run tests/load-test.js
+        
+        # Con salida HTML
+        k6 run --out html=report.html tests/load-test.js
+        ```
+     
+     4. Usar JMeter como alternativa:
+        ```bash
+        # Descargar desde https://jmeter.apache.org/
+        # Crear test plan en JMeter GUI
+        # Configurar thread group con 100-1000 threads
+        # Configurar HTTP request samplers
+        # Agregar listeners para ver resultados
+        ```
+     
+     5. Analizar resultados:
+        ```bash
+        # Si el error rate > 0.1%, identificar problema
+        # Si p95 > 500ms, optimizar queries/código
+        # Si DB tiene high load, agregar índices o cache
+        ```
+
+5.3 TESTING DE SEGURIDAD
+   - Tiempo: 2-3 horas
+   - Descripción:
+     * OWASP Top 10 penetration testing:
+       - Inyección SQL
+       - XSS
+       - CSRF
+       - Acceso no autorizado
+     * Validar que endpoints no autenticados están protegidos
+     * Testear que los permisos se respetan correctamente
+     * Validar que no se pueden acceder datos de otros usuarios
+     * Usar OWASP ZAP o Burp Suite para escaneo automatizado
+     * Revisar logs de seguridad para anomalías
+   - Checklist de seguridad:
+     * [ ] No hay hardcoding de secrets
+     * [ ] Todas las contraseñas están hasheadas
+     * [ ] HTTPS habilitado en producción
+     * [ ] CORS configurado correctamente
+     * [ ] Rate limiting implementado
+     * [ ] Logs de seguridad en lugar
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Usar OWASP ZAP para escaneo:
+        ```bash
+        # Descargar desde https://www.zaproxy.org/
+        # Ejecutar en Docker
+        docker run -v $(pwd):/zap/wrk:rw -t owasp/zap2docker-baseline \
+          -t https://yourdomain.com \
+          -r security-report.html
+        ```
+     
+     2. Test manual de SQL injection:
+        ```bash
+        # Intentar injection en login
+        curl -X POST https://yourdomain.com/api/auth/login \
+          -H "Content-Type: application/json" \
+          -d '{"email":"admin@example.com\" OR \"1\"=\"1","password":"test"}'
+        
+        # Debe retornar error, NO datos
+        ```
+     
+     3. Test de XSS:
+        ```bash
+        # Intentar inyectar script
+        curl -X POST https://yourdomain.com/api/add-product \
+          -H "Content-Type: application/json" \
+          -d '{"name":"<script>alert(\"XSS\")</script>"}'
+        
+        # Debe sanitizar o retornar error
+        ```
+     
+     4. Test de autorización:
+        ```bash
+        # Obtener token de usuario "viewer"
+        VIEWER_TOKEN=$(curl -X POST https://yourdomain.com/api/auth/login \
+          -H "Content-Type: application/json" \
+          -d '{"email":"viewer@example.com","password":"password"}' \
+          | jq -r '.token')
+        
+        # Intentar crear producto (solo admin/manager pueden)
+        curl -X POST https://yourdomain.com/api/add-product \
+          -H "Authorization: Bearer $VIEWER_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"Product"}'
+        
+        # Debe retornar 403 Forbidden
+        ```
+     
+     5. Test de data isolation:
+        ```bash
+        # Obtener sesión de usuario A
+        TOKEN_A=$(login user-a@example.com)
+        
+        # Intentar acceder datos de usuario B
+        curl -X GET https://yourdomain.com/api/products/999 \
+          -H "Authorization: Bearer $TOKEN_A"
+        
+        # Debe retornar 403 si producto pertenece a otro usuario
+        ```
+     
+     6. Checklist de hardening:
+        ```bash
+        # Verificar no hay hardcoding de secrets
+        grep -r "password" src/ --include="*.ts" --include="*.tsx"
+        grep -r "API_KEY" src/ --include="*.ts" --include="*.tsx"
+        
+        # Verificar HTTPS en producción
+        curl -I https://yourdomain.com
+        # Debe tener Strict-Transport-Security header
+        
+        # Verificar CORS
+        curl -H "Origin: https://evil.com" -I https://yourdomain.com
+        # No debe permitir acceso si no está autorizado
+        ```
+
+5.4 TESTING DE COMPATIBILIDAD
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Testear en navegadores modernos:
+       - Chrome (último)
+       - Firefox (último)
+       - Safari (último)
+       - Edge (último)
+     * Testear en dispositivos móviles:
+       - iPhone (último modelo)
+       - Android (últimas 2 versiones)
+     * Validar que el responsive design funciona
+     * Validar que no hay console errors
+     * Testear accessibility (WCAG 2.1 nivel AA mínimo)
+     * Usar herramientas como BrowserStack o LambdaTest
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Usar Playwright para cross-browser testing:
+        ```bash
+        npm install --save-dev @playwright/test
+        npx playwright install
+        ```
+        Crear tests/compatibility.spec.ts:
+        ```typescript
+        import { test, devices } from '@playwright/test';
+        
+        const projects = [
+          { name: 'chromium', use: devices['Desktop Chrome'] },
+          { name: 'firefox', use: devices['Desktop Firefox'] },
+          { name: 'webkit', use: devices['Desktop Safari'] },
+          { name: 'Mobile Chrome', use: devices['Pixel 5'] },
+          { name: 'Mobile Safari', use: devices['iPhone 12'] },
+        ];
+        
+        projects.forEach(({ name, use }) => {
+          test(`Login works on ${name}`, async ({ page }) => {
+            page.setViewportSize({ width: 1280, height: 720 });
+            await page.goto('http://localhost:3000/login');
+            // Realizar login
+            await page.fill('input[type="email"]', 'admin@example.com');
+            await page.fill('input[type="password"]', 'password');
+            await page.click('button:has-text("Login")');
+            await page.waitForNavigation();
+            // Verificar acceso
+            const url = page.url();
+            expect(url).not.toContain('/login');
+          });
+        });
+        ```
+     
+     2. Ejecutar tests con Playwright:
+        ```bash
+        npx playwright test
+        npx playwright test --project=chromium
+        npx playwright test --project=firefox
+        npx playwright test tests/compatibility.spec.ts
+        ```
+     
+     3. Usar BrowserStack para testing real (opcional):
+        ```bash
+        npm install --save-dev browserstack-local
+        ```
+        Crear tests/browserstack.config.ts:
+        ```javascript
+        // Configurar credenciales de BrowserStack
+        const browserstackUser = process.env.BROWSERSTACK_USER;
+        const browserstackKey = process.env.BROWSERSTACK_KEY;
+        
+        const capabilities = [
+          { browserName: 'Chrome', browserVersion: 'latest', platformName: 'Windows 10' },
+          { browserName: 'Safari', browserVersion: 'latest', platformName: 'macOS' },
+          { browserName: 'Chrome', platformName: 'Android', deviceName: 'Samsung Galaxy S21' },
+          { browserName: 'Safari', platformName: 'iOS', deviceName: 'iPhone 13' },
+        ];
+        ```
+     
+     4. Validar accesibilidad:
+        ```bash
+        npm install --save-dev axe-playwright
+        ```
+        ```typescript
+        import { injectAxe, checkA11y } from 'axe-playwright';
+        
+        test('Page is accessible', async ({ page }) => {
+          await page.goto('http://localhost:3000');
+          await injectAxe(page);
+          await checkA11y(page, null, {
+            detailedReport: true,
+            detailedReportOptions: {
+              html: true
+            }
+          });
+        });
+        ```
+     
+     5. Verificar responsive en breakpoints:
+        ```typescript
+        const breakpoints = [
+          { width: 320, height: 568 },   // Mobile
+          { width: 768, height: 1024 },  // Tablet
+          { width: 1920, height: 1080 }, // Desktop
+        ];
+        
+        for (const bp of breakpoints) {
+          page.setViewportSize({ width: bp.width, height: bp.height });
+          await page.goto('http://localhost:3000');
+          
+          // Verificar elementos visibles
+          const sidebar = await page.isVisible('[data-testid="sidebar"]');
+          if (bp.width < 768) {
+            expect(sidebar).toBe(false);
+          } else {
+            expect(sidebar).toBe(true);
+          }
+        }
+        ```
+     
+     6. Verificar console errors:
+        ```typescript
+        page.on('console', msg => {
+          if (msg.type() === 'error') {
+            console.error('Console error:', msg.text());
+            fail(`Console error detected: ${msg.text()}`);
+          }
+        });
+        ```
+
+================================================================================
+6. DEPLOYMENT Y INFRAESTRUCTURA (5-6 horas)
+================================================================================
+
+6.1 SELECCIÓN DE PLATAFORMA DE HOSTING
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Opciones recomendadas:
+       A. Vercel (oficial de Next.js)
+          - Ventajas: Integración perfecta, deployment automático
+          - Costo: ~$20-50/mes para producción
+          - Escalado automático
+       B. AWS (EC2, ECS, Lambda)
+          - Ventajas: Mayor control, escalabilidad
+          - Costo: ~$50-200/mes dependiendo de carga
+          - Requiere más configuración
+       C. Google Cloud Platform
+          - Ventajas: Buena integración con herramientas
+          - Costo: Similar a AWS
+       D. DigitalOcean App Platform
+          - Ventajas: Más simple que AWS, buen valor
+          - Costo: ~$12-30/mes
+     * Evaluación:
+       - Costo total de operación
+       - Requisitos de escalabilidad
+       - Complejidad operativa
+       - Soporte disponible
+     * Recomendación: Vercel para MVP, AWS para producción escalada
+   
+   - HOW TO - IMPLEMENTACIÓN (Vercel):
+     1. Crear cuenta en https://vercel.com y conectar GitHub
+     
+     2. Configurar proyecto:
+        ```bash
+        npm install -g vercel
+        vercel login
+        vercel link
+        ```
+     
+     3. Configurar variables de entorno en Vercel dashboard:
+        - Settings → Environment Variables
+        - DATABASE_URL
+        - ENCRYPTION_KEY
+        - JWT_SECRET
+        - NODE_ENV=production
+     
+     4. Deploy automático:
+        ```bash
+        git push origin main
+        # Vercel despliega automáticamente
+        ```
+     
+     5. Verificar deployment:
+        ```bash
+        vercel logs
+        vercel env list
+        ```
+   
+   - HOW TO - IMPLEMENTACIÓN (AWS):
+     1. Crear instancia EC2:
+        ```bash
+        # Usar Amazon Linux 2 o Ubuntu 20.04 LTS
+        # Instancias recomendadas: t3.medium o t3.large
+        ```
+     
+     2. Configurar servidor:
+        ```bash
+        ssh -i key.pem ec2-user@your-instance-ip
+        sudo yum update -y
+        curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+        sudo yum install -y nodejs
+        sudo yum install -y postgresql
+        ```
+     
+     3. Clonar y configurar aplicación:
+        ```bash
+        git clone https://github.com/your-repo/product-report.git
+        cd product-report
+        npm install
+        npm run build
+        ```
+     
+     4. Configurar PM2 para mantener app corriendo:
+        ```bash
+        npm install -g pm2
+        pm2 start "npm start" --name "product-report"
+        pm2 startup
+        pm2 save
+        ```
+
+6.2 CONFIGURACIÓN DE DEPLOYMENT CONTINUO (CI/CD)
+   - Tiempo: 2-3 horas
+   - Descripción:
+     * Setup de GitHub Actions para CI/CD:
+       1. Ejecutar linter en cada push
+       2. Ejecutar tests en cada push
+       3. Build en ambiente de staging
+       4. Deploy automático a producción en main branch
+       5. Rollback automático si falla
+     * Configuración de ambientes:
+       - Desarrollo (local)
+       - Staging (pre-producción, espejo de prod)
+       - Producción (usuario final)
+     * Cada ambiente debe tener:
+       - Base de datos separada
+       - Variables de entorno distintas
+       - URLs de deployment separadas
+     * Pipeline recomendado:
+       ```
+       push → lint → test → build → staging deploy → 
+       manual approval → prod deploy
+       ```
+   - Archivos a crear:
+     * .github/workflows/ci-cd.yml
+     * .github/workflows/security-scan.yml (opcional pero recomendado)
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Crear workflow de CI/CD:
+        ```bash
+        mkdir -p .github/workflows
+        ```
+        Crear .github/workflows/ci-cd.yml:
+        ```yaml
+        name: CI/CD Pipeline
+        
+        on:
+          push:
+            branches: [ main, staging ]
+          pull_request:
+            branches: [ main ]
+        
+        jobs:
+          lint-and-test:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v3
+              - uses: actions/setup-node@v3
+                with:
+                  node-version: '18'
+              
+              - name: Install dependencies
+                run: npm ci
+              
+              - name: Lint
+                run: npm run lint
+              
+              - name: Test
+                run: npm test -- --coverage
+              
+              - name: Build
+                run: npm run build
+              
+              - name: Upload coverage
+                uses: codecov/codecov-action@v3
+          
+          deploy-staging:
+            needs: lint-and-test
+            runs-on: ubuntu-latest
+            if: github.ref == 'refs/heads/staging'
+            steps:
+              - uses: actions/checkout@v3
+              
+              - name: Deploy to Vercel Staging
+                run: |
+                  npx vercel --prod \
+                    --token ${{ secrets.VERCEL_TOKEN }} \
+                    --confirm
+          
+          deploy-production:
+            needs: lint-and-test
+            runs-on: ubuntu-latest
+            if: github.ref == 'refs/heads/main'
+            steps:
+              - uses: actions/checkout@v3
+              
+              - name: Deploy to Vercel Production
+                run: |
+                  npx vercel --prod \
+                    --token ${{ secrets.VERCEL_TOKEN }} \
+                    --confirm
+        ```
+     
+     2. Configurar secretos en GitHub:
+        - Settings → Secrets → New repository secret
+        - VERCEL_TOKEN (obtener de https://vercel.com/account/tokens)
+        - DATABASE_URL_STAGING
+        - DATABASE_URL_PROD
+        - ENCRYPTION_KEY
+     
+     3. Proteger ramas:
+        - Settings → Branches → Add rule
+        - Branch name pattern: main
+        - Require pull request reviews: ✓
+        - Require status checks to pass: ✓
+     
+     4. Monitorear workflow:
+        - Actions tab en GitHub
+        - Ver logs de cada paso
+        - Configurar notificaciones en Slack (opcional)
+
+6.3 CONFIGURACIÓN DE DOMINIO Y SSL
+   - Tiempo: 0.5-1 hora
+   - Descripción:
+     * Registrar dominio si no está registrado
+     * Configurar DNS:
+       - A record apuntando a IP del servidor
+       - CNAME para www (si aplica)
+       - MX records (si envía emails)
+     * Configurar SSL/TLS:
+       - Usar Let's Encrypt (gratuito) o similar
+       - Auto-renewal de certificados
+       - Certificado debe ser válido para el dominio
+     * Redirigir HTTP a HTTPS
+     * Validar certificado es correcto con openssl s_client
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Registrar dominio (GoDaddy, Namecheap, etc):
+        ```bash
+        # Seleccionar dominio y completar registro
+        # Ej: biofincas.com
+        ```
+     
+     2. Si usa Vercel (recomendado):
+        ```bash
+        # En Vercel dashboard:
+        # Settings → Domains → Add domain
+        # Vercel maneja DNS y SSL automáticamente
+        # Solo ingresar el dominio y Vercel proporciona instrucciones
+        ```
+     
+     3. Si usa AWS/self-hosted:
+        ```bash
+        # En proveedor DNS:
+        A record: biofincas.com → your-server-ip
+        CNAME: www.biofincas.com → biofincas.com
+        
+        # Instalar Certbot para Let's Encrypt
+        sudo yum install certbot python3-certbot-nginx -y
+        sudo certbot certonly --standalone -d biofincas.com -d www.biofincas.com
+        
+        # Copiar certificados a nginx
+        sudo cp /etc/letsencrypt/live/biofincas.com/fullchain.pem /etc/nginx/
+        sudo cp /etc/letsencrypt/live/biofincas.com/privkey.pem /etc/nginx/
+        
+        # Configurar nginx
+        sudo nano /etc/nginx/nginx.conf
+        # Agregar:
+        server {
+          listen 443 ssl http2;
+          server_name biofincas.com www.biofincas.com;
+          ssl_certificate /etc/nginx/fullchain.pem;
+          ssl_certificate_key /etc/nginx/privkey.pem;
+          ssl_protocols TLSv1.2 TLSv1.3;
+          ssl_ciphers HIGH:!aNULL:!MD5;
+        }
+        
+        # Redirigir HTTP a HTTPS
+        server {
+          listen 80;
+          server_name biofincas.com www.biofincas.com;
+          return 301 https://$server_name$request_uri;
+        }
+        ```
+     
+     4. Auto-renewal de certificados:
+        ```bash
+        sudo certbot renew --dry-run
+        # Configurar cron job
+        sudo crontab -e
+        # Agregar: 0 12 * * * /usr/bin/certbot renew --quiet
+        ```
+     
+     5. Validar certificado:
+        ```bash
+        openssl s_client -connect biofincas.com:443 -servername biofincas.com
+        # Verificar que Subject y Issuer son correctos
+        ```
+
+6.4 RESPALDO Y RECUPERACIÓN
+   - Tiempo: 1-1.5 horas
+   - Descripción:
+     * Implementar backup automático de base de datos:
+       - Frecuencia: Diariamente a las 2 AM
+       - Retención: 30 días locales, 1 año en archive
+       - Stored offsite (AWS S3, Google Cloud Storage, etc.)
+     * Implementar backup de archivos estáticos:
+       - Documentos subidos por usuarios
+       - Imágenes
+       - Reportes
+     * Probar restore mensualmente:
+       - Restaurar base de datos
+       - Validar integridad de datos
+       - Documentar tiempo de recovery
+     * RTO (Recovery Time Objective): < 1 hora
+     * RPO (Recovery Point Objective): < 1 día
+   - Herramientas recomendadas:
+     * AWS Backup, Backblaze, Veeam
+     * Automatizar con scripts shell o Lambda
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Crear script de backup manual:
+        ```bash
+        # Crear backup-db.sh
+        #!/bin/bash
+        
+        DB_NAME=product_report
+        DB_USER=postgres
+        BACKUP_DIR=/backups
+        DATE=$(date +%Y%m%d_%H%M%S)
+        
+        mkdir -p $BACKUP_DIR
+        
+        pg_dump -U $DB_USER -d $DB_NAME | gzip > $BACKUP_DIR/backup_$DATE.sql.gz
+        
+        # Archivar backups antiguos (> 30 días) a S3
+        aws s3 cp $BACKUP_DIR/backup_*.sql.gz s3://my-bucket/db-backups/ \
+          --sse AES256
+        
+        find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +30 -delete
+        ```
+        ```bash
+        chmod +x backup-db.sh
+        # Agregar a crontab
+        crontab -e
+        # 0 2 * * * /path/to/backup-db.sh
+        ```
+     
+     2. Restaurar backup:
+        ```bash
+        #!/bin/bash
+        # restore-db.sh
+        
+        BACKUP_FILE=$1
+        DB_NAME=product_report
+        DB_USER=postgres
+        
+        # Crear DB vacía
+        dropdb -U $DB_USER $DB_NAME
+        createdb -U $DB_USER $DB_NAME
+        
+        # Restaurar
+        gunzip -c $BACKUP_FILE | psql -U $DB_USER -d $DB_NAME
+        
+        echo "Database restored from $BACKUP_FILE"
+        ```
+        ```bash
+        ./restore-db.sh /backups/backup_20240115_020000.sql.gz
+        ```
+     
+     3. Backup de archivos:
+        ```bash
+        #!/bin/bash
+        # backup-files.sh
+        
+        BACKUP_DATE=$(date +%Y%m%d_%H%M%S)
+        
+        # Si usa S3 para uploads
+        aws s3 sync s3://my-uploads s3://my-backups/files-$BACKUP_DATE/
+        
+        # Si usa filesystem local
+        tar -czf /backups/files-$BACKUP_DATE.tar.gz /var/www/uploads/
+        aws s3 cp /backups/files-$BACKUP_DATE.tar.gz s3://my-backups/
+        ```
+     
+     4. Prueba de restore mensual:
+        ```bash
+        # Crear database de prueba
+        createdb -U postgres product_report_test
+        
+        # Restaurar último backup
+        LATEST_BACKUP=$(ls -t /backups/backup_*.sql.gz | head -1)
+        gunzip -c $LATEST_BACKUP | psql -U postgres -d product_report_test
+        
+        # Validar integridad
+        psql -U postgres -d product_report_test -c "SELECT COUNT(*) FROM users;"
+        psql -U postgres -d product_report_test -c "SELECT COUNT(*) FROM products;"
+        
+        # Si todo OK, eliminar test DB
+        dropdb -U postgres product_report_test
+        ```
+
+6.5 MONITOREO Y ALERTAS
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Configurar monitoreo de:
+       - Uptime (99.9% SLA mínimo)
+       - Response time (promedio y percentil 95)
+       - Error rate (< 0.1%)
+       - CPU usage (< 80%)
+       - Memoria (< 85%)
+       - Disk space (> 20% libre)
+       - Base de datos:
+         * Conexiones activas
+         * Query performance
+         * Replication lag (si hay replicas)
+     * Implementar alertas para:
+       - Servidor down (inmediato)
+       - Response time > 1s (10 minutos sostenido)
+       - Error rate > 1% (5 minutos)
+       - Disk space < 10% (1 hora)
+       - Base de datos no responde (inmediato)
+     * Herramientas recomendadas:
+       - Datadog, New Relic, Prometheus + Grafana
+       - Uptime Robot para monitoreo externo
+       - PagerDuty para escalación de alertas
+   
+   - HOW TO - IMPLEMENTACIÓN (Datadog):
+     1. Crear cuenta en https://www.datadoghq.com
+     
+     2. Instalar Datadog agent:
+        ```bash
+        # En el servidor
+        DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOUR_API_KEY \
+          DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_agent.sh)"
+        ```
+     
+     3. Configurar monitoreo de aplicación:
+        ```bash
+        npm install --save dd-trace
+        ```
+        Crear src/instrumentation.ts:
+        ```typescript
+        import tracer from 'dd-trace';
+        
+        tracer.init({
+          env: process.env.NODE_ENV,
+          service: 'product-report',
+          version: '1.0.0',
+        });
+        
+        export default tracer;
+        ```
+     
+     4. Integrar con API routes:
+        ```typescript
+        // En cada route
+        import tracer from '@/instrumentation';
+        
+        export async function GET(request: Request) {
+          return tracer.trace('get-products', async () => {
+            // código de la ruta
+          });
+        }
+        ```
+     
+     5. Crear monitors en Datadog:
+        ```bash
+        # Via API
+        curl -X POST "https://api.datadoghq.com/api/v1/monitor" \
+          -H "DD-API-KEY: YOUR_API_KEY" \
+          -H "DD-APPLICATION-KEY: YOUR_APP_KEY" \
+          -d '{
+            "name": "App Response Time High",
+            "type": "metric alert",
+            "query": "avg(last_5m):avg:trace.web.request.duration{service:product-report} > 1000",
+            "message": "App response time is high {{threshold}}ms"
+          }'
+        ```
+     
+     6. Usar Uptime Robot para monitoreo externo:
+        ```bash
+        # Crear monitor en https://uptimerobot.com
+        # URL: https://yourdomain.com/health
+        # Intervalo: 5 minutos
+        # Alertas: Email y Slack
+        ```
+     
+     7. Health check endpoint:
+        ```typescript
+        // src/app/api/health/route.ts
+        export async function GET() {
+          try {
+            // Verificar DB
+            const result = await db.query('SELECT NOW()');
+            
+            return Response.json({
+              status: 'ok',
+              timestamp: new Date().toISOString(),
+              uptime: process.uptime(),
+              database: 'connected'
+            });
+          } catch (error) {
+            return Response.json({
+              status: 'error',
+              error: error.message
+            }, { status: 503 });
+          }
+        }
+        ```
+
+================================================================================
+7. CONFIGURACIÓN DE PRODUCCIÓN (4-6 horas)
+================================================================================
+
+7.1 VARIABLES DE ENTORNO DE PRODUCCIÓN
+   - Tiempo: 1 hora
+   - Descripción:
+     * Configurar en el platform de deployment:
+       - DATABASE_URL: Cadena de conexión a BD producción
+       - POSTGRES_URL: Fallback
+       - NEXT_PUBLIC_API_URL: https://tudominio.com/api
+       - SESSION_SECRET: String seguro aleatorio (mínimo 32 caracteres)
+       - NODE_ENV: "production"
+       - LOG_LEVEL: "info"
+     * Validar que todas las variables están configuradas
+     * Realizar prueba de conexión a base de datos
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Generar variables seguras:
+        ```bash
+        node -e "console.log('SESSION_SECRET=' + require('crypto').randomBytes(32).toString('hex'))"
+        node -e "console.log('ENCRYPTION_KEY=' + require('crypto').randomBytes(32).toString('hex'))"
+        # Copiar salida y guardar en gestor de secretos
+        ```
+     
+     2. Configura en Vercel:
+        ```bash
+        # Si usa Vercel
+        vercel env add DATABASE_URL
+        # Pegar valor cuando pida
+        
+        vercel env add SESSION_SECRET
+        # Pegar valor cuando pida
+        
+        vercel env add ENCRYPTION_KEY
+        vercel env add LOG_LEVEL
+        # LOG_LEVEL = info
+        ```
+     
+     3. Configurar en AWS:
+        ```bash
+        # Usar AWS Secrets Manager
+        aws secretsmanager create-secret \
+          --name product-report/prod \
+          --secret-string '{
+            "DATABASE_URL": "postgres://user:pass@host:5432/db",
+            "SESSION_SECRET": "...",
+            "ENCRYPTION_KEY": "..."
+          }'
+        ```
+     
+     4. Validar conexión:
+        ```bash
+        psql "$DATABASE_URL" -c "SELECT NOW();"
+        # Debe mostrar fecha y hora actual
+        ```
+     
+     5. Crear archivo .env.production para desarrollo (nunca commitear):
+        ```bash
+        # .env.production
+        DATABASE_URL=postgres://prod_user:prod_pass@prod.db.com:5432/product_report
+        SESSION_SECRET=abc123...
+        NODE_ENV=production
+        LOG_LEVEL=info
+        ```7.2 MIGRACIONES DE BASE DE DATOS
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Ejecutar setup de RBAC:
+       ```bash
+       curl -X POST https://tudominio.com/api/setup-rbac
+       ```
+     * Crear usuarios iniciales (admin):
+       ```bash
+       curl -X POST https://tudominio.com/api/seed-demo-users
+       ```
+     * Validar que las tablas existen:
+       - roles, users, user_sessions, audit_logs
+       - products, tasks, phases, indicators
+     * Crear índices necesarios:
+       - product_id, task_id, user_id, status_id
+       - created_at, updated_at
+     * Configurar foreign keys y constraints
+     * Ejecutar plan de backup inicial
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Conectar a base de datos de producción:
+        ```bash
+        export DATABASE_URL="postgres://user:pass@host:5432/product_report"
+        psql "$DATABASE_URL" -c "SELECT version();"
+        ```
+     
+     2. Ejecutar setup de RBAC:
+        ```bash
+        # Opción A: Via curl (si la app está deployed)
+        curl -X POST https://yourdomain.com/api/setup-rbac
+        
+        # Opción B: Ejecutar localmente contra DB de prod
+        node -e "
+          const { Pool } = require('pg');
+          const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+          // Pegar contenido de setup-rbac/route.ts aquí
+          // Ejecutar todas las queries
+        "
+        ```
+     
+     3. Crear usuario admin inicial:
+        ```bash
+        curl -X POST https://yourdomain.com/api/seed-demo-users
+        
+        # O manualmente:
+        psql "$DATABASE_URL" << 'EOF'
+        INSERT INTO users (email, name, role_id, password_hash)
+        VALUES (
+          'admin@biofincas.com',
+          'Administrator',
+          (SELECT id FROM roles WHERE name = 'admin'),
+          '$2b$10$...' -- bcrypt hash de contraseña
+        )
+        ON CONFLICT (email) DO NOTHING;
+        EOF
+        ```
+     
+     4. Verificar tablas:
+        ```bash
+        psql "$DATABASE_URL" -c "
+          SELECT table_name 
+          FROM information_schema.tables 
+          WHERE table_schema = 'public'
+          ORDER BY table_name;
+        "
+        ```
+     
+     5. Crear índices:
+        ```bash
+        psql "$DATABASE_URL" << 'EOF'
+        CREATE INDEX idx_products_user_id ON products(user_id);
+        CREATE INDEX idx_tasks_product_id ON tasks(product_id);
+        CREATE INDEX idx_tasks_status_id ON tasks(status_id);
+        CREATE INDEX idx_users_email ON users(email);
+        CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
+        CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp);
+        EOF
+        ```
+     
+     6. Verificar integridad:
+        ```bash
+        psql "$DATABASE_URL" << 'EOF'
+        -- Verificar usuarios
+        SELECT COUNT(*) as user_count FROM users;
+        
+        -- Verificar roles
+        SELECT name, COUNT(*) FROM roles GROUP BY name;
+        
+        -- Verificar foreign keys
+        SELECT COUNT(*) FROM products WHERE user_id IS NULL;
+        EOF
+        ```
+
+7.3 CONFIGURACIÓN DE LOGGING Y MONITOREO
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Configurar forwarding de logs a:
+       - Sistema centralizado de logging
+       - Datadog, CloudWatch, GCP Logging
+     * Configurar alertas:
+       - Errors: inmediato
+       - Warnings: cada 5 minutos
+       - Info: no alertar, solo registrar
+     * Crear dashboards de monitoreo:
+       - Overview general
+       - Errors y exceptions
+       - Performance metrics
+   
+   - HOW TO - IMPLEMENTACIÓN (CloudWatch):
+     1. Instalar AWS CloudWatch log agent:
+        ```bash
+        # En EC2 instance
+        sudo yum install -y awslogs
+        
+        # Configurar /etc/awslogs/config/app-logs.conf
+        [/var/log/app/error.log]
+        log_group_name = /product-report/errors
+        log_stream_name = {instance_id}
+        datetime_format = %Y-%m-%d %H:%M:%S
+        file = /var/log/app/error.log
+        buffer_duration = 5000
+        initial_state = new
+        ```
+        ```bash
+        sudo service awslogs start
+        ```
+     
+     2. Configurar en Node.js:
+        ```bash
+        npm install winston-cloudwatch
+        ```
+        Crear src/lib/cloud-logger.ts:
+        ```typescript
+        import winston from 'winston';
+        import CloudWatchTransport from 'winston-cloudwatch';
+        
+        export const cloudLogger = winston.createLogger({
+          transports: [
+            new CloudWatchTransport({
+              logGroupName: '/product-report/app',
+              logStreamName: `${process.env.NODE_ENV}`,
+              awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
+              awsRegion: process.env.AWS_REGION,
+              messageFormatter: ({ level, message, meta }) => {
+                return `[${level}] ${message} ${JSON.stringify(meta)}`;
+              },
+            }),
+          ],
+        });
+        ```
+     
+     3. Usar en routes:
+        ```typescript
+        import { cloudLogger } from '@/lib/cloud-logger';
+        
+        export async function GET(request: Request) {
+          try {
+            const data = await fetchData();
+            cloudLogger.info('Data fetched successfully', { count: data.length });
+            return Response.json(data);
+          } catch (error) {
+            cloudLogger.error('Error fetching data', { error: error.message });
+            return Response.json({ error: 'Internal Server Error' }, { status: 500 });
+          }
+        }
+        ```
+     
+     4. Crear CloudWatch dashboard:
+        ```bash
+        aws cloudwatch put-dashboard --dashboard-name product-report-prod \
+          --dashboard-body '{
+            "widgets": [
+              {
+                "type": "metric",
+                "properties": {
+                  "metrics": [["AWS/ApplicationELB", "TargetResponseTime"]],
+                  "period": 300,
+                  "stat": "Average",
+                  "region": "us-east-1"
+                }
+              },
+              {
+                "type": "log",
+                "properties": {
+                  "query": "fields @timestamp, @message | filter @message like /ERROR/ | stats count() by bin(5m)",
+                  "region": "us-east-1"
+                }
+              }
+            ]
+          }'
+        ```
+     
+     5. Configurar alarmas:
+        ```bash
+        aws cloudwatch put-metric-alarm \
+          --alarm-name "product-report-errors-high" \
+          --alarm-description "Alert when error rate > 1%" \
+          --metric-name ErrorCount \
+          --namespace AWS/ApplicationELB \
+          --statistic Sum \
+          --period 300 \
+          --threshold 10 \
+          --comparison-operator GreaterThanThreshold \
+          --evaluation-periods 1 \
+          --alarm-actions arn:aws:sns:us-east-1:123456789:alerts
+        ```
+       - Security events
+     * Configurar retención de logs:
+       - Hot storage: 30 días
+       - Archive: 1 año
+
+7.4 VALIDACIÓN PRE-LAUNCH
+   - Tiempo: 1-2 horas
+   - Descripción:
+     * Checklist de validación final:
+       [ ] Todos los tests pasan
+       [ ] Build sin errores
+       [ ] Performance metrics cumplidos
+       [ ] SSL/HTTPS validado
+       [ ] Backups funcionando
+       [ ] Monitoreo y alertas activos
+       [ ] Usuarios iniciales creados
+       [ ] Documentación actualizada
+       [ ] Plan de rollback definido
+       [ ] Contacto 24/7 para issues definido
+       
+     * Realizar smoke test en producción:
+       - Acceder a login
+       - Crear usuario
+       - Crear producto
+       - Ver dashboard
+       - Generar reporte
+       - Hacer logout
+     
+     * Notificar a usuarios finales:
+       - Enviar comunicación sobre launch
+       - Proporcionar credenciales iniciales
+       - Ofrecer training/onboarding
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Ejecutar todas las pruebas:
+        ```bash
+        npm run lint                # Verificar código
+        npm run typecheck          # Verificar tipos TypeScript
+        npm run test -- --coverage # Ejecutar tests con cobertura
+        npm run build              # Compilar aplicación
+        # Todos deben estar en verde ✓
+        ```
+     
+     2. Verificar performance:
+        ```bash
+        # Lighthouse score
+        npm run build
+        npx lighthouse https://yourdomain.com --view
+        
+        # Bundle size
+        npm run build:analyze
+        # Verificar que bundle < 500KB
+        ```
+     
+     3. SSL check:
+        ```bash
+        openssl s_client -connect yourdomain.com:443 -servername yourdomain.com
+        # Verificar que no hay errores y certificado es válido
+        
+        curl -I https://yourdomain.com
+        # Verificar Strict-Transport-Security header
+        ```
+     
+     4. Smoke test manual:
+        ```bash
+        #!/bin/bash
+        DOMAIN="https://yourdomain.com"
+        ADMIN_EMAIL="admin@biofincas.com"
+        ADMIN_PASS="oroverde2025?"
+        
+        echo "1. Testing login..."
+        LOGIN_RESPONSE=$(curl -s -X POST $DOMAIN/api/auth/login \
+          -H "Content-Type: application/json" \
+          -d "{\"email\":\"$ADMIN_EMAIL\",\"password\":\"$ADMIN_PASS\"}")
+        
+        if echo $LOGIN_RESPONSE | grep -q "token"; then
+          echo "✓ Login OK"
+        else
+          echo "✗ Login FAILED"
+          exit 1
+        fi
+        
+        echo "2. Testing dashboard access..."
+        curl -s $DOMAIN/ | grep -q "Dashboard" && echo "✓ Dashboard OK" || echo "✗ Dashboard FAILED"
+        
+        echo "3. Testing API health..."
+        curl -s $DOMAIN/api/health | grep -q "ok" && echo "✓ Health OK" || echo "✗ Health FAILED"
+        
+        echo "4. Testing database..."
+        curl -s $DOMAIN/api/products | grep -q "products\|error" && echo "✓ Database OK" || echo "✗ Database FAILED"
+        
+        echo ""
+        echo "✓ All smoke tests passed!"
+        ```
+     
+     5. Verificar backups:
+        ```bash
+        # Comprobar último backup
+        ls -lh /backups/backup_*.sql.gz | tail -1
+        
+        # Prueba de restore en DB de prueba
+        TEST_BACKUP=$(ls -t /backups/backup_*.sql.gz | head -1)
+        createdb -U postgres product_report_test
+        gunzip -c $TEST_BACKUP | psql -U postgres -d product_report_test
+        
+        # Validar datos
+        psql -U postgres -d product_report_test -c "SELECT COUNT(*) FROM users;"
+        
+        # Cleanup
+        dropdb -U postgres product_report_test
+        ```
+     
+     6. Enviar comunicación a usuarios:
+        ```
+        Asunto: Bienvenido a OroVerde Monitor - Nuevo Sistema de Gestión de Proyectos
+        
+        Estimado [USUARIO],
+        
+        Le informamos que el sistema OroVerde Monitor está disponible en:
+        https://yourdomain.com
+        
+        Credenciales iniciales:
+        - Email: [USUARIO_EMAIL]
+        - Password: [TEMPORARY_PASSWORD]
+        
+        Por favor cambie su contraseña en la primera sesión.
+        
+        Disponemos de training online para nuevos usuarios:
+        - Martes 10 AM
+        - Jueves 3 PM
+        
+        Para soporte: support@oroverde.com
+        
+        Saludos,
+        Equipo OroVerde
+        ```
+
+================================================================================
+8. MANTENIMIENTO POST-DEPLOYMENT (2-3 horas)
+================================================================================
+
+8.1 MONITOREO DURANTE PRIMERAS 24 HORAS
+   - Tiempo: 2-3 horas (distribuidas a lo largo del día)
+   - Descripción:
+     * Monitoreo cercano de:
+       - Errores en logs
+       - Performance (latencia, response times)
+       - Comportamiento de usuarios
+       - Reporte de issues
+     * Estar disponible para soporte inmediato
+     * Tener rollback plan listo en caso de critical issues
+     * Comunicar status a stakeholders cada 4 horas
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Crear script de monitoreo:
+        ```bash
+        #!/bin/bash
+        # monitor-24h.sh
+        
+        DOMAIN="https://yourdomain.com"
+        INTERVAL=60 # segundos
+        LOG_FILE="monitoring-$(date +%Y%m%d_%H%M%S).log"
+        
+        while true; do
+          TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+          
+          # Health check
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $DOMAIN/api/health)
+          RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" $DOMAIN/api/health)
+          
+          # Error rate (último 5 minutos)
+          ERROR_COUNT=$(grep ERROR /var/log/app/error.log | wc -l)
+          
+          echo "[$TIMESTAMP] Status: $HTTP_CODE | Response: ${RESPONSE_TIME}s | Errors: $ERROR_COUNT" >> $LOG_FILE
+          
+          # Alert si hay problemas
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "⚠️  ALERT: Health check failed with code $HTTP_CODE" | \
+              mail -s "ALERT: Health check failed" support@oroverde.com
+          fi
+          
+          if (( $(echo "$RESPONSE_TIME > 1.0" | bc -l) )); then
+            echo "⚠️  ALERT: Response time too high: ${RESPONSE_TIME}s"
+          fi
+          
+          sleep $INTERVAL
+        done
+        ```
+     
+     2. Revisar logs continuamente:
+        ```bash
+        # Terminal 1: Monitorear errores
+        tail -f /var/log/app/error.log | grep ERROR
+        
+        # Terminal 2: Monitorear acceso
+        tail -f /var/log/app/access.log | grep -E "5[0-9]{2}|4[0-9]{2}"
+        
+        # Terminal 3: Ver métricas del servidor
+        watch -n 5 'free -h; echo "---"; df -h; echo "---"; ps aux | grep node'
+        ```
+     
+     3. Configurar Slack alerts (opcional):
+        ```bash
+        # Instalar webhook de Slack
+        export SLACK_WEBHOOK="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+        
+        # Script para enviar alerts
+        curl -X POST $SLACK_WEBHOOK \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "text": "🚨 Production Alert",
+            "attachments": [{
+              "color": "danger",
+              "title": "High error rate detected",
+              "text": "Error count: 150/min"
+            }]
+          }'
+        ```
+     
+     4. Mantener comunicación con stakeholders:
+        ```bash
+        # Enviar actualizaciones cada 4 horas
+        # 8 AM - "Sistema online, 0 issues"
+        # 12 PM - "Sistema estable, 2 usuarios activos"
+        # 4 PM - "Sistema normal, performance bueno"
+        # 8 PM - "Resumen del día: uptime 100%, 45 usuarios"
+        ```
+     
+     5. Tener rollback plan listo:
+        ```bash
+        # Script de rollback rápido
+        #!/bin/bash
+        echo "Rolling back to previous version..."
+        git revert HEAD
+        npm run build
+        npm run deploy:prod
+        echo "Rollback complete. Testing..."
+        curl -I https://yourdomain.com/api/health
+        ```
+
+8.2 SOPORTE Y SEGUIMIENTO
+   - Tiempo: Ongoing (primera semana)
+   - Descripción:
+     * Responder a issues reportados por usuarios
+     * Monitorear logs para errores no reportados
+     * Documentar bugs encontrados
+     * Priorizar fixes:
+       1. Critical: Sistema no funciona
+       2. High: Funcionalidad crítica no funciona
+       3. Medium: Bug con workaround
+       4. Low: Mejoras o bugs menores
+   
+   - HOW TO - IMPLEMENTACIÓN:
+     1. Crear canal de soporte:
+        ```
+        Canales disponibles:
+        - Email: support@oroverde.com (respuesta en 2 horas)
+        - Teléfono: +1-800-ORO-VERDE (soporte 9-5)
+        - Slack: #support (respuesta inmediata)
+        ```
+     
+     2. Template de ticket de soporte:
+        ```
+        Título: [PRIORIDAD] Descripción breve del problema
+        
+        Descripción:
+        - Qué sucede: ...
+        - Qué esperaba que sucediera: ...
+        - Pasos para reproducir: ...
+        - Capturas de pantalla: ...
+        
+        Entorno:
+        - Navegador: ...
+        - Sistema operativo: ...
+        - URL: ...
+        ```
+     
+     3. Workflow de soporte:
+        ```
+        1. Usuario reporta issue → Crear ticket
+        2. Triage → Asignar prioridad
+        3. Investigación → Debug en logs
+        4. Reproducción → Crear caso de prueba
+        5. Fix → Implementar solución
+        6. Validación → Testear fix
+        7. Deploy → Deployar a producción
+        8. Notificación → Comunicar a usuario
+        9. Cierre → Cerrar ticket
+        ```
+     
+     4. Script para buscar errores en logs:
+        ```bash
+        #!/bin/bash
+        # find-errors.sh
+        
+        DATE=$(date +%Y-%m-%d)
+        
+        echo "=== Critical Errors ==="
+        grep -i "critical\|fatal" /var/log/app/error.log | tail -20
+        
+        echo ""
+        echo "=== DB Connection Errors ==="
+        grep "Connection refused\|Connection timeout" /var/log/app/error.log | tail -10
+        
+        echo ""
+        echo "=== Authentication Errors ==="
+        grep "login_failed\|auth_error" /var/log/app/error.log | tail -10
+        
+        echo ""
+        echo "=== Performance Issues (>1s) ==="
+        grep "duration.*[1-9][0-9]{3,}" /var/log/app/performance.log | tail -10
+        ```
+     
+     5. Dashboard de issues:
+        ```bash
+        # Usar herramienta como Jira, GitHub Issues, o similar
+        # Campos a incluir:
+        - Título y descripción
+        - Prioridad (Critical, High, Medium, Low)
+        - Estado (New, In Progress, Testing, Closed)
+        - Asignado a
+        - Fecha de creación
+        - Fecha de cierre
+        - Tiempo de respuesta
+        
+        # Métricas:
+        - Tiempo promedio de respuesta
+        - Tiempo promedio de resolución
+        - Número de issues abiertos
+        - Número de issues resueltos
+        ```
+
+================================================================================
+9. CRONOGRAMA RECOMENDADO DE IMPLEMENTACIÓN
+================================================================================
+
+Semana 1: Preparación y Testing
+- Día 1-2: Verificación de prerequisitos (item 1)
+- Día 3: Gestión de variables de entorno (item 2)
+- Día 4-5: Optimización de performance (item 3)
+
+Semana 2: Seguridad y Testing
+- Día 1-2: Implementación de seguridad (item 4)
+- Día 3-5: Testing exhaustivo (item 5)
+
+Semana 3: Deployment y Producción
+- Día 1-2: Setup de infraestructura (item 6)
+- Día 3-4: Configuración de producción (item 7)
+- Día 5: Validación final y launch
+
+Semana 4: Post-deployment
+- Días 1-7: Monitoreo y soporte (item 8)
+
+================================================================================
+10. CHECKLIST FINAL PRE-LAUNCH
+================================================================================
+
+PREPARACIÓN TÉCNICA:
+[ ] Todas las dependencias auditadas y actualizadas
+[ ] Código pasa todos los linters
+[ ] Cobertura de tests >= 70%
+[ ] Load test exitoso (1000 usuarios simultáneos)
+[ ] Security scan sin issues críticos
+[ ] Performance Lighthouse > 80
+[ ] SSL/HTTPS funciona
+[ ] Base de datos en producción lista
+[ ] Backups funcionando
+[ ] Monitoreo y alertas configuradas
+[ ] CI/CD pipeline funcionando
+[ ] Rollback plan documentado
+
+SEGURIDAD:
+[ ] Autenticación/Autorización funciona
+[ ] Rate limiting implementado
+[ ] CORS configurado
+[ ] CSRF tokens en forms
+[ ] Input validation implementada
+[ ] SQL injection prevention validada
+[ ] XSS protection implementada
+[ ] Security headers configurados
+[ ] Logs de seguridad activos
+[ ] 2FA opcional disponible
+[ ] Passwords hasheadas con bcrypt
+
+OPERACIONAL:
+[ ] Documentación actualizada
+[ ] Variables de entorno configuradas
+[ ] Usuarios iniciales creados
+[ ] Training de admins completado
+[ ] Plan de escalabilidad definido
+[ ] Política de SLA definida
+[ ] Contacto 24/7 disponible
+[ ] Runbooks de operación creados
+[ ] Procedimiento de rollback testeado
+
+DATA & COMPLIANCE:
+[ ] Política de privacidad publicada
+[ ] Términos de servicio publicados
+[ ] GDPR/regulaciones compliance validadas
+[ ] Data classification implementada
+[ ] Audit trail funcionando
+[ ] Retención de datos política definida
+
+================================================================================
+11. MÉTRICAS DE ÉXITO
+================================================================================
+
+Post-Launch (primeros 30 días):
+- Uptime: >= 99.9%
+- Response time p95: < 500ms
+- Error rate: < 0.1%
+- User adoption: > 80% de usuarios activos
+- Critical issues: 0
+- High priority issues: < 5
+- User satisfaction: > 4/5 estrellas
+
+Primeros 90 días:
+- Uptime: >= 99.95%
+- Response time p95: < 300ms
+- Error rate: < 0.05%
+- User retention: > 70%
+- Performance improvement: > 20%
+
+================================================================================
+12. CONTACTO Y SOPORTE
+================================================================================
+
+En caso de issues durante deployment:
+
+1. Verificar que todas las variables de entorno están correctas
+2. Revisar logs del servidor y base de datos
+3. Ejecutar health check endpoint
+4. Si es crítico, ejecutar rollback plan
+5. Contactar a equipo técnico de soporte
+
+Canales de comunicación:
+- Email: support@oroverde.com
+- Teléfono: [número]
+- Slack: #biofincas-monitor-support
+
+================================================================================
+DOCUMENTO FINAL
+================================================================================
+
+Este documento debe ser revisado y actualizado:
+- Antes de cada deployment a producción
+- Cada 6 meses para validar vigencia
+- Cuando se agreguen nuevas features críticas
+- Cuando cambien infraestructura o dependencias
+
+Versión: 1.0
+Fecha: 29 de Noviembre de 2025
+Responsable: Angel / Equipo de Desarrollo
+Próxima revisión: 29 de Mayo de 2026

@@ -1,0 +1,872 @@
+# Documentación de Usuario - BioFincas Monitor v5
+## Guía Completa de Uso de la Plataforma
+
+Esta guía paso a paso te ayudará a interactuar de manera efectiva con todos los dashboards y funcionalidades integradas en BioFincas Monitor.
+
+================================================================================
+1. ACCESO A LA PLATAFORMA - HOW TO
+================================================================================
+
+1.1 LOGIN INICIAL
+   Paso a paso:
+   1. Abre tu navegador web (Chrome, Firefox, Safari o Edge)
+   
+   2. Ingresa la URL de acceso:
+      https://yourdomain.com/login
+      (o la URL específica que te proporcionó tu administrador)
+   
+   3. En la página de login verás un formulario dividido en dos secciones:
+      - Lado izquierdo: Logo y branding de OroVerde
+      - Lado derecho: Formulario de login
+   
+   4. Completa los campos:
+      - Campo "Email": Ingresa tu correo electrónico registrado
+      - Campo "Password": Ingresa tu contraseña
+      (Si olvidaste tu contraseña, contacta al administrador: support@oroverde.com)
+   
+   5. Haz clic en el botón "Login"
+   
+   6. Espera a que se procese la autenticación (2-3 segundos)
+      - Si es exitosa, serás redirigido al Dashboard principal
+      - Si falla, verás un mensaje de error en rojo indicando el problema
+   
+   Credenciales de demo (si aplica):
+   - Email: admin@example.com
+   - Password: oroverde2025?
+   
+   Nota importante: Tu sesión se mantiene activa durante 7 días
+   Sin embargo, por seguridad, cierra sesión cuando termines de trabajar
+
+1.2 CAMBIO DE CONTRASEÑA (Recomendado en primer login)
+   Paso a paso:
+   1. Haz login normalmente
+   
+   2. En la barra superior derecha (TopBar), busca el icono de tu perfil
+      (generalmente muestra tus iniciales o un ícono de usuario)
+   
+   3. Haz clic en el ícono de perfil
+      Verás un menú desplegable con opciones
+   
+   4. Selecciona "Cambiar contraseña" o "Change password"
+   
+   5. Se abrirá un modal/ventana con los campos:
+      - Contraseña actual: Ingresa tu contraseña actual
+      - Nueva contraseña: Crea una contraseña fuerte
+        * Mínimo 12 caracteres
+        * Incluir mayúsculas (A-Z)
+        * Incluir minúsculas (a-z)
+        * Incluir números (0-9)
+        * Incluir símbolos (!@#$%^&*)
+        Ejemplo: MyNewPass123!
+      - Confirmar contraseña: Repite la nueva contraseña
+   
+   6. Haz clic en "Guardar" o "Save"
+   
+   7. Verás un mensaje de confirmación "Contraseña actualizada correctamente"
+
+1.3 CERRAR SESIÓN
+   Paso a paso:
+   1. En la barra superior derecha (TopBar), haz clic en tu perfil
+   
+   2. Selecciona "Cerrar sesión" o "Logout"
+   
+   3. Automáticamente serás redirigido a la página de login
+   
+   Nota: Siempre cierra sesión al terminar, especialmente si usas una computadora compartida
+
+================================================================================
+2. NAVEGACIÓN GENERAL - HOW TO
+================================================================================
+
+2.1 ENTENDIENDO LA INTERFAZ PRINCIPAL
+   
+   Estructura de la pantalla:
+   
+   ┌─────────────────────────────────────────────────┐
+   │        TopBar (Barra Superior)                  │
+   │ Logo    Búsqueda    Notificaciones  Perfil      │
+   ├─────────────────────────────────────────────────┤
+   │Sidebar  │                                       │
+   │(Lateral)│   CONTENIDO PRINCIPAL                 │
+   │         │   (Dashboard, Productos, etc)         │
+   │         │                                       │
+   │ Menu    │                                       │
+   │Items    │                                       │
+   │         │                                       │
+   └─────────────────────────────────────────────────┘
+   
+   Componentes principales:
+   
+   A) TOPBAR (Barra Superior):
+      - Logo de OroVerde: Haz clic para volver al Dashboard
+      - Barra de búsqueda: Busca productos, tareas, indicadores
+      - Icono de Notificaciones: Ver alertas y eventos importantes
+      - Icono de Perfil: Acceder a tu cuenta y configuración
+   
+   B) SIDEBAR (Barra Lateral):
+      - Se puede contraer/expandir con el botón ≡ (hamburguesa)
+      - Opciones principales del menú:
+        * Dashboard - Panel principal con métricas
+        * Productos - Gestión de productos y proyectos
+        * Indicadores - Indicadores clave de desempeño
+        * Tareas - Listado de tareas por estado
+        * (Otras opciones según tu rol)
+   
+   C) CONTENIDO PRINCIPAL:
+      - El área central donde se muestra la información
+      - Varía según qué sección hayas seleccionado
+
+2.2 NAVEGACIÓN POR SECCIONES
+   Paso a paso:
+   
+   Para acceder a cualquier sección:
+   1. Mira el Sidebar en el lado izquierdo
+   
+   2. Identifica el ícono y nombre de la sección que deseas visitar:
+      📊 Dashboard
+      📦 Productos
+      📈 Indicadores
+      ✓ Tareas
+   
+   3. Haz clic en la sección deseada
+   
+   4. La pantalla se actualiza mostrando el contenido de esa sección
+   
+   Tip: El item actualmente seleccionado aparece resaltado en el Sidebar
+
+2.3 BÚSQUEDA RÁPIDA
+   Paso a paso:
+   1. En la barra superior, localiza el campo de búsqueda
+      (generalmente tiene un ícono de lupa 🔍)
+   
+   2. Haz clic en el campo de búsqueda
+   
+   3. Comienza a escribir lo que buscas:
+      - Nombre de un producto: "Café Sostenible"
+      - Nombre de una tarea: "Evaluación de calidad"
+      - Código de indicador: "IND-2024-001"
+   
+   4. Verás sugerencias mientras escribes
+      (busca en tiempo real entre productos, tareas e indicadores)
+   
+   5. Haz clic en el resultado que deseas
+   
+   6. Serás llevado directamente al detalle de ese elemento
+
+2.4 CONTRAER/EXPANDIR SIDEBAR
+   Paso a paso:
+   1. En la esquina superior izquierda, busca el botón ≡ (tres líneas horizontales)
+      o el ícono de flecha
+   
+   2. Haz clic en el botón
+   
+   3. El Sidebar se contraerá/expandirá:
+      - Expandido: Muestra nombres completos de las opciones
+      - Contraído: Muestra solo los iconos, dejando más espacio
+   
+   Nota: Esta preferencia se guarda automáticamente
+
+================================================================================
+3. DASHBOARD PRINCIPAL - HOW TO
+================================================================================
+
+3.1 ENTENDIENDO EL DASHBOARD
+   
+   El Dashboard es tu panel de control principal. Muestra:
+   - Métricas clave de todos tus proyectos
+   - Gráficos de progreso
+   - Tareas pendientes
+   - Actividad reciente
+   
+   Estructura del Dashboard:
+   
+   ┌─────────────────────────────────────────┐
+   │ Tarjetas de Métricas (resumen rápido)   │
+   │ [ 45 Productos ] [ 230 Tareas ]         │
+   ├─────────────────────────────────────────┤
+   │ Gráficos de Progreso                    │
+   │ [Gráfico 1]          [Gráfico 2]        │
+   ├─────────────────────────────────────────┤
+   │ Actividad Reciente                      │
+   │ - Producto X actualizado hace 2 horas   │
+   │ - Tarea Y completada hace 4 horas       │
+   └─────────────────────────────────────────┘
+
+3.2 INTERPRETAR LAS TARJETAS DE MÉTRICAS
+   
+   Tarjeta de Productos:
+   - Total: Número total de productos en el sistema
+   - Activos: Productos en desarrollo
+   - Completados: Productos terminados
+   
+   Tarjeta de Tareas:
+   - Total: Número total de tareas
+   - Completadas: Tareas terminadas
+   - En progreso: Tareas siendo trabajadas actualmente
+   - Pendientes: Tareas aún no iniciadas
+   
+   Tarjeta de Indicadores:
+   - Total: Número de indicadores definidos
+   - Asignados: Indicadores con responsable
+   - Promedio de progreso: Porcentaje completado promedio
+
+3.3 FILTRAR DATOS EN EL DASHBOARD
+   Paso a paso:
+   1. Busca los controles de filtro (generalmente en la parte superior del contenido)
+   
+   2. Disponibles filtros:
+      - Por Producto: Selecciona un producto específico
+      - Por País: Filtra por país donde se implementa
+      - Por Responsable: Muestra datos del usuario seleccionado
+      - Por Período: Rango de fechas (ej: últimos 30 días)
+      - Por Estado: Activo, Completado, En espera, etc.
+   
+   3. Haz clic en cada filtro y selecciona los criterios
+   
+   4. El dashboard se actualiza automáticamente
+   
+   5. Para limpiar filtros:
+      Busca un botón "Limpiar filtros" o "Reset"
+      Todos los datos mostrarán sin restricciones
+
+3.4 VER DETALLES AMPLIADOS
+   Paso a paso:
+   1. Identifica una métrica o gráfico de interés
+   
+   2. Haz clic sobre ella
+   
+   3. Opciones que pueden suceder:
+      A) Se abre un modal con más detalles
+      B) Se abre una página con información extendida
+      C) Se filtran datos relacionados
+   
+   4. Para cerrar:
+      - Si es un modal: Busca la X en la esquina superior derecha
+      - Si es una página: Haz clic en "Atrás" o el botón back ← 
+
+3.5 EXPORTAR DATOS DEL DASHBOARD
+   Paso a paso:
+   1. En el dashboard, busca el botón "Exportar" o ⬇️
+   
+   2. Haz clic en el botón
+   
+   3. Selecciona el formato:
+      - PDF: Para imprimir o compartir formato profesional
+      - Excel: Para análisis en hojas de cálculo
+      - CSV: Para importar en otros sistemas
+   
+   4. El archivo se descargará automáticamente a tu carpeta "Descargas"
+
+================================================================================
+4. SECCIÓN DE PRODUCTOS - HOW TO
+================================================================================
+
+4.1 ACCEDER A PRODUCTOS
+   Paso a paso:
+   1. En el Sidebar, busca el ícono 📦 "Productos"
+   
+   2. Haz clic en "Productos"
+   
+   3. Se abrirá la sección de Productos
+   
+   4. Por defecto, verás la vista de "Lista"
+      Muestra una tabla con todos los productos
+
+4.2 DIFERENTES VISTAS DE PRODUCTOS
+   
+   La sección de Productos tiene varias vistas:
+   
+   A) VISTA DE LISTA (predeterminada)
+      - Tabla con columnas: Nombre, Estado, Progreso, Responsable, Fechas
+      - Haz clic en una fila para ver detalles del producto
+   
+   B) VISTA DE MATRIZ
+      - Tabla de doble entrada (productos vs. fases)
+      - Útil para ver completitud por fase
+      - Acceder: Busca la pestaña "Matriz" o ícono de matriz
+   
+   C) VISTA GANTT
+      - Diagrama de timeline con barras horizontales
+      - Muestra cronograma y dependencias
+      - Útil para planificación
+      - Acceder: Busca la pestaña "Gantt"
+   
+   D) VISTA DE MÉTRICAS
+      - Gráficos y análisis de desempeño
+      - KPIs por producto
+      - Acceder: Busca la pestaña "Métricas"
+
+4.3 BUSCAR UN PRODUCTO ESPECÍFICO
+   Paso a paso:
+   1. En la sección de Productos, busca el campo de búsqueda
+      (generalmente en la parte superior de la tabla)
+   
+   2. Haz clic en el campo "Buscar productos..."
+   
+   3. Comienza a escribir el nombre del producto
+      Ejemplo: "Café" si buscas "Café Sostenible"
+   
+   4. La tabla se filtra en tiempo real
+      Mostrando solo productos que coinciden
+   
+   5. Haz clic en el producto que buscas
+
+4.4 VER DETALLES DE UN PRODUCTO
+   Paso a paso:
+   1. En la lista de productos, identifica el producto de interés
+   
+   2. Haz clic en la fila del producto
+   
+   3. Se abre la página de detalle del producto
+   
+   4. En esta página verás:
+      - Nombre y descripción completa
+      - Estado actual: Activo / Completado / En desarrollo
+      - Porcentaje de progreso (visual con barra)
+      - Fechas: Inicio, Fin esperado, Fin real
+      - Responsable: Persona a cargo del producto
+      - Fases asociadas: Desglose en sub-tareas
+      - Tareas pendientes: Lista de lo que falta
+      - Documentos adjuntos: Archivos relacionados
+   
+   5. Para volver:
+      Haz clic en el botón ← "Atrás" o en "Productos" del Sidebar
+
+4.5 CREAR UN NUEVO PRODUCTO
+   Paso a paso:
+   1. En la sección de Productos, busca el botón "+ Nuevo Producto" o "+ Add"
+      (generalmente en la esquina superior derecha)
+   
+   2. Haz clic en el botón
+   
+   3. Se abre un formulario con los campos:
+      - Nombre del producto *: Nombre descriptivo (requerido)
+        Ejemplo: "Café Orgánico Certificado"
+      - Descripción: Detalles del producto
+      - Fecha de inicio *: Cuándo comienza (requerido)
+      - Fecha de fin esperada *: Cuándo debe terminar (requerido)
+      - Responsable *: Quién será encargado (requerido)
+      - País: Dónde se implementa
+      - Estado: Activo, Pendiente, etc.
+   
+   4. Completa todos los campos marcados con *
+   
+   5. Haz clic en "Guardar" o "Crear Producto"
+   
+   6. Verás un mensaje de confirmación
+   
+   7. El nuevo producto aparecerá en la lista
+   
+   Nota: Si no ves el botón "+ Nuevo Producto", tu rol no tiene permisos.
+   Contacta al administrador.
+
+4.6 EDITAR UN PRODUCTO
+   Paso a paso:
+   1. En la lista de productos, busca el producto a editar
+   
+   2. Haz clic en la fila del producto para abrir su detalle
+   
+   3. Busca el botón "Editar" o el ícono ✏️ (lápiz)
+      Generalmente en la esquina superior derecha
+   
+   4. Haz clic en "Editar"
+   
+   5. El formulario ahora es editable
+      Los campos se iluminan o cambian de color
+   
+   6. Realiza los cambios necesarios:
+      - Actualizar fechas
+      - Cambiar responsable
+      - Modificar descripción
+      - Cambiar estado
+   
+   7. Haz clic en "Guardar cambios" o "Save"
+   
+   8. Verás confirmación: "Producto actualizado correctamente"
+
+4.7 ELIMINAR UN PRODUCTO
+   Paso a paso:
+   1. En el detalle del producto, busca el botón "Eliminar" o ícono 🗑️
+   
+   2. Haz clic en "Eliminar"
+   
+   3. Aparecerá una confirmación:
+      "¿Estás seguro de que deseas eliminar este producto?
+       Esta acción no se puede deshacer."
+   
+   4. Tienes dos opciones:
+      - "Cancelar": No eliminar, volver atrás
+      - "Confirmar eliminación": Proceder con la eliminación
+   
+   5. Si confirmas, el producto se elimina del sistema
+   
+   Advertencia: La eliminación es permanente.
+   Asegúrate antes de confirmar.
+
+================================================================================
+5. GESTIÓN DE TAREAS - HOW TO
+================================================================================
+
+5.1 ACCEDER A TAREAS
+   Paso a paso:
+   1. En el Sidebar, busca el ícono ✓ "Tareas"
+   
+   2. Haz clic en "Tareas"
+   
+   3. Se muestra la sección de Tareas
+      Por defecto, verás todas las tareas con filtros
+   
+   4. Verás pestañas o filtros:
+      - Todas las tareas
+      - Mis tareas (asignadas a ti)
+      - Tareas pendientes
+      - Tareas completadas
+
+5.2 FILTRAR Y ORDENAR TAREAS
+   Paso a paso:
+   1. En la parte superior de la lista de tareas, busca los controles:
+   
+   2. Filtros disponibles:
+      - Por Estado: Pendiente, En progreso, Completada
+      - Por Responsable: Asignada a quién
+      - Por Producto: A qué producto pertenece
+      - Por Prioridad: Alta, Media, Baja
+      - Por Fecha: Próximas vencidas, Por vencer
+   
+   3. Haz clic en el filtro que deseas aplicar
+   
+   4. La lista se actualiza mostrando solo las tareas que coinciden
+   
+   5. Para ordenar:
+      Busca las flechas ↑↓ en los encabezados de columna
+      Haz clic para ordenar alfabético, por fecha, etc.
+
+5.3 VER DETALLES DE UNA TAREA
+   Paso a paso:
+   1. En la lista de tareas, identifica la tarea
+   
+   2. Haz clic en la fila de la tarea
+   
+   3. Se abre el detalle de la tarea mostrando:
+      - Título: Nombre de la tarea
+      - Descripción: Detalles completos
+      - Estado: Pendiente / En progreso / Completada
+      - Asignado a: Responsable
+      - Producto asociado: A cuál producto pertenece
+      - Fecha de vencimiento: Cuándo debe estar lista
+      - Prioridad: Alta, Media, Baja
+      - Comentarios: Conversación sobre la tarea
+      - Adjuntos: Archivos relacionados
+
+5.4 CAMBIAR ESTADO DE UNA TAREA
+   Paso a paso:
+   1. Abre el detalle de la tarea
+   
+   2. Busca el campo "Estado"
+   
+   3. Haz clic en el desplegable del estado
+      Opciones: Pendiente → En progreso → Completada
+   
+   4. Selecciona el nuevo estado
+   
+   5. El cambio se guarda automáticamente
+   
+   6. Se registra en el historial:
+      "Angel cambió de Pendiente a En progreso"
+
+5.5 ASIGNAR UNA TAREA
+   Paso a paso:
+   1. En el detalle de la tarea, busca el campo "Asignado a"
+   
+   2. Si la tarea no está asignada, verás "Sin asignar" o similar
+   
+   3. Haz clic en el campo
+   
+   4. Se abre una lista de usuarios disponibles
+   
+   5. Busca el nombre del usuario
+      O empieza a escribir para filtrar
+   
+   6. Haz clic en el usuario
+   
+   7. La tarea ahora está asignada a ese usuario
+      Se le enviará una notificación
+   
+   Nota: Solo users con rol apropiado pueden asignar tareas
+
+5.6 AGREGAR COMENTARIOS A UNA TAREA
+   Paso a paso:
+   1. En el detalle de la tarea, busca la sección "Comentarios"
+      Generalmente en la parte inferior
+   
+   2. En el campo de texto "Agregar comentario", haz clic
+   
+   3. Escribe tu comentario
+      Ejemplo: "Necesito clarificación sobre el alcance"
+   
+   4. Puedes:
+      - Formatear texto: Negrita, cursiva (si la interfaz lo permite)
+      - Mencionar a otros: @usuario para notificarlos
+      - Adjuntar archivos: Busca el botón 📎 o ⬆️
+   
+   5. Haz clic en "Enviar" o presiona Ctrl+Enter
+   
+   6. Tu comentario aparece en la conversación
+      Otros usuarios serán notificados
+
+5.7 ADJUNTAR ARCHIVOS A UNA TAREA
+   Paso a paso:
+   1. En el detalle de la tarea, busca la sección "Adjuntos"
+   
+   2. Haz clic en "+ Agregar archivo" o en el icono 📎
+   
+   3. Se abre un navegador de archivos
+   
+   4. Selecciona el archivo que deseas adjuntar
+      Tipos permitidos: PDF, Word, Excel, imágenes, etc.
+      Tamaño máximo: 10MB por archivo
+   
+   5. Haz clic en "Abrir" o "Seleccionar"
+   
+   6. El archivo se carga
+      Verás una barra de progreso
+   
+   7. Una vez completo, el archivo aparece en la lista
+   
+   8. Otros usuarios pueden descargar haciendo clic en el archivo
+
+================================================================================
+6. INDICADORES Y MÉTRICAS - HOW TO
+================================================================================
+
+6.1 ACCEDER A INDICADORES
+   Paso a paso:
+   1. En el Sidebar, busca el ícono 📈 "Indicadores"
+   
+   2. Haz clic en "Indicadores"
+   
+   3. Se abre la sección de Indicadores
+   
+   4. Verás pestañas o secciones:
+      - Overview: Resumen de todos los indicadores
+      - Output: Indicadores de productos/outputs
+      - Workpackage: Indicadores por paquete de trabajo
+
+6.2 VISTA GENERAL DE INDICADORES (Overview)
+   Paso a paso:
+   1. Haz clic en la pestaña "Overview"
+   
+   2. Verás tarjetas mostrando:
+      - Indicadores totales en el sistema
+      - Indicadores con avance > 80%
+      - Indicadores atrasados
+      - Progreso promedio general
+   
+   3. Cada tarjeta es clickeable para ver más detalles
+   
+   4. Puedes filtrar por:
+      - Producto
+      - Línea de base o Meta
+      - Responsable
+
+6.3 INDICADORES POR OUTPUT
+   Paso a paso:
+   1. Haz clic en la pestaña "Output"
+   
+   2. Verás una tabla con:
+      - Nombre del producto/output
+      - Indicadores asociados
+      - Meta establecida
+      - Valor actual
+      - Porcentaje completado
+      - Última actualización
+   
+   3. Haz clic en un producto
+   
+   4. Se abre el detalle con:
+      - Descripción del producto
+      - Lista de indicadores
+      - Gráficos de progreso
+      - Histórico de cambios
+
+6.4 INDICADORES POR WORKPACKAGE
+   Paso a paso:
+   1. Haz clic en la pestaña "Workpackage"
+   
+   2. Verás una vista organizada por:
+      - Paquetes de trabajo (líneas de acción)
+      - Indicadores dentro de cada paquete
+      - Avance por paquete
+   
+   3. Expande un paquete haciendo clic en el ▼
+      Para ver indicadores individuales
+   
+   4. Haz clic en un indicador para ver detalles
+
+6.5 ACTUALIZAR UN INDICADOR
+   Paso a paso:
+   1. Identifica el indicador que deseas actualizar
+   
+   2. Haz clic en el indicador para abrir su detalle
+   
+   3. Busca el botón "Editar" o ✏️
+   
+   4. Haz clic en "Editar"
+   
+   5. Se activan los campos editables:
+      - Valor actual: Ingresa el nuevo valor
+      - Fecha de reporte: Actualiza si es diferente
+      - Notas: Agrega observaciones sobre el cambio
+      
+   6. Completa los campos
+      Ejemplo: Valor actual = 85 (fue 80 antes)
+   
+   7. Haz clic en "Guardar"
+   
+   8. El indicador se actualiza
+      Se muestra: "Actualizado hace 2 minutos"
+
+6.6 GENERAR REPORTE DE INDICADORES
+   Paso a paso:
+   1. En la sección de Indicadores, busca el botón "Generar Reporte"
+   
+   2. Haz clic en "Generar Reporte"
+   
+   3. Se abre un formulario para personalizar el reporte:
+      - Seleccionar indicadores: Todos o específicos
+      - Rango de fechas: De cuándo a cuándo
+      - Formato: PDF o Excel
+      - Incluir gráficos: Sí o No
+      - Incluir análisis: Sí o No
+   
+   4. Selecciona las opciones deseadas
+   
+   5. Haz clic en "Generar"
+   
+   6. El reporte se crea y descarga automáticamente
+
+================================================================================
+7. NOTIFICACIONES Y ALERTAS - HOW TO
+================================================================================
+
+7.1 ACCEDER A NOTIFICACIONES
+   Paso a paso:
+   1. En la TopBar (barra superior), busca el ícono de campana 🔔
+   
+   2. Haz clic en la campana
+   
+   3. Se abre un panel mostrando:
+      - Notificaciones recientes
+      - Número de notificaciones sin leer (número en rojo)
+      - Filtros por categoría
+
+7.2 TIPOS DE NOTIFICACIONES
+   
+   Las notificaciones pueden ser:
+   
+   A) TAREAS:
+      "Tu tarea 'Evaluación' vence en 2 días"
+      "La tarea 'Reporte' fue completada"
+   
+   B) PRODUCTOS:
+      "Producto 'Café' fue 50% completado"
+      "Producto 'Cacao' requiere actualización"
+   
+   C) ASIGNACIONES:
+      "Te asignaron la tarea 'Análisis de datos'"
+      "Eres responsable de 'Producto X'"
+   
+   D) CAMBIOS:
+      "El estado de la tarea cambió a 'Completada'"
+      "Se agregó un comentario a tu producto"
+
+7.3 FILTRAR NOTIFICACIONES
+   Paso a paso:
+   1. Abre el panel de notificaciones
+   
+   2. En la parte superior del panel, verás categorías:
+      - Todas
+      - Tareas
+      - Productos
+      - Indicadores
+      - Cambios de estado
+   
+   3. Haz clic en una categoría para filtrar
+   
+   4. Solo aparecerán notificaciones de esa categoría
+
+7.4 MARCAR NOTIFICACIONES COMO LEÍDAS
+   Paso a paso:
+   1. Abre el panel de notificaciones
+   
+   2. Las notificaciones sin leer aparecen con un punto azul ●
+   
+   3. Para marcar como leída:
+      - Haz clic en la notificación (la abrirá)
+      - O haz clic en el punto azul para marcar sin abrir
+   
+   4. El punto desaparece
+   
+   5. Para marcar todas como leídas:
+      Busca la opción "Marcar todas como leídas" en la parte superior
+
+7.5 CONFIGURAR PREFERENCIAS DE NOTIFICACIONES
+   Paso a paso:
+   1. En el panel de notificaciones, busca el ícono ⚙️ (engranaje)
+   
+   2. Haz clic en "Configurar notificaciones"
+   
+   3. Se abre la configuración con opciones:
+      - Email: Recibir notificaciones por correo (Sí/No)
+      - Push: Notificaciones en el navegador (Sí/No)
+      - En-app: Notificaciones dentro de la plataforma (Sí/No)
+      - Frecuencia: Inmediata, Diaria, Semanal
+   
+   4. Selecciona tus preferencias
+   
+   5. Para cada tipo de notificación (tareas, productos, etc)
+      puedes personalizar sus ajustes
+   
+   6. Haz clic en "Guardar preferencias"
+
+================================================================================
+8. ROLES Y PERMISOS - HOW TO
+================================================================================
+
+8.1 ENTENDIENDO LOS ROLES
+   
+   Existen 4 roles principales en BioFincas Monitor:
+   
+   A) ADMIN (Administrador)
+      - Acceso total al sistema
+      - Puede crear y eliminar usuarios
+      - Puede cambiar permisos de otros
+      - Ve todos los datos de todos los productos
+      - Puede configurar la plataforma
+   
+   B) MANAGER (Gerente/Coordinador)
+      - Acceso a la mayoría de funciones
+      - Puede crear y editar productos
+      - Puede asignar tareas
+      - Ve datos de productos asignados a su línea
+      - Puede crear reportes
+   
+   C) USER (Usuario)
+      - Acceso a funcionalidades básicas
+      - Puede ver productos asignados
+      - Puede trabajar en tareas asignadas
+      - Puede actualizar indicadores
+      - NO puede eliminar datos
+   
+   D) VIEWER (Visualizador)
+      - Acceso de solo lectura
+      - Solo puede ver información
+      - NO puede crear, editar o eliminar
+      - Útil para stakeholders externos
+
+8.2 VERIFICAR TU ROL
+   Paso a paso:
+   1. En la TopBar, haz clic en tu perfil
+   
+   2. Se abre el menú de usuario
+   
+   3. Busca la línea que dice "Rol:" o "Role:"
+      Verás tu rol actual (Admin, Manager, User, Viewer)
+   
+   4. Si necesitas un rol diferente, contacta al administrador
+
+8.3 SOLICITAR CAMBIO DE PERMISOS
+   Paso a paso:
+   1. Si necesitas permisos adicionales:
+   
+   2. En tu perfil, busca el botón "Solicitar acceso"
+      o envía un correo a: support@oroverde.com
+   
+   3. En tu solicitud, especifica:
+      - Qué permisos necesitas
+      - Por qué los necesitas
+      - Productos o datos que requieres
+   
+   4. El administrador evaluará y aprobará/denegará
+   
+   5. Serás notificado cuando se procese tu solicitud
+
+================================================================================
+9. PREGUNTAS FRECUENTES Y SOLUCIÓN DE PROBLEMAS
+================================================================================
+
+P: ¿Olvidé mi contraseña, qué hago?
+R: Contacta al administrador: support@oroverde.com
+   Proporciona tu email y nombre completo
+   El administrador te enviará una contraseña temporal
+   En tu próximo login, cambia la contraseña temporal
+
+P: ¿Cómo agrego usuarios nuevos?
+R: Solo los ADMINs pueden agregar usuarios
+   Si eres Admin: Ve a Configuración → Usuarios → Agregar usuario
+   Si no eres Admin: Contacta al administrador
+
+P: ¿Puedo cambiar el país de un producto después de crearlo?
+R: Sí, usa el botón "Editar" en el detalle del producto
+   Cambia el país y guarda
+   Se actualiza automáticamente
+
+P: ¿Qué significa "En progreso" vs "Pendiente"?
+R: Pendiente: Tarea que aún no ha comenzado
+   En progreso: Tarea en la que se está trabajando actualmente
+   Completada: Tarea finalizada
+
+P: ¿Cómo descargo un reporte?
+R: Ve al Dashboard o Indicadores
+   Busca el botón "Exportar" o ⬇️
+   Selecciona PDF o Excel
+   El archivo se descarga automáticamente
+
+P: ¿Cuánto tiempo dura mi sesión?
+R: Tu sesión dura 7 días sin actividad
+   Si cierras el navegador, la sesión se mantiene
+   Por seguridad, cierra sesión cuando termines
+
+P: ¿Cómo resto permisos de un usuario?
+R: Solo el ADMIN puede hacer esto
+   Ve a Configuración → Usuarios
+   Selecciona el usuario
+   Cambia su rol a "Viewer" o elimina accesos específicos
+   Haz clic en "Guardar"
+
+P: ¿Se pueden recuperar datos eliminados?
+R: Los datos eliminados son permanentes
+   No hay "papelera de reciclaje"
+   Por eso siempre confirma antes de eliminar
+   Contacta al admin si necesitas recuperar datos (tiene backups)
+
+================================================================================
+10. CONTACTO Y SOPORTE
+================================================================================
+
+¿Necesitas ayuda?
+
+Email: support@oroverde.com
+Teléfono: +1-800-ORO-VERDE
+Horario: Lunes a Viernes, 9 AM - 5 PM
+
+Canales disponibles:
+- Chat en vivo: Disponible en la plataforma
+- Correo electrónico: Respuesta en 24 horas
+- Teléfono: Para problemas urgentes
+- Documentación: Esta guía + FAQ en la plataforma
+
+Antes de contactar, intenta:
+1. Leer esta documentación
+2. Revisar las FAQ (Preguntas Frecuentes)
+3. Limpiar el caché del navegador (Ctrl+Shift+Delete)
+4. Probar en otro navegador
+5. Reiniciar tu sesión (cerrar y abrir sesión nuevamente)
+
+================================================================================
+
+Versión: 1.0
+Fecha de actualización: 6 de Noviembre de 2025
+Próxima revisión: 6 de Enero de 2026
+
+Última actualización: Agregar instrucciones paso a paso detalladas para todas las funciones

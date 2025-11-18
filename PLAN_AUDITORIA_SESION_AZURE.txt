@@ -1,0 +1,1022 @@
+============================================================
+PLAN DE INGENIERÍA DE SOFTWARE PARA PROYECTOS
+Backend NestJS + Frontend Angular + Azure Infrastructure
+============================================================
+
+PROYECTOS:
+- PROYECTO PRINCIPAL: BioFincas Monitor (migración a arquitectura separada)
+- PROYECTO PARALELO: DigiDeeFree Monitor (implementación)
+
+NUEVA ARQUITECTURA:
+- Frontend: Angular 18+ (SPA) → Azure Static Web Apps
+- Backend: NestJS (API REST) → Azure App Service
+- Base de datos: PostgreSQL → Azure Database for PostgreSQL
+- Autenticación: JWT + Session Management
+- Manejo de sesiones → Azure Cache for Redis
+- Manejo de roles y permisos: RBAC (Role-Based Access Control) + ACL (Access Control List)
+- Auditoría: Sistema completo de logs y trazabilidad
+
+MIGRACIÓN DE FRONTEND:
+- Estado actual: Next.js 15 + React 19
+- Estado objetivo: Angular 18+ con arquitectura modular
+- Razón: Mejor arquitectura empresarial, TypeScript nativo, escalabilidad
+
+============================================================
+FASE 0: IMPLEMENTACIÓN DE DIGIDEEFREE MONITOR (Semana 0 - 5 jornadas de 5hrs)
+============================================================
+PROYECTO PARALELO - Adaptación del sistema de monitoreo para DigiDeeFree
+
+Jornada 1 (5hrs):
+   - Research de infraestructura Azure para nueva arquitectura (2hrs)
+     * Azure App Service (planes, pricing, configuraciones)
+     * Azure Static Web Apps (características, limitaciones, integración)
+     * Azure Database for PostgreSQL (Flexible Server vs Single Server)
+   - Documentación de arquitectura objetivo para ambos proyectos (2hrs)
+     * Diagramas de infraestructura (Frontend, Backend, BD, Cache)
+     * Diagrama de flujos de comunicación entre servicios
+   - Análisis de costos estimados de infraestructura Azure (1hr)
+      - Entregable: Documento de research de infraestructura Azure, diagramas de arquitectura, análisis de costos
+
+Jornada 2 (5hrs):
+   - Reunión de levantamiento de requerimientos con DigiDeeFree (1.5hrs)
+   - Análisis de necesidades específicas del proyecto (1.5hrs)
+   - Identificación de diferencias vs BioFincas (productos, métricas, indicadores) (1hr)
+   - Documentación de arquitectura específica para DigiDeeFree (1hr)
+      - Entregable: Documento de requerimientos DigiDeeFree, documento de arquitectura específica
+
+Jornada 3 (5hrs):
+   - Análisis de dominio de negocio DigiDeeFree (1.5hrs)
+   - Definición de entidades específicas (productos digitales, componentes, features) (2hrs)
+   - Mapeo de procesos y flujos de trabajo (1hr)
+      - Entregable: Modelo de dominio, diagrama de procesos
+
+Jornada 4 (5hrs):
+   - Diseño de modelo de datos para DigiDeeFree (3hrs)
+   - Identificación de tablas comunes y específicas (1.5hrs)
+   - Diseño de estrategia multi-tenant o multi-proyecto (1hr)
+      - Entregable: ERD específico para DigiDeeFree, scripts SQL
+
+Jornada 5 (5hrs):
+   - Clonación y adaptación del código base de BioFincas (3hrs)
+   - Configuración de nuevo repositorio y proyecto (1hr)
+   - Personalización de entidades y modelos (2hrs)
+   - Pruebas básicas y validación (0.5hr)
+      - Entregable: Proyecto DigiDeeFree inicializado, MVP funcional (Recopilador de Productos)
+
+============================================================
+FASE 1: ANÁLISIS Y DISEÑO DE ARQUITECTURA (Semana 1 - 5 jornadas de 5hrs)
+============================================================
+PROYECTO PRINCIPAL - BioFincas Monitor
+
+Jornada 1 (5hrs):
+   - Análisis de arquitectura actual BioFincas (monolito Next.js) (2hrs)
+   - Diseño de nueva arquitectura separada (Backend NestJS + Frontend Angular) (2hrs)
+   - Planificación de migración Next.js → Angular y definición de fases (1hr)
+      - Entregable: Diagrama de arquitectura objetivo, plan de migración a Angular
+
+Jornada 2 (5hrs):
+   - Reunión con consorcio/stakeholders BioFincas (2hrs)
+   - Definición de roles y permisos del sistema (Admin, Product Owner, Developer, Viewer?) (1.5hrs)
+   - Identificación de recursos y acciones a controlar (1hr)
+      - Entregable: Acta de reunión, matriz de roles y permisos
+
+Jornada 3 (5hrs):
+   - Diseño de modelo de datos para autenticación (users, roles, permissions) (2hrs)
+   - Diseño de modelo de datos para auditoría (audit_logs) (1.5hrs)
+   - Diseño de modelo de datos para sesiones (Azure) (1.5hrs)
+      - Entregable: ERD completo, scripts SQL DDL
+
+Jornada 4 (5hrs):
+   - Diseño de API REST (endpoints, recursos, métodos HTTP) (2.5hrs)
+   - Documentación de contratos API (OpenAPI/Swagger) (2hrs)
+   - Definición de estrategia de versionado de API (0.5hr) 
+      - Entregable: Especificación documento de API
+
+Jornada 5 (5hrs):
+   - Revisión de compliance (GDPR, LFPDPPP) (2hrs)
+   - Diseño de flujos de autenticación/autorización (2hrs)
+      - Entregable: Checklist de compliance, diagramas de flujo, reporte semanal
+
+------------------------------------------------------------
+FASE 2: PREPARACIÓN DE INFRAESTRUCTURA EN AZURE (Semana 2 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Provisionar Azure Database for PostgreSQL Server (2hrs)
+   - Configurar firewall, VNet, SSL/TLS (1hr)
+   - Crear base de datos y esquema inicial (2hrs)
+      - Entregable: Base de datos PostgreSQL configurada
+
+Jornada 2 (5hrs):
+   - Provisionar Azure (2hrs)
+   - Pruebas de conectividad y latencia (1.5hrs)
+      - Entregable: Redis configurado y probado
+
+Jornada 3 (5hrs):
+   - Crear Azure App Service para backend NestJS (2hrs)
+   - Configurar Azure Static Web Apps para frontend Angular (2hrs)
+   - Configurar dominios personalizados y SSL (1hr)
+      - Entregable: Servicios de hosting configurados
+
+Jornada 4 (5hrs):
+   - Crear Azure Key Vault (1hr)
+   - Configurar Managed Identities para App Service (1.5hrs)
+      - Entregable: Key Vault con secretos, identidades configuradas
+
+------------------------------------------------------------
+FASE 3: DESARROLLO DEL BACKEND NESTJS - CORE (Semana 3 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Inicializar proyecto NestJS con CLI (0.5hr)
+   - Configurar estructura de módulos (auth, users, audit, products, tasks) (2hrs)
+   - Configurar TypeORM con PostgreSQL (1.5hrs)
+   - Setup de variables de entorno y configuración (1hr)
+      - Entregable: Proyecto NestJS base configurado
+
+Jornada 2 (5hrs):
+   - Crear entidades de base de datos (User, Role, Permission, AuditLog) (2hrs)
+   - Generar migraciones con TypeORM (1hr)
+   - Ejecutar migraciones en Azure PostgreSQL (1hr)
+   - Seeds de datos iniciales (roles y permisos base) (1hr)
+      - Entregable: Esquema de BD implementado, seeds ejecutados
+
+Jornada 3 (5hrs):
+   - Implementar módulo de autenticación (AuthModule) (2.5hrs)
+   - Implementar estrategia JWT (2hrs)
+   - Crear guards de autenticación (0.5hr)
+      - Entregable: Sistema de autenticación JWT funcional
+
+Jornada 4 (5hrs):
+   - Implementar gestión de sesiones con Azure (2.5hrs)
+   - Crear middleware de validación de sesión (1.5hrs)
+   - Implementar endpoints: login, logout, refresh-token (1hr)
+      - Entregable: Gestión de sesiones stateful
+
+Jornada 5 (5hrs):
+   - Pruebas unitarias de autenticación y sesiones (3hrs)
+   - Pruebas de integración (1.5hrs)
+   - Reporte semanal (1hr)
+      - Entregable: Tests, reporte semanal
+
+
+------------------------------------------------------------
+FASE 4: DESARROLLO DEL BACKEND NESTJS - RBAC Y ACL (Semana 4 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Implementar módulo de autorización (AuthorizationModule) (2hrs)
+   - Crear decoradores personalizados (@Roles, @Permissions) (2hrs)
+   - Implementar guards de autorización (RolesGuard, PermissionsGuard) (1hr)
+      - Entregable: Sistema RBAC implementado
+
+Jornada 2 (5hrs):
+   - Implementar ACL para control granular de recursos (3hrs)
+   - Crear servicio de verificación de permisos (1.5hrs)
+   - Integrar RBAC + ACL en endpoints (0.5hr)
+      - Entregable: Sistema de autorización completo
+
+Jornada 3 (5hrs):
+   - Implementar módulo de gestión de usuarios (UsersModule) (2hrs)
+   - CRUD de usuarios con autorización (2hrs)
+   - Endpoints de asignación de roles y permisos (1hr)
+      - Entregable: Gestión de usuarios funcional
+
+Jornada 4 (5hrs):
+   - Implementar módulo de gestión de roles (RolesModule) (2hrs)
+   - CRUD de roles y permisos (2hrs)
+   - Validaciones de integridad (1hr)
+      - Entregable: Gestión de roles funcional
+
+Jornada 5 (5hrs):
+   - Pruebas unitarias e integración de RBAC/ACL (3hrs)
+   - Documentación de permisos y roles (1hr)
+   - Reporte semanal (1hr)
+      - Entregable: Sistema autorización probado, documentación
+
+
+------------------------------------------------------------
+FASE 5: DESARROLLO DEL BACKEND NESTJS - AUDITORÍA (Semana 5 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Implementar módulo de auditoría (AuditModule) (2hrs)
+   - Crear interceptor global para captura de eventos (2hrs)
+   - Configurar logging de eventos críticos (1hr)
+      - Entregable: Sistema de auditoría base
+
+Jornada 2 (5hrs):
+   - Implementar lógica de registro de auditoría (quién, qué, cuándo, dónde) (2.5hrs)
+   - Capturar IP, user-agent, payload de requests (1.5hrs)
+   - Almacenar before/after en cambios de datos (1hr)
+      - Entregable: Auditoría detallada funcional
+
+Jornada 3 (5hrs):
+   - Crear endpoints de consulta de logs (/audit-logs) (2hrs)
+   - Implementar filtros avanzados (usuario, fecha, acción, entidad) (2hrs)
+   - Implementar paginación y ordenamiento (1hr)
+      - Entregable: API de consulta de auditoría
+
+Jornada 4 (5hrs):
+   - Implementar retención y archivado de logs (2hrs)
+   - Configurar alertas de eventos críticos (1.5hrs)
+      - Entregable: Gestión completa de logs
+
+Jornada 5 (5hrs):
+   - Pruebas exhaustivas del sistema de auditoría (3hrs)
+   - Documentación del sistema de auditoría (1hr)
+   - Reporte semanal (1hr)
+      - Entregable: Auditoría probada y documentada
+
+
+------------------------------------------------------------
+FASE 6: MIGRACIÓN DE LÓGICA DE NEGOCIO AL BACKEND (Semana 6 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+    - Implementar CRUD completo con autorización (2hrs)
+      - Entregable: Módulo de productos en NestJS
+
+Jornada 2 (5hrs):
+   - Migrar módulo de tareas (TasksModule) (3hrs)
+   - Implementar CRUD completo con autorización (2hrs)
+      - Entregable: Módulo de tareas en NestJS
+
+Jornada 3 (5hrs):
+   - Migrar módulo de indicadores (IndicatorsModule) (3hrs)
+   - Implementar endpoints de consulta y cálculo (2hrs)
+      - Entregable: Módulo de indicadores en NestJS
+
+Jornada 4 (5hrs):
+   - Migrar módulo de métricas y reportes (MetricsModule) (3hrs)
+   - Implementar endpoints de estadísticas (2hrs)
+      - Entregable: Módulo de métricas en NestJS
+
+Jornada 5 (5hrs):
+   - Pruebas de integración de todos los módulos (3hrs)
+   - Documentación API actualizada (1hr)
+   - Reporte semanal (1hr)
+      - Entregable: Backend NestJS completo
+
+
+------------------------------------------------------------
+FASE 7: MIGRACIÓN A ANGULAR Y DESARROLLO DEL FRONTEND (Semana 7 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Crear proyecto Angular 18+ con Angular CLI (0.5hr)
+   - Configurar estructura modular (core, shared, features) (2hrs)
+   - Configurar HttpClient y variables de entorno (1hr)
+   - Análisis de componentes Next.js a migrar (1.5hrs)
+      - Entregable: Proyecto Angular base configurado, inventario de componentes
+
+Jornada 2 (5hrs):
+   - Implementar servicio de autenticación con JWT (2.5hrs)
+   - Crear AuthGuard y AuthInterceptor (1.5hrs)
+   - Implementar gestión de tokens (almacenamiento, refresh) (1hr)
+      - Entregable: Módulo de autenticación funcional
+
+Jornada 3 (5hrs):
+   - Migrar componentes principales de Next.js a Angular (3hrs)
+   - Implementar servicios HTTP para consumir API backend (2hrs)
+      - Entregable: Componentes core migrados
+
+Jornada 4 (5hrs):
+   - Implementar guards de autorización basados en roles (2hrs)
+   - Migrar componentes de productos y tareas (2hrs)
+   - Crear directivas de permisos para UI condicional (1hr)
+      - Entregable: Sistema de autorización en frontend
+
+Jornada 5 (5hrs):
+   - Migrar componentes de indicadores y métricas (2.5hrs)
+   - Configurar routing de Angular con lazy loading (1.5hrs)
+   - Reporte semanal (1hr)
+      - Entregable: Componentes principales migrados, routing configurado
+
+
+------------------------------------------------------------
+FASE 8: FINALIZAR MIGRACIÓN ANGULAR Y OPTIMIZACIÓN (Semana 8 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Migrar componentes restantes (gráficos D3.js/Recharts, modales, formularios) (3hrs)
+   - Implementar estado global con signals o NGRX (2hrs)
+      - Entregable: Todos los componentes migrados
+
+Jornada 2 (5hrs):
+   - Migrar estilos Tailwind CSS a Angular (2hrs)
+   - Ajustar responsive design y componentes UI (2hrs)
+   - Implementar tema y variables CSS (1hr)
+      - Entregable: Estilos completamente migrados
+
+Jornada 3 (5hrs):
+   - Optimizar bundle de Angular (Ahead-of-Time compilation) (1.5hrs)
+   - Implementar lazy loading de módulos y standalone components (2hrs)
+   - Configurar service workers para PWA (1.5hrs)
+      - Entregable: Angular optimizado con PWA
+
+Jornada 4 (5hrs):
+
+
+------------------------------------------------------------
+FASE 9: SEGURIDAD Y COMPLIANCE (Semana 9 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Implementar CORS adecuado (1hr)
+   - Implementar headers de seguridad (CSP, HSTS, etc.) (2hrs)
+   - Configurar helmet.js en NestJS (1hr)
+   - Implementar sanitización de inputs (1hr)
+      - Entregable: Headers de seguridad configurados
+
+Jornada 2 (5hrs):
+   - Auditoría de seguridad (SAST) con SonarQube/Snyk (2hrs)
+   - Corrección de vulnerabilidades (2hrs)
+   - Escaneo de dependencias (npm audit) (1hr)
+      - Entregable: Vulnerabilidades corregidas
+
+Jornada 3 (5hrs):
+   - Implementar protección contra CSRF (2hrs)
+   - Implementar protección contra XSS (1.5hrs)
+   - Implementar protección contra SQL Injection (validaciones) (1.5hrs)
+      - Entregable: Protecciones implementadas
+
+Jornada 4 (5hrs):
+   - Configurar WAF en Azure (2hrs)
+   - Implementar logging de eventos de seguridad (2hrs)
+   - Configurar alertas de seguridad (1hr)
+      - Entregable: WAF y alertas configurados
+
+Jornada 5 (5hrs):
+   - Pruebas de penetración básicas (OWASP Top 10) (3hrs)
+   - Documentación de políticas de seguridad (1hr)
+   - Reporte semanal (1hr)
+      - Entregable: Informe de seguridad
+
+
+------------------------------------------------------------
+FASE 10: TESTING EXHAUSTIVO (Semana 10 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Escribir tests unitarios para backend (servicios, guards, interceptors) (4hrs)
+   - Configurar Jest y cobertura (1hr)
+      - Entregable: Suite de tests unitarios backend
+
+Jornada 2 (5hrs):
+   - Escribir tests de integración para API (3hrs)
+   - Alcanzar cobertura mínima del 80% (1hr)
+      - Entregable: Tests de integración
+
+Jornada 3 (5hrs):
+   - Escribir tests E2E con Playwright/Cypress (4hrs)
+   - Configurar ejecución automática en CI (1hr)
+      - Entregable: Tests E2E configurados
+
+Jornada 4 (5hrs):
+   - Testing manual de flujos críticos (3hrs)
+   - Testing de accesibilidad (a11y) (1.5hrs)
+   - Corrección de bugs encontrados (1hr)
+      - Entregable: QA completado
+
+Jornada 5 (5hrs):
+   - Pruebas de regresión completas (3hrs)
+   - Documentación de casos de prueba (1hr)
+   - Reporte semanal (1hr)
+      - Entregable: Suite completa de tests
+
+
+------------------------------------------------------------
+FASE 11: CI/CD Y PREPARACIÓN PARA DESPLIEGUE (Semana 11 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Crear pipeline CI/CD para backend (GitHub Actions/Azure DevOps) (3hrs)
+   - Configurar build, test y deploy automático (2hrs)
+      - Entregable: Pipeline backend funcional
+
+Jornada 2 (5hrs):
+   - Crear pipeline CI/CD para frontend Angular (GitHub Actions/Azure DevOps) (3hrs)
+   - Configurar build, test y deploy automático a Static Web Apps (2hrs)
+      - Entregable: Pipeline Angular funcional
+
+Jornada 3 (5hrs):
+   - Configurar entornos (dev, staging, production) (2hrs)
+   - Implementar estrategia de blue-green deployment (2hrs)
+   - Configurar rollback automático (1hr)
+      - Entregable: Estrategia de deployment
+
+Jornada 4 (5hrs):
+   - Crear scripts de migración de datos (2hrs)
+   - Planificar ventana de mantenimiento (1hr)
+   - Crear checklist de go-live (1hr)
+   - Preparar comunicación a usuarios (1hr)
+      - Entregable: Plan de migración
+
+Jornada 5 (5hrs):
+   - Despliegue a staging (1hr)
+   - Pruebas finales en staging (3hrs)
+   - Reporte semanal (1hr)
+      - Entregable: Staging validado
+
+
+------------------------------------------------------------
+FASE 12: GO-LIVE Y ESTABILIZACIÓN (Semana 12 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+
+Jornada 1 (5hrs):
+   - Backup completo de sistemas actuales (1hr)
+   - Migración de datos a producción (2hrs)
+   - Despliegue de backend NestJS a Azure App Service (1hr)
+   - Despliegue de frontend Angular a Azure Static Web Apps (1hr)
+      - Entregable: Aplicación migrada en producción
+
+Jornada 2 (5hrs):
+   - Verificación de servicios y health checks (1hr)
+   - Monitoreo intensivo de métricas (2hrs)
+   - Corrección de issues críticos (1.5hrs)
+   - Comunicación de status (0.5hr)
+      - Entregable: Sistema estable en producción
+
+Jornada 3 (5hrs):
+   - Análisis de logs y métricas de uso real (2hrs)
+   - Ajustes de configuración según carga (2hrs)
+   - Documentación de incidentes (0.5hr)
+      - Entregable: Informe de métricas
+
+Jornada 4 (5hrs):
+   - Documentación para capacitación a usuarios finales (5hrs)
+      - Entregable: Documentación de usuario
+
+Jornada 5 (5hrs):
+   - Revisión post-mortem del lanzamiento (2hrs)
+   - Plan de mejora continua (1hr)
+   - Reporte final del proyecto (1hr)
+      - Entregable: Documentación completa, cierre de proyecto
+
+
+============================================================
+MODELOS DE DATOS CLAVE
+============================================================
+
+-- Tabla de usuarios
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tabla de roles
+CREATE TABLE roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(50) UNIQUE NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tabla de permisos
+CREATE TABLE permissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  resource VARCHAR(100) NOT NULL,
+  action VARCHAR(50) NOT NULL,
+  description TEXT,
+  UNIQUE(resource, action)
+);
+
+-- Relación usuarios-roles (muchos a muchos)
+CREATE TABLE user_roles (
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  role_id UUID REFERENCES roles(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, role_id)
+);
+
+-- Relación roles-permisos (muchos a muchos)
+CREATE TABLE role_permissions (
+  role_id UUID REFERENCES roles(id) ON DELETE CASCADE,
+  permission_id UUID REFERENCES permissions(id) ON DELETE CASCADE,
+  PRIMARY KEY (role_id, permission_id)
+);
+
+-- Tabla de auditoría
+CREATE TABLE audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  action VARCHAR(100) NOT NULL,
+  resource VARCHAR(100) NOT NULL,
+  resource_id UUID,
+  before JSONB,
+  after JSONB,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_audit_logs_user ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_resource ON audit_logs(resource, resource_id);
+CREATE INDEX idx_audit_logs_created ON audit_logs(created_at);
+
+
+============================================================
+ROLES Y PERMISOS INICIALES
+============================================================
+
+Roles:
+- SUPER_ADMIN: Control total del sistema
+- ADMIN: Gestión de usuarios y configuración
+- MANAGER: Gestión de proyectos y equipos
+- USER: Acceso a funcionalidades estándar
+- VIEWER: Solo lectura
+
+Recursos:
+- users, roles, permissions, products, tasks, indicators, 
+  outputs, workpackages, organizations, audit_logs
+
+Acciones:
+- create, read, update, delete, list, export
+
+
+============================================================
+TAREAS ADICIONALES IDENTIFICADAS
+============================================================
+
+1. Implementar sistema de notificaciones en tiempo real (WebSockets/SignalR)
+2. Configurar backup automático de PostgreSQL
+3. Implementar feature flags con Azure App Configuration
+4. Configurar análisis de errores con Sentry
+5. Implementar healthcheck endpoints (/health, /ready)
+6. Documentación completa de API con Swagger UI
+7. Implementar logs estructurados (JSON)
+8. Configurar Application Insights para telemetría
+9. Implementar búsqueda full-text en PostgreSQL
+10. Plan de disaster recovery y business continuity
+
+
+============================================================
+ESTIMACIÓN TOTAL: 14 SEMANAS (70 jornadas de 5hrs = 350 horas totales)
+============================================================
+
+============================================================
+PLAN COMPLETO PARA LLEVAR LA APLICACIÓN A PRODUCCIÓN
+============================================================
+
+FASE 1: ANÁLISIS DE REQUERIMIENTOS Y SELECCIÓN DE BD (Semana 1 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Research de bases de datos en Azure (PostgreSQL, Cosmos DB, SQL Database) (2hrs)
+   - Análisis comparativo: costos, escalabilidad, latencia, backups, seguridad (2hrs)
+   - Planificación de la semana y definición de entregables (1hr)
+      - Entregable: Documento comparativo de BD y plan semanal
+
+Jornada 2 (5hrs):
+   - Reunión con consorcio/stakeholders (2hrs)
+   - Identificación de acciones críticas a auditar (login, CRUD, permisos, etc.) (2hrs)
+   - Documentación inicial de eventos (1hr)
+      - Entregable: Acta de reunión, lista de eventos a auditar
+
+Jornada 3 (5hrs):
+   - Definición de flujos de sesión (login, logout, expiración, refresh) (2hrs)
+   - Documentación de requisitos funcionales (2hrs)
+   - Documentación de requisitos no funcionales (performance, disponibilidad) (1hr)
+      - Entregable: Diagramas de flujo, documento de requisitos funcionales/no funcionales
+
+
+FASE 2: DISEÑO DE ARQUITECTURA (Semana 2 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Diseño de arquitectura lógica (componentes, flujos, integraciones) (3hrs)
+   - Diseño de arquitectura física (infraestructura Azure) (2hrs)
+      - Entregable: Diagramas de arquitectura lógica y física (borrador)
+
+Jornada 2 (5hrs):
+   - Refinamiento de diagramas de arquitectura (1hr)
+   - Selección y justificación de servicios Azure (PostgreSQL, App Service, Static Web Apps) (2hrs)
+   - Definición de tiers y SKUs para cada servicio (2hrs)
+      - Entregable: Documento de justificación de servicios Azure
+
+Jornada 3 (5hrs):
+   - Diseño de modelo de datos para auditoría (tablas, índices, particiones) (2.5hrs)
+   - Diseño de modelo de datos para sesiones en Redis (2.5hrs)
+      - Entregable: Scripts SQL, ERD, documento de estructura Redis
+
+Jornada 4 (5hrs):
+   - Diseño de esquema de seguridad (roles, permisos, cifrado) (2hrs)
+   - Definición de estrategia de backups y recuperación (1hr)
+   - Diseño de monitoreo y alertas (Azure Monitor, Application Insights) (2hrs)
+      - Entregable: Documento de seguridad, plan de DR, configuración de monitoreo
+
+Jornada 5 (5hrs):
+   - Revisión cruzada de todos los diseños con el equipo (2hrs)
+   - Ajustes y validación de arquitectura (2hrs)
+   - Elaboración de reporte semanal (1hr)
+      - Entregable: Acta de validación, reporte semanal
+
+
+FASE 3: PREPARACIÓN DE INFRAESTRUCTURA EN AZURE (Semana 3 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Provisionar Azure Database for PostgreSQL (2hrs)
+   - Configurar firewall, SSL/TLS, y reglas de red (1hr)
+   - Crear estructura inicial de base de datos (tablas core) (2hrs)
+      - Entregable: Base de datos PostgreSQL en Azure configurada
+
+Jornada 2 (5hrs):
+   - Provisionar Azure Cache for Redis (2hrs)
+   - Configurar persistencia, clustering y políticas de eviction (1.5hrs)
+   - Pruebas de conectividad y latencia (1.5hrs)
+      - Entregable: Redis configurado y probado
+
+Jornada 3 (5hrs):
+   - Crear Azure Key Vault (1hr)
+   - Migrar secretos y connection strings a Key Vault (2hrs)
+   - Configurar identidades administradas (Managed Identities) (2hrs)
+      - Entregable: Key Vault con secretos migrados
+
+Jornada 4 (5hrs):
+   - Configurar Azure Monitor y Application Insights (2hrs)
+   - Definir métricas, logs y alertas personalizadas (2hrs)
+   - Preparar integración con futuro frontend Angular (1hr)
+      - Entregable: Monitoreo configurado
+
+Jornada 5 (5hrs):
+   - Documentar toda la infraestructura provisionada (2hrs)
+   - Crear runbooks para operaciones comunes (1.5hrs)
+   - Reporte semanal (1.5hrs)
+      - Entregable: Documentación de infraestructura, runbooks, reporte
+
+
+FASE 4: IMPLEMENTACIÓN DE AUDITORÍA Y SESIONES (Semana 4 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Crear tabla audit_logs en PostgreSQL (1hr)
+   - Implementar función de auditoría en backend (logAudit) (3hrs)
+   - Pruebas unitarias de función de auditoría (1hr)
+      - Entregable: Sistema de auditoría funcional
+
+Jornada 2 (5hrs):
+   - Integrar auditoría en endpoints críticos (CRUD productos, tareas, usuarios) (3hrs)
+   - Crear endpoint GET /api/audit-logs con paginación y filtros (2hrs)
+      - Entregable: Endpoints con auditoría integrada
+
+Jornada 3 (5hrs):
+   - Implementar manejo de sesiones con Redis (2.5hrs)
+   - Crear middleware de validación de sesión (2hrs)
+   - Implementar endpoints de login/logout (0.5hr)
+      - Entregable: Sistema de sesiones stateful funcional
+
+Jornada 4 (5hrs):
+   - Implementar refresh de sesiones y expiración automática (2hrs)
+   - Implementar logout global y gestión de sesiones activas (2hrs)
+   - Pruebas de flujos de sesión (1hr)
+      - Entregable: Gestión completa de sesiones
+
+Jornada 5 (5hrs):
+   - Pruebas de integración entre auditoría y sesiones (2hrs)
+   - Ajustes y correcciones (2hrs)
+   - Reporte semanal (1hr)
+      - Entregable: Sistemas integrados, reporte
+
+
+FASE 5: MIGRACIÓN DE PRISMA A AZURE (Semana 5 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Análisis de esquema actual de Prisma (2hrs)
+   - Generación de scripts de migración SQL (2hrs)
+   - Revisión y validación de scripts (1hr)
+      - Entregable: Scripts de migración SQL
+
+Jornada 2 (5hrs):
+   - Ejecutar migración en ambiente de staging (2hrs)
+   - Verificar integridad de datos migrados (2hrs)
+   - Ajustes y correcciones (1hr)
+      - Entregable: Base de datos migrada en staging
+
+Jornada 3 (5hrs):
+   - Reescribir capa de acceso a datos (reemplazar Prisma por pg) (4hrs)
+   - Pruebas unitarias de acceso a datos (1hr)
+      - Entregable: Capa de datos refactorizada
+
+Jornada 4 (5hrs):
+   - Refactorizar endpoints API para usar nueva capa de datos (3hrs)
+   - Pruebas de integración de endpoints (2hrs)
+      - Entregable: API refactorizada y probada
+
+Jornada 5 (5hrs):
+   - Pruebas end-to-end de toda la aplicación (3hrs)
+   - Documentación de cambios realizados (1hr)
+   - Reporte semanal (1hr)
+      - Entregable: Aplicación migrada, documentación, reporte
+
+
+FASE 6: OPTIMIZACIÓN Y RENDIMIENTO (Semana 6 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Análisis de queries lentas y optimización (3hrs)
+   - Creación de índices en PostgreSQL (1hr)
+   - Implementación de caché con Redis (1hr)
+      - Entregable: Queries optimizadas, índices creados
+
+Jornada 2 (5hrs):
+   - Implementar paginación en endpoints grandes (2hrs)
+   - Optimizar carga de componentes Angular (lazy loading, standalone components) (2hrs)
+   - Optimización de imágenes y assets (1hr)
+      - Entregable: Frontend optimizado
+
+Jornada 3 (5hrs):
+   - Configurar CDN para assets estáticos de Angular (2hrs)
+   - Implementar compresión gzip/brotli (1hr)
+   - Configurar caching headers (1hr)
+   - Pruebas de rendimiento con Lighthouse (1hr)
+      - Entregable: Assets optimizados, métricas de rendimiento
+
+Jornada 4 (5hrs):
+   - Pruebas de carga con k6 o Artillery (3hrs)
+   - Análisis de resultados y ajustes (1.5hrs)
+   - Documentación de optimizaciones (0.5hr)
+      - Entregable: Informe de pruebas de carga
+
+Jornada 5 (5hrs):
+   - Implementar rate limiting en API (2hrs)
+   - Configurar connection pooling en PostgreSQL (1hr)
+   - Ajustes finales de rendimiento (1hr)
+   - Reporte semanal (1hr)
+      - Entregable: Sistema optimizado, reporte
+
+
+FASE 7: SEGURIDAD Y COMPLIANCE (Semana 7 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Auditoría de seguridad de código (SAST) (2hrs)
+   - Corrección de vulnerabilidades identificadas (2hrs)
+   - Documentación de correcciones (1hr)
+      - Entregable: Código auditado y corregido
+
+Jornada 2 (5hrs):
+   - Implementar headers de seguridad (CSP, HSTS, X-Frame-Options) (2hrs)
+   - Configurar CORS adecuadamente (1hr)
+   - Implementar sanitización de inputs (2hrs)
+      - Entregable: Headers y validaciones de seguridad
+
+Jornada 3 (5hrs):
+   - Escaneo de dependencias (npm audit, Snyk) (1hr)
+   - Actualización de dependencias vulnerables (2hrs)
+   - Pruebas de regresión (2hrs)
+      - Entregable: Dependencias actualizadas
+
+Jornada 4 (5hrs):
+   - Configurar WAF (Web Application Firewall) en Azure (2hrs)
+   - Implementar logging de seguridad (2hrs)
+   - Configurar alertas de seguridad (1hr)
+      - Entregable: WAF configurado, logging de seguridad
+
+Jornada 5 (5hrs):
+   - Pruebas de penetración básicas (2hrs)
+   - Documentación de políticas de seguridad (2hrs)
+   - Reporte semanal (1hr)
+      - Entregable: Informe de seguridad, reporte
+
+
+FASE 8: TESTING EXHAUSTIVO (Semana 8 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Escribir tests unitarios para componentes críticos (4hrs)
+   - Configurar framework de testing (Jest/Vitest) (1hr)
+      - Entregable: Suite de tests unitarios
+
+Jornada 2 (5hrs):
+   - Escribir tests de integración para API (4hrs)
+   - Alcanzar cobertura mínima del 70% (1hr)
+      - Entregable: Tests de integración
+
+Jornada 3 (5hrs):
+   - Escribir tests E2E con Playwright o Cypress (4hrs)
+   - Configurar CI para ejecutar tests automáticamente (1hr)
+      - Entregable: Tests E2E, CI configurado
+
+Jornada 4 (5hrs):
+   - Testing manual de flujos críticos (2hrs)
+   - Testing de accesibilidad (a11y) (1.5hrs)
+   - Corrección de issues encontrados (1.5hrs)
+      - Entregable: Issues de QA corregidos
+
+Jornada 5 (5hrs):
+   - Pruebas de regresión completas (3hrs)
+   - Documentación de casos de prueba (1hr)
+   - Reporte semanal (1hr)
+      - Entregable: Suite completa de tests, reporte
+
+
+FASE 9: PREPARACIÓN PARA DESPLIEGUE (Semana 9 - 5 jornadas de 5hrs)
+
+Jornada 1 (5hrs):
+   - Configurar entornos (dev, staging, production) en Azure (2hrs)
+   - Configurar variables de entorno por ambiente (1hr)
+   - Configurar dominios y certificados SSL (2hrs)
+      - Entregable: Entornos configurados
+
+Jornada 2 (5hrs):
+   - Crear pipeline CI/CD con GitHub Actions o Azure DevOps (3hrs)
+   - Configurar despliegue automático a staging (1hr)
+   - Pruebas de pipeline (1hr)
+      - Entregable: Pipeline CI/CD funcional
+
+Jornada 3 (5hrs):
+   - Implementar estrategia de rollback (2hrs)
+   - Configurar blue-green deployment o canary releases (2hrs)
+   - Documentar proceso de despliegue (1hr)
+      - Entregable: Estrategia de deployment, documentación
+
+Jornada 4 (5hrs):
+   - Crear scripts de migración de datos para producción (2hrs)
+   - Planificar ventana de mantenimiento para go-live (1hr)
+   - Preparar comunicación a usuarios (1hr)
+   - Crear checklist de go-live (1hr)
+      - Entregable: Plan de migración, checklist
+
+Jornada 5 (5hrs):
+   - Despliegue a ambiente de staging (1hr)
+   - Pruebas finales en staging (3hrs)
+   - Reporte semanal y preparación para producción (1hr)
+      - Entregable: Staging validado, reporte
+
+
+------------------------------------------------------------
+FASE 12: GO-LIVE Y ESTABILIZACIÓN - BIOFINCAS (Semana 12 - 5 jornadas de 5hrs)
+------------------------------------------------------------
+PROYECTO PRINCIPAL
+
+Jornada 1 (5hrs):
+   - Backup completo de sistemas actuales (1hr)
+   - Despliegue a producción (2hrs)
+   - Verificación de servicios y health checks (1hr)
+   - Monitoreo intensivo post-deployment (1hr)
+      - Entregable: Aplicación en producción
+
+Jornada 2 (5hrs):
+   - Monitoreo continuo de métricas y logs (2hrs)
+   - Corrección de issues críticos si aparecen (2hrs)
+   - Comunicación de status a stakeholders (1hr)
+      - Entregable: Sistema estable
+
+Jornada 3 (5hrs):
+   - Análisis de métricas de uso (performance, errores, usuarios) (2hrs)
+   - Ajustes de configuración según carga real (2hrs)
+   - Documentación de incidentes (1hr)
+      - Entregable: Informe de métricas
+
+Jornada 4 (5hrs):
+   - Capacitación a usuarios finales (3hrs)
+   - Documentación de usuario final (2hrs)
+      - Entregable: Usuarios capacitados, documentación
+
+Jornada 5 (5hrs):
+   - Revisión post-mortem del proceso de lanzamiento (2hrs)
+   - Documentación de lecciones aprendidas (1hr)
+   - Plan de mejora continua (1hr)
+   - Reporte final del proyecto (1hr)
+      - Entregable: Documentación completa, reporte final
+
+
+============================================================
+FASE 13: DESPLIEGUE DE DIGIDEEFREE MONITOR (Semana 13 - 5 jornadas de 5hrs)
+============================================================
+PROYECTO PARALELO - Finalización y despliegue
+
+Jornada 1 (5hrs):
+   - Revisión y actualización del código DigiDeeFree según aprendizajes de BioFincas (2.5hrs)
+   - Aplicar mejoras de arquitectura y seguridad (2hrs)
+   - Actualizar dependencias (0.5hr)
+      - Entregable: Código actualizado y mejorado
+
+Jornada 2 (5hrs):
+   - Provisionar infraestructura Azure para DigiDeeFree (2.5hrs)
+   - Configurar base de datos, Redis, Key Vault (2hrs)
+   - Configurar dominios y SSL (0.5hr)
+      - Entregable: Infraestructura DigiDeeFree lista
+
+Jornada 3 (5hrs):
+   - Migración de datos DigiDeeFree a Azure PostgreSQL (2hrs)
+   - Configurar pipelines CI/CD específicos (2hrs)
+   - Pruebas de deployment en staging (1hr)
+      - Entregable: Pipeline DigiDeeFree funcional
+
+Jornada 4 (5hrs):
+   - Despliegue de DigiDeeFree a producción (2hrs)
+   - Verificación de servicios (1hr)
+   - Monitoreo y ajustes iniciales (2hrs)
+      - Entregable: DigiDeeFree en producción
+
+Jornada 5 (5hrs):
+   - Capacitación a usuarios DigiDeeFree (2.5hrs)
+   - Documentación específica del proyecto (2hrs)
+   - Reporte final de implementación (0.5hr)
+      - Entregable: Documentación DigiDeeFree, reporte final
+
+
+============================================================
+CONSIDERACIONES PARA IMPLEMENTACIÓN MULTI-PROYECTO
+============================================================
+
+ESTRATEGIAS RECOMENDADAS:
+
+1. CÓDIGO COMPARTIDO (MONOREPO):
+   - Crear monorepo con Nx (recomendado para Angular + NestJS)
+   - Estructura:
+     /apps
+       /biofincas-backend (NestJS)
+       /biofincas-frontend (Angular)
+       /digideefree-backend (NestJS)
+       /digideefree-frontend (Angular)
+     /libs
+       /shared/backend (módulos comunes NestJS)
+       /shared/frontend (componentes comunes Angular)
+       /shared/types (interfaces TypeScript compartidas)
+
+2. BASE DE DATOS:
+   Opción A - Bases de datos separadas (RECOMENDADO):
+     - biofincas_db
+     - digideefree_db
+     - Ventaja: Aislamiento total, escalabilidad independiente
+   
+   Opción B - Multi-tenant con discriminador:
+     - Tabla: organizations (biofincas, digideefree)
+     - Todas las entidades con organization_id
+     - Ventaja: Código compartido, menor costo
+
+3. AUTENTICACIÓN COMPARTIDA:
+   - Azure AD B2C o Auth0 como proveedor único
+   - Usuarios pueden acceder a múltiples proyectos
+   - Roles y permisos por organización
+
+4. INFRAESTRUCTURA:
+   - Shared: Key Vault, Redis (con namespaces)
+   - Separado: App Services, Static Web Apps, bases de datos
+
+
+TAREAS ADICIONALES IDENTIFICADAS PARA PRODUCCIÓN:
+
+1. Implementación de sistema de logging centralizado
+2. Configuración de alertas y notificaciones (PagerDuty, Slack)
+3. Implementación de feature flags para control de funcionalidades
+4. Configuración de análisis de errores (Sentry o similar)
+5. Documentación de API (Swagger/OpenAPI)
+6. Implementación de healthcheck endpoints
+7. Configuración de auto-scaling
+8. Plan de disaster recovery y business continuity
+9. Políticas de retención de datos y GDPR compliance
+10. Documentación de runbooks para operaciones
+
+
+============================================================
+RESUMEN EJECUTIVO
+============================================================
+
+PROYECTOS:
+1. BioFincas Monitor - Migración a arquitectura separada
+2. DigiDeeFree Monitor - Implementación desde cero
+
+DURACIÓN TOTAL: 14 SEMANAS (70 jornadas de 5hrs = 350 horas totales)
+- Semana 0: DigiDeeFree MVP + Research Azure (5 jornadas)
+- Semanas 1-11: BioFincas migración y desarrollo (55 jornadas)
+  * Incluye migración Next.js → Angular (Semanas 7-8)
+- Semana 12: BioFincas go-live (5 jornadas)
+- Semana 13: DigiDeeFree producción (5 jornadas)
+
+DESGLOSE POR PROYECTO:
+- BioFincas Monitor: 12 semanas (60 jornadas × 5hrs = 300 horas)
+  * Fases 1-6: Backend NestJS, infraestructura, autenticación, autorización
+  * Fases 7-8: Migración completa de Next.js a Angular
+  * Fases 9-12: Seguridad, testing, CI/CD, deployment
+- DigiDeeFree Monitor: 2 semanas (10 jornadas × 5hrs = 50 horas)
+  * Fase 0: MVP inicial (también con Angular)
+  * Fase 13: Despliegue final a producción
+
+STACK TECNOLÓGICO:
+- Backend: NestJS + TypeORM
+- Frontend: Angular 18+ (migrado desde Next.js 15)
+- Base de datos: Azure Database for PostgreSQL
+- Cache: Azure Cache for Redis
+- Hosting: Azure App Service + Azure Static Web Apps
+- CI/CD: GitHub Actions / Azure DevOps
+- Monitoreo: Azure Monitor + Application Insights
+- Seguridad: Azure Key Vault, Managed Identities, JWT, RBAC, ACL
+
+ENTREGABLES PRINCIPALES:
+- Sistema de autenticación y autorización completo
+- Sistema de auditoría detallado
+- APIs REST documentadas (OpenAPI)
+- Frontend optimizado y seguro
+- Infraestructura en Azure completamente configurada
+- Pipelines CI/CD automáticos
+- Documentación técnica y de usuario
+- Tests unitarios, integración y E2E
+- Dos aplicaciones en producción (BioFincas + DigiDeeFree)
+
+============================================================
+ESTIMACIÓN TOTAL: 14 SEMANAS (70 jornadas de 5hrs = 350 horas totales)
+============================================================
+

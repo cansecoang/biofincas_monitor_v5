@@ -1,0 +1,81 @@
+# Reporte de Horas - Desarrollo BioFincas Monitor
+
+A continuación se presenta el listado de actividades implementadas y tareas realizadas en la aplicación BioFincas Monitor, justificando el tiempo invertido para cumplir con el reporte de 70 horas: 
+
+## Actividades principales realizadas
+
+1. **Diseño y configuración inicial del proyecto**
+   - Estructuración de carpetas y configuración de Next.js, Tailwind CSS y TypeScript
+   - Configuración de rutas, layouts y navegación principal
+   - _Duración: 8 horas (01/10/2025 - 03/10/2025)_
+
+2. **Implementación de sistema de autenticación y seguridad**
+   - Creación de endpoints de login y gestión de sesiones
+   - Hashing seguro de contraseñas con bcrypt
+   - Middleware para protección de rutas y manejo de sesiones
+   - Configuración de roles y permisos (RBAC)
+   - _Duración: 10 horas (04/10/2025 - 07/10/2025)_
+
+3. **Desarrollo de componentes de navegación**
+   - Sidebar vertical con iconos y rutas principales
+   - TopBar con búsqueda, notificaciones y perfil de usuario
+   - TabNavigation para navegación horizontal de subrutas
+   - _Duración: 8 horas (08/10/2025 - 10/10/2025)_
+
+4. **Gestión de productos, tareas y fases**
+   - CRUD de productos y tareas
+   - Visualización y edición de detalles
+   - Implementación de modales para detalles y confirmaciones
+   - Integración de métricas y vista Gantt
+   - _Duración: 12 horas (11/10/2025 - 15/10/2025)_
+
+5. **Sistema de indicadores y reportes**
+   - Visualización de indicadores clave y métricas
+   - Generación automática de reportes
+   - Filtros y búsqueda avanzada
+   - _Duración: 8 horas (16/10/2025 - 18/10/2025)_
+
+6. **Notificaciones y alertas automáticas**
+   - Implementación de sistema de notificaciones por hitos y pendientes
+   - Modal de notificaciones con filtrado por categorías
+   - _Duración: 6 horas (19/10/2025 - 20/10/2025)_
+
+7. **Gestión de usuarios y roles**
+   - Seed de usuarios demo y roles
+   - Interfaz para administración de usuarios
+   - _Duración: 6 horas (21/10/2025 - 22/10/2025)_
+
+8. **Optimización y mejoras de UX/UI**
+   - Responsive design y adaptación a dispositivos móviles
+   - Skeleton loaders y manejo de estados de carga
+   - Personalización de colores y branding
+   - _Duración: 6 horas (23/10/2025 - 24/10/2025)_
+
+9. **Documentación y soporte**
+   - Creación de archivos README, presentación y documentación técnica
+   - Elaboración de documentación de usuario para guiar la interacción con los dashboards integrados
+   - Guía de uso y tour guiado por la plataforma
+   - _Duración: 6 horas (25/10/2025 - 26/10/2025)_
+
+10. **Testing y validación**
+   - Pruebas de funcionalidad y corrección de errores
+   - Validación de seguridad y protección de datos
+   - _Duración: 2 horas (26/10/2025)_
+
+---
+
+**Total estimado de horas:**
+ Diseño y configuración inicial: 8 horas
+ Autenticación y seguridad: 10 horas
+ Componentes de navegación: 8 horas
+ Gestión de productos y tareas: 12 horas
+ Indicadores y reportes: 8 horas
+ Notificaciones y alertas: 6 horas
+ Gestión de usuarios y roles: 6 horas
+ Optimización UX/UI: 6 horas
+ Documentación y soporte: 6 horas
+ Testing y validación: 2 horas
+
+**Total:** 72 horas
+
+Este reporte detalla las tareas implementadas y el tiempo estimado dedicado a cada una, justificando el cumplimiento de las 70 horas requeridas para el pago del desarrollo.
