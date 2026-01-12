@@ -23,10 +23,6 @@ export async function GET(request: NextRequest) {
           t.end_date_planned      AS end_planned,
           t.start_date_actual     AS start_actual,
           t.end_date_actual       AS end_actual,
-          t.checkin_oro_verde     AS checkin_oro_verde,
-          t.checkin_user          AS checkin_user,
-          t.checkin_communication AS checkin_communication,
-          t.checkin_gender        AS checkin_gender,
           t.phase_id              AS phase_id,
           p.phase_name            AS phase_name,
           t.status_id             AS status_id,
@@ -34,9 +30,7 @@ export async function GET(request: NextRequest) {
           t.responsable_id        AS org_id,
           o.organization_name     AS org_name,
           t.product_id            AS product_id,
-          z.product_name          AS product_name,
-          t.created_at,
-          t.updated_at
+          z.product_name          AS product_name
         FROM tasks t
         LEFT JOIN phases        p ON p.phase_id        = t.phase_id
         LEFT JOIN status        s ON s.status_id       = t.status_id
@@ -84,10 +78,6 @@ export async function GET(request: NextRequest) {
         t.end_date_planned      AS end_planned,
         t.start_date_actual     AS start_actual,
         t.end_date_actual       AS end_actual,
-        t.checkin_oro_verde     AS checkin_oro_verde,
-        t.checkin_user          AS checkin_user,
-        t.checkin_communication AS checkin_communication,
-        t.checkin_gender        AS checkin_gender,
         t.phase_id              AS phase_id,
         p.phase_name            AS phase_name,
         t.status_id             AS status_id,
@@ -95,9 +85,7 @@ export async function GET(request: NextRequest) {
         t.responsable_id        AS org_id,
         o.organization_name     AS org_name,
         t.product_id            AS product_id,
-        z.product_name          AS product_name,
-        t.created_at,
-        t.updated_at
+        z.product_name          AS product_name
       FROM tasks t
       LEFT JOIN phases        p ON p.phase_id        = t.phase_id
       LEFT JOIN status        s ON s.status_id       = t.status_id

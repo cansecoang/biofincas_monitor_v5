@@ -4,7 +4,6 @@ import { query } from '@/lib/db';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const workpackageId = searchParams.get('workpackageId');
     const outputId = searchParams.get('outputId');
 
     let queryText = `
@@ -12,15 +11,14 @@ export async function GET(request: Request) {
         p.product_id,
         p.product_name,
         p.product_objective,
-        p.product_output,
         p.deliverable,
         p.delivery_date,
-        p.workpackage_id,
-        w.workpackage_name,
+        p.product_output_id,
+        o.output_name,
         c.country_name,
         po.organization_name as product_owner_name
       FROM products p
-      LEFT JOIN workpackages w ON p.workpackage_id = w.workpackage_id
+      LEFT JOIN outputs o ON p.product_output_id = o.output_id
       LEFT JOIN countries c ON p.country_id = c.country_id
       LEFT JOIN organizations po ON p.product_owner_id = po.organization_id
       WHERE 1=1
@@ -29,14 +27,8 @@ export async function GET(request: Request) {
     const params: any[] = [];
     let paramCount = 1;
 
-    if (workpackageId) {
-      queryText += ` AND p.workpackage_id = $${paramCount}`;
-      params.push(parseInt(workpackageId));
-      paramCount++;
-    }
-
     if (outputId) {
-      queryText += ` AND p.product_output = $${paramCount}`;
+      queryText += ` AND p.product_output_id = $${paramCount}`;
       params.push(parseInt(outputId));
       paramCount++;
     }

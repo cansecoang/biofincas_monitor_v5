@@ -29,27 +29,24 @@ interface TaskStepWizardProps {
 }
 
 interface TaskFormData {
-  // Step 1: General Information
   assignToProduct: string;
   taskName: string;
   taskDescription: string;
-  
-  // Step 2: Assignment
   assignedTo: string;
   phase: string;
   status: string;
-  
-  // Step 3: Start-End Date
   startDate: string;
   endDate: string;
   actualStartDate: string;
   actualEndDate: string;
-  
-  // Step 4: Check-in
-  checkInOroVerde: string;
-  checkInUser: string;
-  checkInCommunication: string;
-  checkInGender: string;
+  checkins: Checkin[];
+}
+
+interface Checkin {
+  id: string;
+  checkin_with_id: string;
+  checkin_date: string;
+  checkin_description: string;
 }
 
 interface Product {
@@ -77,7 +74,7 @@ const STEPS = [
   { id: 1, title: 'General Information', subtitle: 'Create New Task' },
   { id: 2, title: 'Assignment', subtitle: 'Create New Task' },
   { id: 3, title: 'Start-End Date', subtitle: 'Create New Task' },
-  { id: 4, title: 'Check-in', subtitle: 'Create New Task' },
+  { id: 4, title: 'Check-ins', subtitle: 'Create New Task' },
   { id: 5, title: 'Summary', subtitle: 'Create New Task' },
 ];
 
@@ -121,10 +118,7 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
     endDate: formatDateForInput(existingTask?.end_planned) || '',
     actualStartDate: formatDateForInput(existingTask?.start_actual) || '',
     actualEndDate: formatDateForInput(existingTask?.end_actual) || '',
-    checkInOroVerde: formatDateTimeForInput(existingTask?.checkin_oro_verde) || '',
-    checkInUser: formatDateTimeForInput(existingTask?.checkin_user) || '',
-    checkInCommunication: formatDateTimeForInput(existingTask?.checkin_communication) || '',
-    checkInGender: formatDateTimeForInput(existingTask?.checkin_gender) || '',
+    checkins: [],
   });
 
   // Cargar productos al montar el componente
@@ -212,7 +206,7 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
     if (isSubmitting) return;
     
     // Validación final antes de enviar
-    if (!formData.taskName || !formData.assignToProduct || !formData.phase || !formData.status || !formData.startDate || !formData.endDate) {
+    if (!formData.taskName || !formData.assignToProduct) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -224,24 +218,21 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
       const taskData = {
         task_name: formData.taskName,
         task_detail: formData.taskDescription,
-        start_date_planned: formData.startDate,
-        end_date_planned: formData.endDate,
+        start_date_planned: formData.startDate || null,
+        end_date_planned: formData.endDate || null,
         start_date_actual: formData.actualStartDate || null,
         end_date_actual: formData.actualEndDate || null,
-        checkin_oro_verde: formData.checkInOroVerde || null,
-        checkin_user: formData.checkInUser || null,
-        checkin_communication: formData.checkInCommunication || null,
-        checkin_gender: formData.checkInGender || null,
-        phase_id: parseInt(formData.phase) || null,
-        status_id: parseInt(formData.status) || null,
-        responsable_id: parseInt(formData.assignedTo) || null,
-        product_id: productId ? parseInt(productId) : parseInt(formData.assignToProduct)
+        phase_id: formData.phase ? parseInt(formData.phase) : null,
+        status_id: formData.status ? parseInt(formData.status) : null,
+        responsable_id: formData.assignedTo ? parseInt(formData.assignedTo) : null,
+        product_id: productId ? parseInt(productId) : parseInt(formData.assignToProduct),
       };
 
       // Determinar si es creación o actualización
       const url = isEditMode ? `/api/update-task?taskId=${existingTask?.id}` : '/api/add-task';
       const method = isEditMode ? 'PUT' : 'POST';
 
+      // Crear o actualizar la tarea primero
       const response = await fetch(url, {
         method: method,
         headers: {
@@ -256,6 +247,29 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
       }
 
       const result = await response.json();
+      const taskId = isEditMode ? existingTask?.id : result.task?.task_id;
+
+      // Crear todos los checkins asociados al task_id
+      if (formData.checkins.length > 0 && taskId) {
+        const checkinPromises = formData.checkins
+          .filter(checkin => checkin.checkin_with_id && checkin.checkin_date)
+          .map(checkin => 
+            fetch('/api/add-checkin', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                checkin_with_id: parseInt(checkin.checkin_with_id),
+                checkin_date: checkin.checkin_date,
+                checkin_description: checkin.checkin_description || null,
+                task_id: taskId,
+              }),
+            })
+          );
+
+        await Promise.all(checkinPromises);
+      }
       
       toast.success(`Task ${isEditMode ? 'updated' : 'created'} successfully!`);
       
@@ -313,13 +327,43 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
         return formData.assignedTo && formData.phase && formData.status;
       case 3: // Start-End Date
         return formData.startDate && formData.endDate;
-      case 4: // Check-in (todos opcionales)
+      case 4: // Check-ins (opcionales)
         return true;
       case 5: // Summary
         return true;
       default:
         return false;
     }
+  };
+
+  // Funciones para manejar checkins
+  const addCheckin = () => {
+    const newCheckin: Checkin = {
+      id: Date.now().toString(),
+      checkin_with_id: '',
+      checkin_date: '',
+      checkin_description: '',
+    };
+    setFormData(prev => ({
+      ...prev,
+      checkins: [...prev.checkins, newCheckin]
+    }));
+  };
+
+  const removeCheckin = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      checkins: prev.checkins.filter(c => c.id !== id)
+    }));
+  };
+
+  const updateCheckin = (id: string, field: keyof Checkin, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      checkins: prev.checkins.map(c => 
+        c.id === id ? { ...c, [field]: value } : c
+      )
+    }));
   };
 
   // Calculate progress percentage
@@ -543,56 +587,86 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
           </div>
         )}
 
-        {/* Step 4: Check-in */}
+        {/* Step 4: Check-ins */}
         {currentStep === 4 && (
-          <div className="px-1 grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Check-in Oro Verde
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.checkInOroVerde}
-                onChange={(e) => updateFormData('checkInOroVerde', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
-              />
+          <div className="px-1 space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Check-ins with Organizations
+              </h3>
+              <button
+                type="button"
+                onClick={addCheckin}
+                className="px-4 py-2 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-colors text-sm"
+              >
+                + Add Check-in
+              </button>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Check-in User
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.checkInUser}
-                onChange={(e) => updateFormData('checkInUser', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
-              />
-            </div>
+            {formData.checkins.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No check-ins added. Click "Add Check-in" to create one.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {formData.checkins.map((checkin, index) => (
+                  <div key={checkin.id} className="p-4 border-2 border-gray-200 rounded-2xl relative">
+                    <button
+                      type="button"
+                      onClick={() => removeCheckin(checkin.id)}
+                      className="absolute top-4 right-4 text-red-500 hover:text-red-700 font-bold"
+                    >
+                      ✕
+                    </button>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Check-in Communication
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.checkInCommunication}
-                onChange={(e) => updateFormData('checkInCommunication', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
-              />
-            </div>
+                    <div className="grid grid-cols-2 gap-4 pr-8">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-2">
+                          Check-in with Organization
+                        </label>
+                        <select
+                          value={checkin.checkin_with_id}
+                          onChange={(e) => updateCheckin(checkin.id, 'checkin_with_id', e.target.value)}
+                          className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600 appearance-none"
+                        >
+                          <option value="">Select organization</option>
+                          {organizations.map((org) => (
+                            <option key={org.organization_id} value={org.organization_id}>
+                              {org.organization_name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Check-in Gender
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.checkInGender}
-                onChange={(e) => updateFormData('checkInGender', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
-              />
-            </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-2">
+                          Check-in Date
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={checkin.checkin_date}
+                          onChange={(e) => updateCheckin(checkin.id, 'checkin_date', e.target.value)}
+                          className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
+                        />
+                      </div>
+
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium text-gray-900 mb-2">
+                          Description
+                        </label>
+                        <textarea
+                          value={checkin.checkin_description}
+                          onChange={(e) => updateCheckin(checkin.id, 'checkin_description', e.target.value)}
+                          placeholder="Describe the check-in"
+                          rows={2}
+                          className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600 resize-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -680,29 +754,36 @@ export default function TaskStepWizard({ onComplete, onCancel, existingTask }: T
               </div>
             </div>
 
-           
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Check-in
+                Check-ins
               </h3>
-              <div className="space-y-3">
-                <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Check-in Oro Verde</span>
-                  <span className="text-sm text-gray-900">{formData.checkInOroVerde || '—'}</span>
+              {formData.checkins.length > 0 ? (
+                <div className="space-y-3">
+                  {formData.checkins.map((checkin, index) => (
+                    <div key={checkin.id} className="p-3 bg-gray-50 rounded-xl">
+                      <div className="flex">
+                        <span className="w-40 text-sm font-medium text-gray-600">Organization</span>
+                        <span className="text-sm text-gray-900">
+                          {checkin.checkin_with_id 
+                            ? organizations.find(o => o.organization_id.toString() === checkin.checkin_with_id)?.organization_name || '—'
+                            : '—'}
+                        </span>
+                      </div>
+                      <div className="flex mt-2">
+                        <span className="w-40 text-sm font-medium text-gray-600">Date</span>
+                        <span className="text-sm text-gray-900">{checkin.checkin_date || '—'}</span>
+                      </div>
+                      <div className="flex mt-2">
+                        <span className="w-40 text-sm font-medium text-gray-600">Description</span>
+                        <span className="text-sm text-gray-900">{checkin.checkin_description || '—'}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Check-in User</span>
-                  <span className="text-sm text-gray-900">{formData.checkInUser || '—'}</span>
-                </div>
-                <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Check-in Communication</span>
-                  <span className="text-sm text-gray-900">{formData.checkInCommunication || '—'}</span>
-                </div>
-                <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Check-in Gender</span>
-                  <span className="text-sm text-gray-900">{formData.checkInGender || '—'}</span>
-                </div>
-              </div>
+              ) : (
+                <p className="text-sm text-gray-500">No check-ins added</p>
+              )}
             </div>
           </div>
         )}
