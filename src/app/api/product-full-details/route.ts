@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Get detailed product information with primary organization and country
+    // Get detailed product information with primary organization
     const productQuery = `
       SELECT 
         p.product_id,
@@ -17,24 +17,16 @@ export async function GET(request: Request) {
         p.product_objective,
         p.deliverable,
         TO_CHAR(p.delivery_date, 'YYYY-MM-DD') AS delivery_date,
-        p.product_output,
+        p.product_output_id,
         p.methodology_description,
-        p.gender_specific_actions,
-        p.next_steps,
-        p.workpackage_id,
-        p.workinggroup_id,
         p.product_owner_id,
-        p.country_id,
-        w.workpackage_name,
-        wg.workinggroup_name,
         o.organization_name AS primary_organization,
         o.organization_description AS primary_org_description,
-        c.country_name
+        out.output_number,
+        out.output_name
       FROM products p
-      LEFT JOIN workpackages w ON w.workpackage_id = p.workpackage_id
-      LEFT JOIN workinggroup wg ON wg.workinggroup_id = p.workinggroup_id
       LEFT JOIN organizations o ON o.organization_id = p.product_owner_id
-      LEFT JOIN countries c ON c.country_id = p.country_id
+      LEFT JOIN outputs out ON out.output_id = p.product_output_id
       WHERE p.product_id = $1
     `;
 
@@ -60,7 +52,6 @@ export async function GET(request: Request) {
         i.indicator_id,
         i.indicator_code,
         i.output_number,
-        i.indicator_name,
         i.indicator_description
       FROM product_indicators pi
       JOIN indicators i ON i.indicator_id = pi.indicator_id
@@ -178,18 +169,12 @@ export async function GET(request: Request) {
         objective: product.product_objective,
         deliverable: product.deliverable,
         deliveryDate: product.delivery_date,
-        outputNumber: product.product_output,
+        outputId: product.product_output_id,
+        outputNumber: product.output_number,
+        outputName: product.output_name,
         methodologyDescription: product.methodology_description,
-        genderSpecificActions: product.gender_specific_actions,
-        nextSteps: product.next_steps,
-        workPackageId: product.workpackage_id,
-        workPackageName: product.workpackage_name,
-        workingGroupId: product.workinggroup_id,
-        workingGroupName: product.workinggroup_name,
         primaryOrganizationId: product.product_owner_id,
-        primaryOrganization: product.primary_organization,
-        countryId: product.country_id,
-        country: product.country_name
+        primaryOrganization: product.primary_organization
       },
       // Primary organization (from product owner)
       primaryOrganization: product.primary_organization ? {

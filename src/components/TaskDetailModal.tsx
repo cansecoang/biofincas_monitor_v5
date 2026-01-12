@@ -15,10 +15,6 @@ interface Task {
   end_planned?: string;
   start_actual?: string | null;
   end_actual?: string | null;
-  checkin_oro_verde?: string;
-  checkin_user?: string;
-  checkin_communication?: string;
-  checkin_gender?: string;
   phase_id?: number;
   phase_name?: string;
   status_id?: number;
@@ -85,10 +81,6 @@ export default function TaskDetailModal({
               end_planned: task.end_planned,
               start_actual: task.start_actual,
               end_actual: task.end_actual,
-              checkin_oro_verde: task.checkin_oro_verde,
-              checkin_user: task.checkin_user,
-              checkin_communication: task.checkin_communication,
-              checkin_gender: task.checkin_gender,
               phase_id: task.phase_id,
               status_id: task.status_id,
               responsable_id: task.org_id,
@@ -184,12 +176,6 @@ export default function TaskDetailModal({
       endDate: formatDate(task?.end_planned),
       actualStartDate: formatDate(task?.start_actual),
       actualEndDate: formatDate(task?.end_actual),
-    },
-    checkIn: {
-      oroVerde: formatDateTime(task?.checkin_oro_verde),
-      user: formatDateTime(task?.checkin_user),
-      communication: formatDateTime(task?.checkin_communication),
-      gender: formatDateTime(task?.checkin_gender),
     },
   };
 
@@ -322,32 +308,6 @@ export default function TaskDetailModal({
             <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
               <span className="text-sm text-gray-600 font-medium">Actual End Date</span>
               <span className="text-sm text-gray-900">{taskData.dates.actualEndDate}</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Check-in Section */}
-        <section className="mb-8">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Check-in</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
-              <span className="text-sm text-gray-600 font-medium">Check-in Oro Verde</span>
-              <span className="text-sm text-gray-900">{taskData.checkIn.oroVerde}</span>
-            </div>
-
-            <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
-              <span className="text-sm text-gray-600 font-medium">Check-in User</span>
-              <span className="text-sm text-gray-900">{taskData.checkIn.user}</span>
-            </div>
-
-            <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
-              <span className="text-sm text-gray-600 font-medium">Check-in Communication</span>
-              <span className="text-sm text-gray-900">{taskData.checkIn.communication}</span>
-            </div>
-
-            <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
-              <span className="text-sm text-gray-600 font-medium">Check-in Gender</span>
-              <span className="text-sm text-gray-900">{taskData.checkIn.gender}</span>
             </div>
           </div>
         </section>

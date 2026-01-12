@@ -6,7 +6,7 @@ interface Product {
   product_id: number;
   product_name: string;
   product_owner: string;
-  country_name: string;
+  organization_name: string;
   delivery_date: string;
 }
 
@@ -123,7 +123,7 @@ export default function ProductListModal({ open, onClose, products, title }: Pro
                         Product
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Country
+                        Organization
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Owner
@@ -154,7 +154,7 @@ export default function ProductListModal({ open, onClose, products, title }: Pro
                           <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4 text-gray-400" />
                             <span className="text-sm text-gray-700">
-                              {product.country_name}
+                              {product.organization_name}
                             </span>
                           </div>
                         </td>

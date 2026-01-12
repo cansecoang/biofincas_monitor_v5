@@ -145,8 +145,7 @@ export async function POST(request: NextRequest) {
       product_output_id || null,
       methodology_description?.trim() || null,
       product_owner_id || null,
-      country_id || null
-      responsable_id || null
+      country_id || null,
     ]);
 
     const productId = productResult.rows[0].product_id;

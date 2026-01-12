@@ -17,10 +17,6 @@ interface TaskStepWizardProps {
     end_planned?: string;
     start_actual?: string | null;
     end_actual?: string | null;
-    checkin_oro_verde?: string | null;
-    checkin_user?: string | null;
-    checkin_communication?: string | null;
-    checkin_gender?: string | null;
     phase_id?: number;
     status_id?: number;
     responsable_id?: number;

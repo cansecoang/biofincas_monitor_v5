@@ -18,18 +18,12 @@ interface ProductData {
     objective: string;
     deliverable: string;
     deliveryDate: string;
+    outputId: number;
     outputNumber: number;
+    outputName: string;
     methodologyDescription: string;
-    genderSpecificActions: string;
-    nextSteps: string;
-    workPackageId: number;
-    workPackageName: string;
-    workingGroupId: number;
-    workingGroupName: string;
     primaryOrganizationId: number;
     primaryOrganization: string;
-    countryId: number;
-    country: string;
   };
   primaryOrganization: {
     organization_name: string;
@@ -55,7 +49,6 @@ interface ProductData {
     indicator_id: number;
     indicator_code: string;
     output_number: string;
-    indicator_name: string;
     indicator_description: string;
   }>;
   distributors: {
@@ -241,18 +234,6 @@ export default function ProductDetailModal({
                       <span className="text-sm text-gray-900">{productData.product.methodologyDescription}</span>
                     </div>
                   )}
-                  {productData.product.genderSpecificActions && (
-                    <div className="grid grid-cols-[200px_1fr] gap-x-6">
-                      <span className="text-sm text-gray-600 font-medium">Gender Specific Actions</span>
-                      <span className="text-sm text-gray-900">{productData.product.genderSpecificActions}</span>
-                    </div>
-                  )}
-                  {productData.product.nextSteps && (
-                    <div className="grid grid-cols-[200px_1fr] gap-x-6">
-                      <span className="text-sm text-gray-600 font-medium">Next Steps</span>
-                      <span className="text-sm text-gray-900">{productData.product.nextSteps}</span>
-                    </div>
-                  )}
                 </div>
               </section>
 
@@ -260,28 +241,10 @@ export default function ProductDetailModal({
               <section>
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Location and Context</h2>
                 <div className="space-y-3">
-                  {productData.product.outputNumber && (
+                  {productData.product.outputName && (
                     <div className="grid grid-cols-[200px_1fr] gap-x-6">
                       <span className="text-sm text-gray-600 font-medium">Output</span>
-                      <span className="text-sm text-gray-900">Output {productData.product.outputNumber}</span>
-                    </div>
-                  )}
-                  {productData.product.workPackageName && (
-                    <div className="grid grid-cols-[200px_1fr] gap-x-6">
-                      <span className="text-sm text-gray-600 font-medium">Workpackage</span>
-                      <span className="text-sm text-gray-900">{productData.product.workPackageName}</span>
-                    </div>
-                  )}
-                  {productData.product.workingGroupName && (
-                    <div className="grid grid-cols-[200px_1fr] gap-x-6">
-                      <span className="text-sm text-gray-600 font-medium">Working Group</span>
-                      <span className="text-sm text-gray-900">{productData.product.workingGroupName}</span>
-                    </div>
-                  )}
-                  {productData.product.country && (
-                    <div className="grid grid-cols-[200px_1fr] gap-x-6">
-                      <span className="text-sm text-gray-600 font-medium">Country</span>
-                      <span className="text-sm text-gray-900">{productData.product.country}</span>
+                      <span className="text-sm text-gray-900">{productData.product.outputName}</span>
                     </div>
                   )}
                   {productData.product.primaryOrganization && (
@@ -341,8 +304,7 @@ export default function ProductDetailModal({
                           {indicator.indicator_code}
                         </span>
                         <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                          <p className="font-medium mb-1">{indicator.indicator_name}</p>
-                          <p className="text-gray-300">{indicator.indicator_description}</p>
+                          <p className="text-gray-200">{indicator.indicator_description}</p>
                         </div>
                       </div>
                     ))}

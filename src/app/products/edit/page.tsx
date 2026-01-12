@@ -59,7 +59,7 @@ function EditProductContent() {
           methodologyDescription: data.product.methodologyDescription || '',
           genderSpecificActions: data.product.genderSpecificActions || '',
           nextSteps: data.product.nextSteps || '',
-          output: data.product.outputNumber?.toString() || '',
+          output: data.product.outputId?.toString() || '',
           workpackage: data.product.workPackageId?.toString() || '',
           workingGroup: data.product.workingGroupId?.toString() || '',
           country: data.product.countryId?.toString() || '',

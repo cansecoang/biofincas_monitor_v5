@@ -25,16 +25,11 @@ interface Output {
   output_name: string;
 }
 
-interface WorkPackage {
-  workpackage_id: number;
-  workpackage_name: string;
-}
-
 interface ProductDetail {
   product_id: number;
   product_name: string;
   product_owner: string;
-  country_name: string;
+  organization_name: string;
   delivery_date: string;
 }
 
@@ -225,7 +220,7 @@ function IndicatorCard({
               META {indicator.indicator_code}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              {indicator.workpackage_name}
+              {indicator.indicator_description}
             </p>
             <div className="flex items-center gap-2 mt-2">
               <Package2 className="h-4 w-4 text-gray-400" />

@@ -38,10 +38,7 @@ export default function IndicatorDetailModal({ open, onClose, indicator, onProdu
   const indicatorData = {
     general: {
       code: indicator.indicator_code,
-      name: indicator.indicator_name,
       description: indicator.indicator_description || 'Sin descripción disponible',
-      workpackage_id: indicator.workpackage_id,
-      workpackage_name: indicator.workpackage_name,
       output_number: indicator.output_number,
       output_name: indicator.output_name,
     },
@@ -112,16 +109,8 @@ export default function IndicatorDetailModal({ open, onClose, indicator, onProdu
                   <span className="text-sm text-gray-900">{indicatorData.general.code}</span>
                 </div>
                 <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
-                  <span className="text-sm text-gray-600 font-medium">Nombre</span>
-                  <span className="text-sm text-gray-900">{indicatorData.general.name}</span>
-                </div>
-                <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
                   <span className="text-sm text-gray-600 font-medium">Descripción</span>
                   <span className="text-sm text-gray-900">{indicatorData.general.description}</span>
-                </div>
-                <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
-                  <span className="text-sm text-gray-600 font-medium">Work Package</span>
-                  <span className="text-sm text-gray-900">{indicatorData.general.workpackage_name}</span>
                 </div>
                 <div className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
                   <span className="text-sm text-gray-600 font-medium">Output</span>
@@ -178,12 +167,11 @@ export default function IndicatorDetailModal({ open, onClose, indicator, onProdu
               <div className="space-y-2">
                 {indicatorData.products && indicatorData.products.length > 0 ? (
                   indicatorData.products.map((product, idx) => (
-                    <div key={idx} className="grid grid-cols-[160px_1fr_1fr] gap-x-6 gap-y-1 items-center cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition-all"
+                    <div key={idx} className="grid grid-cols-[1fr_160px] gap-x-6 gap-y-1 items-center cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition-all"
                       onClick={() => handleProductClick(product.product_id)}
                     >
-                      <span className="text-sm text-gray-600 font-medium">{product.product_name}</span>
-                      <span className="text-xs text-gray-500">{product.country_name}</span>
-                      <span className="text-xs text-gray-500">{product.workpackage_name}</span>
+                      <span className="text-sm text-gray-900 font-medium">{product.product_name}</span>
+                      <span className="text-xs text-gray-500">{product.organization_name}</span>
                     </div>
                   ))
                 ) : (

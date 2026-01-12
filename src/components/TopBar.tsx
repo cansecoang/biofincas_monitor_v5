@@ -22,8 +22,8 @@ function TopBarContent() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{
-    products: Array<{ product_id: number; product_name: string; country_name?: string }>;
-    indicators: Array<{ indicator_id: number; indicator_code: string; indicator_name: string; workpackage_name?: string }>;
+    products: Array<{ product_id: number; product_name: string; organization_name?: string }>;
+    indicators: Array<{ indicator_id: number; indicator_code: string; indicator_description: string; output_name?: string }>;
   }>({ products: [], indicators: [] });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedIndicator, setSelectedIndicator] = useState<IndicatorPerformance | undefined>(undefined);
@@ -84,7 +84,7 @@ function TopBarContent() {
           ? indicatorsData.indicators
               .filter((i: any) => 
                 (i.indicator_code && i.indicator_code.toLowerCase().includes(searchLower)) ||
-                (i.indicator_name && i.indicator_name.toLowerCase().includes(searchLower))
+                (i.indicator_description && i.indicator_description.toLowerCase().includes(searchLower))
               )
               .slice(0, 5)
           : [];
@@ -243,7 +243,7 @@ function TopBarContent() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-900 truncate">{product.product_name}</p>
-                          <p className="text-xs text-gray-500">{product.country_name}</p>
+                          <p className="text-xs text-gray-500">{product.organization_name}</p>
                         </div>
                       </Link>
                     ))}
@@ -271,7 +271,7 @@ function TopBarContent() {
                           <p className="font-medium text-gray-900 truncate">
                             <span className="text-green-600 font-semibold">META {indicator.indicator_code}</span>
                           </p>
-                          <p className="text-xs text-gray-500">{indicator.workpackage_name}</p>
+                          <p className="text-xs text-gray-500">{indicator.output_name}</p>
                         </div>
                       </button>
                     ))}
