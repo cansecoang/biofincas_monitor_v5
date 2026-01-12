@@ -28,6 +28,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+bd_biofincas_example.sql
 
 # vercel
 .vercel
