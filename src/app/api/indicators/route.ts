@@ -4,9 +4,12 @@ import { query } from '@/lib/db';
 export async function GET() {
   try {
     const result = await query(
-      `SELECT i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, COALESCE(wp.workpackage_name, 'Sin WP') as workpackage_name
+      `SELECT 
+        i.indicator_id, 
+        i.indicator_code, 
+        i.indicator_description,
+        i.output_number
        FROM indicators i
-       LEFT JOIN workpackages wp ON i.workpackage_id = wp.workpackage_id
        ORDER BY i.indicator_code`
     );
     return NextResponse.json({

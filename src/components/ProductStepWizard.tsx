@@ -71,14 +71,14 @@ interface Indicator {
   indicator_id: number;
   indicator_code: string;
   indicator_description: string;
+  output_number: number;
 }
 
 const STEPS = [
   { id: 1, title: 'General Information', subtitle: 'Basic product details' },
-  { id: 2, title: 'Location and Context', subtitle: 'Output, workpackage, and location' },
-  { id: 3, title: 'Team', subtitle: 'Responsible parties and organizations' },
-  { id: 4, title: 'Indicators', subtitle: 'Select related indicators' },
-  { id: 5, title: 'Summary', subtitle: 'Review and confirm' },
+  { id: 2, title: 'Team', subtitle: 'Responsible parties and organizations' },
+  { id: 3, title: 'Indicators', subtitle: 'Select related indicators' },
+  { id: 4, title: 'Summary', subtitle: 'Review and confirm' },
 ];
 
 export default function ProductStepWizard({ 
@@ -247,8 +247,7 @@ export default function ProductStepWizard({
         methodology_description: formData.methodologyDescription || null,
         product_output_id: formData.output ? parseInt(formData.output) : null,
         product_owner_id: formData.productOwner ? parseInt(formData.productOwner) : null,
-        responsable_id: formData.responsable ? parseInt(formData.responsable) : null,
-        country_id: null, // Puede agregarse si se necesita
+        country_id: null,
         responsibles: formData.responsable ? [{ 
           user_id: parseInt(formData.responsable), 
           is_primary: true,
@@ -335,8 +334,9 @@ export default function ProductStepWizard({
       <div className="flex-1 overflow-y-auto mb-2">
         {/* Step 1: General Information */}
         {currentStep === 1 && (
-          <div className="grid grid-cols-2 gap-6 px-1">
-            <div className="col-span-2">
+          <div className="grid grid-cols-2 gap-4 px-1">
+            {/* Row 1: Product Name and Delivery Date */}
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Product Name *
               </label>
@@ -346,32 +346,6 @@ export default function ProductStepWizard({
                 onChange={(e) => updateFormData('productName', e.target.value)}
                 placeholder="Product Name"
                 className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Product Objective
-              </label>
-              <textarea
-                value={formData.productObjective}
-                onChange={(e) => updateFormData('productObjective', e.target.value)}
-                placeholder="Product Objective"
-                rows={3}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              />
-            </div>
-
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Deliverable
-              </label>
-              <textarea
-                value={formData.deliverable}
-                onChange={(e) => updateFormData('deliverable', e.target.value)}
-                placeholder="Deliverable"
-                rows={2}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               />
             </div>
 
@@ -387,7 +361,35 @@ export default function ProductStepWizard({
               />
             </div>
 
-            <div className="col-span-2">
+            {/* Row 2: Product Objective and Deliverable */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Product Objective
+              </label>
+              <textarea
+                value={formData.productObjective}
+                onChange={(e) => updateFormData('productObjective', e.target.value)}
+                placeholder="Product Objective"
+                rows={2}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Deliverable
+              </label>
+              <textarea
+                value={formData.deliverable}
+                onChange={(e) => updateFormData('deliverable', e.target.value)}
+                placeholder="Deliverable"
+                rows={2}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
+            {/* Row 3: Methodology Description and Output */}
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Methodology Description
               </label>
@@ -395,19 +397,14 @@ export default function ProductStepWizard({
                 value={formData.methodologyDescription}
                 onChange={(e) => updateFormData('methodologyDescription', e.target.value)}
                 placeholder="Describe the methodology to be used"
-                rows={3}
+                rows={2}
                 className="w-full px-4 py-2 bg-gray-50 border-0 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               />
             </div>
-          </div>
-        )}
 
-        {/* Step 2: Location and Context */}
-        {currentStep === 2 && (
-          <div className="grid grid-cols-2 gap-6 px-1">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Output
+                Output *
               </label>
               <select
                 value={formData.output}
@@ -417,12 +414,17 @@ export default function ProductStepWizard({
                 <option value="">Select output</option>
                 {outputs.map((output) => (
                   <option key={output.output_id} value={output.output_id}>
-                    {output.output_name}
+                    {output.output_number}: {output.output_name}
                   </option>
                 ))}
               </select>
             </div>
+          </div>
+        )}
 
+        {/* Step 2: Team */}
+        {currentStep === 2 && (
+          <div className="space-y-6 px-1">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Product Owner
@@ -436,6 +438,24 @@ export default function ProductStepWizard({
                 {productOwnerOrgs.map((org) => (
                   <option key={org.organization_id} value={org.organization_id}>
                     {org.organization_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Responsible
+              </label>
+              <select
+                value={formData.responsable}
+                onChange={(e) => updateFormData('responsable', e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+              >
+                <option value="">Select responsible</option>
+                {users.map((user) => (
+                  <option key={user.user_id} value={user.user_id}>
+                    {user.user_name}
                   </option>
                 ))}
               </select>
@@ -487,19 +507,19 @@ export default function ProductStepWizard({
           </div>
         )}
 
-        {/* Step 4: Indicators */}
-        {currentStep === 4 && (
+        {/* Step 3: Indicators */}
+        {currentStep === 3 && (
           <div>
             {formData.output ? (
               <div className="grid grid-cols-2 gap-4 px-1">
                 {(() => {
-                  // Get the selected output's number
+                  // Get the selected output
                   const selectedOutput = outputs.find(o => o.output_id.toString() === formData.output);
                   const outputNumber = selectedOutput?.output_number;
                   
-                  // Filter indicators that belong to the selected output
+                  // Filter indicators by output_number
                   const filteredIndicators = indicators.filter(indicator => 
-                    outputNumber && indicator.indicator_code.startsWith(outputNumber + '.')
+                    outputNumber !== undefined && indicator.output_number.toString() === outputNumber
                   );
 
                   if (filteredIndicators.length === 0) {
@@ -537,7 +557,7 @@ export default function ProductStepWizard({
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                Please select an output in Step 2 to view available indicators
+                Please select an output in Step 1 to view available indicators
               </div>
             )}
           </div>
@@ -545,8 +565,8 @@ export default function ProductStepWizard({
 
         
 
-        {/* Step 6: Summary */}
-        {currentStep === 6 && (
+        {/* Step 4: Summary */}
+        {currentStep === 4 && (
           <div className="space-y-6 px-1">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -573,24 +593,10 @@ export default function ProductStepWizard({
                   <span className="w-48 text-sm font-medium text-gray-600">Methodology Description</span>
                   <span className="text-sm font-bold text-gray-900 flex-1">{formData.methodologyDescription || '—'}</span>
                 </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Location and Context
-              </h3>
-              <div className="space-y-3">
                 <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Output</span>
-                  <span className="text-sm font-bold text-gray-900">
+                  <span className="w-48 text-sm font-medium text-gray-600">Output</span>
+                  <span className="text-sm font-bold text-gray-900 flex-1">
                     {outputs.find(o => o.output_id.toString() === formData.output)?.output_name || '—'}
-                  </span>
-                </div>
-                <div className="flex">
-                  <span className="w-40 text-sm font-medium text-gray-600">Product Owner</span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {productOwnerOrgs.find(o => o.organization_id.toString() === formData.productOwner)?.organization_name || '—'}
                   </span>
                 </div>
               </div>
@@ -601,6 +607,12 @@ export default function ProductStepWizard({
                 Team
               </h3>
               <div className="space-y-3">
+                <div className="flex">
+                  <span className="w-40 text-sm font-medium text-gray-600">Product Owner</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {productOwnerOrgs.find(o => o.organization_id.toString() === formData.productOwner)?.organization_name || '—'}
+                  </span>
+                </div>
                 <div className="flex">
                   <span className="w-40 text-sm font-medium text-gray-600">Responsible</span>
                   <span className="text-sm font-bold text-gray-900">

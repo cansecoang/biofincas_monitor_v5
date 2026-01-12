@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
       methodology_description,
       product_owner_id,
       country_id,
-      responsable_id,
       
       // Relaciones
       responsibles = [],
@@ -101,17 +100,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (responsable_id) {
-      const userExists = await validateIdExists(client, 'users', 'user_id', responsable_id);
-      if (!userExists) {
-        await client.query('ROLLBACK');
-        return NextResponse.json({
-          success: false,
-          message: `Responsible user with ID ${responsable_id} does not exist`
-        }, { status: 400 });
-      }
-    }
-
     // ✅ VALIDACIÓN DE FECHAS
     if (delivery_date) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -144,9 +132,8 @@ export async function POST(request: NextRequest) {
         product_output_id,
         methodology_description,
         product_owner_id,
-        country_id,
-        responsable_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+        country_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING product_id;
     `;
 
@@ -158,7 +145,7 @@ export async function POST(request: NextRequest) {
       product_output_id || null,
       methodology_description?.trim() || null,
       product_owner_id || null,
-      country_id || null,
+      country_id || null
       responsable_id || null
     ]);
 
