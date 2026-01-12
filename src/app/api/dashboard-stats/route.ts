@@ -71,8 +71,8 @@ export async function GET() {
         p.product_id,
         p.product_name,
         p.delivery_date,
-        c.country_name,
-        w.workpackage_name,
+        COALESCE(org.organization_name, 'Sin organización') as organization_name,
+        COALESCE(o.output_name, 'Sin output') as output_name,
         (
           SELECT COUNT(*)
           FROM tasks t
@@ -81,24 +81,24 @@ export async function GET() {
             AND s.status_name NOT IN ('Completed', 'Cancelled')
         ) as pending_tasks
       FROM products p
-      LEFT JOIN countries c ON p.country_id = c.country_id
-      LEFT JOIN workpackages w ON p.workpackage_id = w.workpackage_id
+      LEFT JOIN organizations org ON p.product_owner_id = org.organization_id
+      LEFT JOIN outputs o ON p.product_output_id = o.output_id
       ORDER BY p.product_id DESC
       LIMIT 5
     `;
     const recentActivityResult = await pool.query(recentActivityQuery);
 
-    // Distribución de productos por workpackage
-    const workpackageDistributionQuery = `
+    // Distribución de productos por output
+    const outputDistributionQuery = `
       SELECT 
-        w.workpackage_name,
+        o.output_name,
         COUNT(p.product_id) as product_count
-      FROM workpackages w
-      LEFT JOIN products p ON w.workpackage_id = p.workpackage_id
-      GROUP BY w.workpackage_id, w.workpackage_name
-      ORDER BY product_count DESC
+      FROM outputs o
+      LEFT JOIN products p ON o.output_id = p.product_output_id
+      GROUP BY o.output_id, o.output_name, o.output_number
+      ORDER BY o.output_number
     `;
-    const workpackageDistributionResult = await pool.query(workpackageDistributionQuery);
+    const outputDistributionResult = await pool.query(outputDistributionQuery);
 
     return NextResponse.json({
       success: true,
@@ -124,7 +124,7 @@ export async function GET() {
         }
       },
       recentActivity: recentActivityResult.rows,
-      workpackageDistribution: workpackageDistributionResult.rows
+      outputDistribution: outputDistributionResult.rows
     });
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);

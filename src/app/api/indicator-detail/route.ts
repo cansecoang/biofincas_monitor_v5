@@ -16,8 +16,7 @@ export async function GET(request: Request) {
 
     // Buscar el indicador por indicator_code
     const indicatorQuery = `
-      SELECT i.indicator_id, i.indicator_code, i.indicator_name, COALESCE(i.indicator_description, '') as indicator_description,
-             i.workpackage_id, COALESCE(wp.workpackage_name, 'Sin WP') as workpackage_name,
+      SELECT i.indicator_id, i.indicator_code, COALESCE(i.indicator_description, '') as indicator_description,
              i.output_number, COALESCE(o.output_name, 'Sin Output') as output_name,
              COUNT(DISTINCT pi.product_id) as assigned_products_count,
              COUNT(t.task_id) as total_tasks,
@@ -25,14 +24,13 @@ export async function GET(request: Request) {
              COUNT(CASE WHEN t.end_date_planned < CURRENT_DATE AND s.status_name NOT IN ('Completed', 'Reviewed') THEN 1 END) as overdue_tasks,
              ROUND((COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) * 100.0 / NULLIF(COUNT(t.task_id), 0)), 1) as completion_percentage
       FROM indicators i
-      LEFT JOIN workpackages wp ON i.workpackage_id = wp.workpackage_id
-      LEFT JOIN outputs o ON i.output_number = o.output_id
+      LEFT JOIN outputs o ON i.output_number = o.output_number
       LEFT JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
       LEFT JOIN products p ON pi.product_id = p.product_id
       LEFT JOIN tasks t ON p.product_id = t.product_id
       LEFT JOIN status s ON t.status_id = s.status_id
       WHERE i.indicator_code = $1
-      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.workpackage_id, wp.workpackage_name, i.output_number, o.output_name
+      GROUP BY i.indicator_id, i.indicator_code, i.indicator_description, i.output_number, o.output_name
       LIMIT 1
     `;
     const indicatorResult = await pool.query(indicatorQuery, [indicatorCode]);
@@ -44,11 +42,10 @@ export async function GET(request: Request) {
 
     // Obtener productos asignados
     const productsQuery = `
-      SELECT p.product_id, p.product_name, COALESCE(c.country_name, 'Sin país') as country_name, COALESCE(wp.workpackage_name, 'Sin WP') as workpackage_name
+      SELECT p.product_id, p.product_name, COALESCE(org.organization_name, 'Sin organización') as organization_name
       FROM product_indicators pi
       INNER JOIN products p ON pi.product_id = p.product_id
-      LEFT JOIN countries c ON p.country_id = c.country_id
-      LEFT JOIN workpackages wp ON p.workpackage_id = wp.workpackage_id
+      LEFT JOIN organizations org ON p.product_owner_id = org.organization_id
       WHERE pi.indicator_id = $1
       ORDER BY p.product_name
     `;
@@ -72,10 +69,7 @@ export async function GET(request: Request) {
     const indicator: any = {
       indicator_id: row.indicator_id,
       indicator_code: row.indicator_code,
-      indicator_name: row.indicator_name,
       indicator_description: row.indicator_description,
-      workpackage_id: row.workpackage_id,
-      workpackage_name: row.workpackage_name,
       output_number: parseInt(row.output_number) || 0,
       output_name: row.output_name || 'Sin Output',
       assigned_products_count: parseInt(row.assigned_products_count) || 0,

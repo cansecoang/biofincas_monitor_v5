@@ -8,7 +8,6 @@ import TabsLayout from '@/components/TabsLayout';
 const indicatorTabs = [
   { id: 'overview', label: 'Overview', href: '/indicators/overview' },
   { id: 'output', label: 'Output', href: '/indicators/output' },
-  { id: 'workpackage', label: 'Workpackage', href: '/indicators/workpackage' },
 ];
 
 // Interfaces
@@ -18,15 +17,9 @@ interface Output {
   output_name: string;
 }
 
-interface Workpackage {
-  workpackage_id: number;
-  workpackage_name: string;
-  workpackage_description?: string;
-}
-
-interface Country {
-  country_id: number;
-  country_name: string;
+interface Organization {
+  organization_id: number;
+  organization_name: string;
 }
 
 // Configuración de títulos y subtítulos por ruta
@@ -38,10 +31,6 @@ const pageHeaders: Record<string, { title: string; subtitle: string }> = {
   '/indicators/output': {
     title: 'Output Indicators',
     subtitle: 'View indicators organized by output'
-  },
-  '/indicators/workpackage': {
-    title: 'Workpackage Indicators',
-    subtitle: 'View indicators organized by work package'
   }
 };
 
@@ -53,29 +42,24 @@ function IndicatorsLayoutContent({ children }: { children: ReactNode }) {
 
   // Estados para los dropdowns
   const [outputs, setOutputs] = useState<Output[]>([]);
-  const [workpackages, setWorkpackages] = useState<Workpackage[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOutput, setSelectedOutput] = useState<string>('');
-  const [selectedWorkpackage, setSelectedWorkpackage] = useState<string>('');
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedOrganization, setSelectedOrganization] = useState<string>('');
 
   // Cargar datos de los endpoints
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [outputsRes, workpackagesRes, countriesRes] = await Promise.all([
+        const [outputsRes, organizationsRes] = await Promise.all([
           fetch('/api/outputs'),
-          fetch('/api/work-packages'),
-          fetch('/api/countries')
+          fetch('/api/organizations')
         ]);
 
         const outputsData = await outputsRes.json();
-        const workpackagesData = await workpackagesRes.json();
-        const countriesData = await countriesRes.json();
+        const organizationsData = await organizationsRes.json();
 
         if (outputsData.success) setOutputs(outputsData.outputs);
-        if (workpackagesData.success) setWorkpackages(workpackagesData.workpackages);
-        if (countriesData.success) setCountries(countriesData.countries);
+        if (organizationsData.success) setOrganizations(organizationsData.organizations);
       } catch (error) {
         console.error('Error loading dropdown data:', error);
       }
@@ -87,21 +71,18 @@ function IndicatorsLayoutContent({ children }: { children: ReactNode }) {
   // Sincronizar estados con URL params al cargar
   useEffect(() => {
     const outputId = searchParams.get('outputId');
-    const workpackageId = searchParams.get('workpackageId');
-    const countryId = searchParams.get('countryId');
+    const organizationId = searchParams.get('organizationId');
 
     if (outputId) setSelectedOutput(outputId);
-    if (workpackageId) setSelectedWorkpackage(workpackageId);
-    if (countryId) setSelectedCountry(countryId);
+    if (organizationId) setSelectedOrganization(organizationId);
   }, [searchParams]);
 
   // Función para actualizar URL con los parámetros seleccionados
-  const updateURL = (outputId: string, workpackageId: string, countryId: string) => {
+  const updateURL = (outputId: string, organizationId: string) => {
     const params = new URLSearchParams();
     
     if (outputId) params.append('outputId', outputId);
-    if (workpackageId) params.append('workpackageId', workpackageId);
-    if (countryId) params.append('countryId', countryId);
+    if (organizationId) params.append('organizationId', organizationId);
     
     const queryString = params.toString();
     const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
@@ -113,19 +94,13 @@ function IndicatorsLayoutContent({ children }: { children: ReactNode }) {
   const handleOutputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedOutput(value);
-    updateURL(value, selectedWorkpackage, selectedCountry);
+    updateURL(value, selectedOrganization);
   };
 
-  const handleWorkpackageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleOrganizationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    setSelectedWorkpackage(value);
-    updateURL(selectedOutput, value, selectedCountry);
-  };
-
-  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setSelectedCountry(value);
-    updateURL(selectedOutput, selectedWorkpackage, value);
+    setSelectedOrganization(value);
+    updateURL(selectedOutput, value);
   };
 
   return (
@@ -139,67 +114,40 @@ function IndicatorsLayoutContent({ children }: { children: ReactNode }) {
 
         {/* Dropdowns Section */}
         <div className="flex gap-3 pr-6">
-          {/* Output Dropdown - visible en todas las rutas excepto /indicators/workpackage */}
-          {pathname !== '/indicators/workpackage' && (
-            <div className="relative w-36">
-              <select 
-                value={selectedOutput}
-                onChange={handleOutputChange}
-                className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
-              >
-                <option value="">Output</option>
-                {outputs.map((output) => (
-                  <option key={output.output_id} value={output.output_id}>
-                    {output.output_name}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+          {/* Output Dropdown */}
+          <div className="relative w-36">
+            <select 
+              value={selectedOutput}
+              onChange={handleOutputChange}
+              className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
+            >
+              <option value="">Output</option>
+              {outputs.map((output) => (
+                <option key={output.output_id} value={output.output_number}>
+                  {output.output_name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
-          )}
+          </div>
 
-          {/* Workpackage Dropdown - visible en todas las rutas excepto /indicators/output */}
-          {pathname !== '/indicators/output' && (
+          {/* Organization Dropdown */}
+          {pathname === '/indicators/overview' && (
             <div className="relative w-36">
               <select 
-                value={selectedWorkpackage}
-                onChange={handleWorkpackageChange}
+                value={selectedOrganization}
+                onChange={handleOrganizationChange}
                 className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
               >
-                <option value="">Workpackage</option>
-                {/* Mostrar opción "Todos" solo si NO estamos en /indicators/workpackage */}
-                {pathname !== '/indicators/workpackage' && <option value="all">Todos</option>}
-                {workpackages.map((wp) => (
-                  <option key={wp.workpackage_id} value={wp.workpackage_id}>
-                    {wp.workpackage_name}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          )}
-
-          {/* Countries Dropdown - oculto en /indicators/output y /indicators/workpackage */}
-          {pathname !== '/indicators/output' && pathname !== '/indicators/workpackage' && (
-            <div className="relative w-36">
-              <select 
-                value={selectedCountry}
-                onChange={handleCountryChange}
-                className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
-              >
-                <option value="">Country</option>
+                <option value="">Organization</option>
                 <option value="all">Todos</option>
-                {countries.map((country) => (
-                  <option key={country.country_id} value={country.country_id}>
-                    {country.country_name}
+                {organizations.map((org) => (
+                  <option key={org.organization_id} value={org.organization_id}>
+                    {org.organization_name}
                   </option>
                 ))}
               </select>

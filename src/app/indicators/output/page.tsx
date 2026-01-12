@@ -6,25 +6,15 @@ import { useSearchParams } from 'next/navigation';
 interface Indicator {
   indicator_id: number;
   indicator_code: string;
-  indicator_name: string;
+  indicator_description: string;
   assigned_products_count: number;
   completion_percentage: number;
-}
-
-interface WorkPackage {
-  workpackage_id: number;
-  workpackage_name: string;
-  workpackage_description?: string;
-  indicators: Indicator[];
-  total_assigned_products: number;
-  total_completed_products: number;
-  overall_completion: number;
 }
 
 interface OutputProgressData {
   success: boolean;
   output_number: string;
-  workpackages: WorkPackage[];
+  indicators: Indicator[];
   total_indicators: number;
 }
 
@@ -108,7 +98,7 @@ export default function OutputIndicatorsPage() {
     );
   }
 
-  if (!data || data.workpackages.length === 0) {
+  if (!data || data.indicators.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-12">
         <div className="text-center">
@@ -123,55 +113,48 @@ export default function OutputIndicatorsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {data.workpackages.map((workpackage) => (
-        <div 
-          key={workpackage.workpackage_id || workpackage.workpackage_name} 
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
-        >
-          {/* Header del workpackage */}
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {workpackage.workpackage_name}
-            </h2>
-            <p className="text-sm text-gray-500">
-              Shows indicators of {workpackage.workpackage_name.toLowerCase()}
-            </p>
-          </div>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-1">
+          Output {data.output_number} Indicators
+        </h2>
+        <p className="text-sm text-gray-500">
+          {data.total_indicators} indicator{data.total_indicators !== 1 ? 's' : ''} total
+        </p>
+      </div>
 
-          {/* Lista de indicadores */}
-          <div className="space-y-6">
-            {workpackage.indicators.map((indicator) => (
-              <div key={indicator.indicator_id} className="space-y-2">
-                {/* Header del indicador */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      META {indicator.indicator_code}
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      {indicator.assigned_products_count} product{indicator.assigned_products_count !== 1 ? 's' : ''} assigned
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900">
-                      {indicator.completion_percentage}%
-                    </div>
-                  </div>
-                </div>
-
-                {/* Barra de progreso */}
-                <div className="relative w-full h-6 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full bg-gradient-to-r ${getProgressColor(indicator.completion_percentage)} transition-all duration-500 ease-out rounded-full`}
-                    style={{ width: `${indicator.completion_percentage}%` }}
-                  ></div>
+      {/* Lista de indicadores */}
+      <div className="space-y-6">
+        {data.indicators.map((indicator) => (
+          <div key={indicator.indicator_id} className="space-y-2">
+            {/* Header del indicador */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  META {indicator.indicator_code}
+                </h3>
+                <p className="text-xs text-gray-500">
+                  {indicator.assigned_products_count} product{indicator.assigned_products_count !== 1 ? 's' : ''} assigned
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-gray-900">
+                  {indicator.completion_percentage}%
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Barra de progreso */}
+            <div className="relative w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full bg-gradient-to-r ${getProgressColor(indicator.completion_percentage)} transition-all duration-500 ease-out rounded-full`}
+                style={{ width: `${indicator.completion_percentage}%` }}
+              ></div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

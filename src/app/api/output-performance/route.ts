@@ -5,10 +5,9 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const outputFilter = searchParams.get('output');
-    const workPackageFilter = searchParams.get('workPackage');
-    const countryFilter = searchParams.get('country');
+    const organizationFilter = searchParams.get('organization');
 
-    console.log('🎯 Output Performance API called with filters:', { outputFilter, workPackageFilter, countryFilter });
+    console.log('🎯 Output Performance API called with filters:', { outputFilter, organizationFilter });
 
     if (!outputFilter) {
       return NextResponse.json({ error: 'Output parameter is required' }, { status: 400 });
@@ -16,18 +15,11 @@ export async function GET(request: Request) {
 
     // 🎯 QUERY SIMPLIFICADA: Obtener indicadores con métricas básicas por output
     let paramIndex = 2;
-    let indicatorWhereConditions = ''; // Condiciones para filtrar indicadores directamente
     let productWhereConditions = '';   // Condiciones para filtrar productos
     
-    // Filtro de workPackage: aplicar a indicadores
-    if (workPackageFilter && workPackageFilter !== 'all') {
-      indicatorWhereConditions += ` AND i.workpackage_id = $${paramIndex}`;
-      paramIndex++;
-    }
-    
-    // Filtro de country: aplicar a productos
-    if (countryFilter && countryFilter !== 'all') {
-      productWhereConditions += ` AND p.country_id = $${paramIndex}`;
+    // Filtro de organization: aplicar a productos
+    if (organizationFilter && organizationFilter !== 'all') {
+      productWhereConditions += ` AND p.product_owner_id = $${paramIndex}`;
       paramIndex++;
     }
 
@@ -35,12 +27,9 @@ export async function GET(request: Request) {
       SELECT 
         i.indicator_id,
         i.indicator_code,
-        i.indicator_name,
         COALESCE(i.indicator_description, '') as indicator_description,
         i.output_number,
         COALESCE(o.output_name, 'Sin Output') as output_name,
-        i.workpackage_id,
-        COALESCE(wp.workpackage_name, 'Sin WP') as workpackage_name,
         COUNT(DISTINCT pi.product_id) as assigned_products_count,
         COUNT(t.task_id) as total_tasks,
         COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) as completed_tasks,
@@ -50,14 +39,13 @@ export async function GET(request: Request) {
            NULLIF(COUNT(t.task_id), 0)), 1
         ) as completion_percentage
       FROM indicators i
-      LEFT JOIN workpackages wp ON i.workpackage_id = wp.workpackage_id
-      LEFT JOIN outputs o ON i.output_number = o.output_id
+      LEFT JOIN outputs o ON i.output_number = o.output_number
       LEFT JOIN product_indicators pi ON i.indicator_id = pi.indicator_id
       LEFT JOIN products p ON pi.product_id = p.product_id ${productWhereConditions.replace('AND', 'AND')}
       LEFT JOIN tasks t ON p.product_id = t.product_id
       LEFT JOIN status s ON t.status_id = s.status_id
-      WHERE i.output_number = $1 ${indicatorWhereConditions}
-      GROUP BY i.indicator_id, i.indicator_code, i.indicator_name, i.indicator_description, i.output_number, o.output_name, i.workpackage_id, wp.workpackage_name
+      WHERE i.output_number = $1
+      GROUP BY i.indicator_id, i.indicator_code, i.indicator_description, i.output_number, o.output_name
       ORDER BY 
         -- Ordenamiento natural: primero por la parte numérica antes del punto
         CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER),
@@ -66,11 +54,8 @@ export async function GET(request: Request) {
     `;
 
     const queryParams: any[] = [outputFilter];
-    if (workPackageFilter && workPackageFilter !== 'all') {
-      queryParams.push(workPackageFilter);
-    }
-    if (countryFilter && countryFilter !== 'all') {
-      queryParams.push(countryFilter);
+    if (organizationFilter && organizationFilter !== 'all') {
+      queryParams.push(organizationFilter);
     }
 
     console.log('🔍 Executing main query with params:', queryParams);
@@ -80,12 +65,12 @@ export async function GET(request: Request) {
 
     // 🎯 Para cada indicador, obtener productos asignados
     const indicators = await Promise.all(result.rows.map(async (row) => {
-      // Construir WHERE conditions para sub-queries (solo country, workpackage ya se filtró en indicadores)
+      // Construir WHERE conditions para sub-queries
       let subParamIndex = 2;
       let subWhereConditions = '';
       
-      if (countryFilter && countryFilter !== 'all') {
-        subWhereConditions += ` AND p.country_id = $${subParamIndex}`;
+      if (organizationFilter && organizationFilter !== 'all') {
+        subWhereConditions += ` AND p.product_owner_id = $${subParamIndex}`;
         subParamIndex++;
       }
 
@@ -94,20 +79,18 @@ export async function GET(request: Request) {
         SELECT 
           p.product_id,
           p.product_name,
-          COALESCE(c.country_name, 'Sin país') as country_name,
-          COALESCE(wp.workpackage_name, 'Sin WP') as workpackage_name
+          COALESCE(org.organization_name, 'Sin organización') as organization_name
         FROM product_indicators pi
         INNER JOIN products p ON pi.product_id = p.product_id
-        LEFT JOIN countries c ON p.country_id = c.country_id
-        LEFT JOIN workpackages wp ON p.workpackage_id = wp.workpackage_id
+        LEFT JOIN organizations org ON p.product_owner_id = org.organization_id
         WHERE pi.indicator_id = $1
         ${subWhereConditions}
         ORDER BY p.product_name
       `;
       
       const productsParams: any[] = [row.indicator_id];
-      if (countryFilter && countryFilter !== 'all') {
-        productsParams.push(countryFilter);
+      if (organizationFilter && organizationFilter !== 'all') {
+        productsParams.push(organizationFilter);
       }
       
       const productsResult = await pool.query(productsQuery, productsParams);
@@ -137,10 +120,7 @@ export async function GET(request: Request) {
       return {
         indicator_id: row.indicator_id,
         indicator_code: row.indicator_code,
-        indicator_name: row.indicator_name,
         indicator_description: row.indicator_description,
-        workpackage_id: row.workpackage_id,
-        workpackage_name: row.workpackage_name,
         output_number: parseInt(row.output_number) || 0,
         output_name: row.output_name || 'Sin Output',
         assigned_products_count: parseInt(row.assigned_products_count) || 0,
@@ -189,18 +169,17 @@ export async function GET(request: Request) {
           p.product_id,
           p.product_name,
           p.delivery_date,
-          COALESCE(c.country_name, 'Sin país') as country_name,
           COALESCE(org.organization_name, 'Sin asignar') as product_owner,
+          COALESCE(org.organization_name, 'Sin organización') as organization_name,
           COUNT(t.task_id) as total_tasks,
           COUNT(CASE WHEN s.status_name IN ('Completed', 'Reviewed') THEN 1 END) as completed_tasks,
           COUNT(CASE WHEN t.end_date_planned < CURRENT_DATE AND s.status_name NOT IN ('Completed', 'Reviewed') THEN 1 END) as overdue_tasks
         FROM products p
-        LEFT JOIN countries c ON p.country_id = c.country_id
         LEFT JOIN organizations org ON p.product_owner_id = org.organization_id
         LEFT JOIN tasks t ON p.product_id = t.product_id
         LEFT JOIN status s ON t.status_id = s.status_id
         WHERE p.product_id = ANY($1)
-        GROUP BY p.product_id, p.product_name, p.delivery_date, c.country_name, org.organization_name
+        GROUP BY p.product_id, p.product_name, p.delivery_date, org.organization_name
         ORDER BY p.product_name
       `;
       
@@ -221,7 +200,7 @@ export async function GET(request: Request) {
           product_id: row.product_id,
           product_name: row.product_name,
           product_owner: row.product_owner,
-          country_name: row.country_name,
+          organization_name: row.organization_name,
           delivery_date: row.delivery_date
         };
         
@@ -278,8 +257,7 @@ export async function GET(request: Request) {
       summary,
       filters: {
         output: outputFilter,
-        workPackage: workPackageFilter,
-        country: countryFilter
+        organization: organizationFilter
       }
     };
 

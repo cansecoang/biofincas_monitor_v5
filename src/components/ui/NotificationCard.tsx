@@ -1,7 +1,7 @@
 'use client';
 
 interface NotificationCardProps {
-  category: 'Oro Verde' | 'User' | 'Communication' | 'Gender';
+  category: string;
   date: string;
   time: string;
   country: string;
@@ -14,7 +14,7 @@ interface NotificationCardProps {
 }
 
 // Configuración de colores por categoría
-const categoryColors = {
+const categoryColors: Record<string, { bg: string; badge: string; button: string }> = {
   'Oro Verde': {
     bg: 'bg-blue-50',
     badge: 'bg-blue-400 text-white',
@@ -37,6 +37,13 @@ const categoryColors = {
   },
 };
 
+// Color predeterminado para organizaciones no definidas
+const defaultColors = {
+  bg: 'bg-gray-50',
+  badge: 'bg-gray-400 text-white',
+  button: 'bg-gray-400 hover:bg-gray-500 text-white',
+};
+
 export default function NotificationCard({
   category,
   date,
@@ -49,7 +56,7 @@ export default function NotificationCard({
   taskId,
   onViewTask,
 }: NotificationCardProps) {
-  const colors = categoryColors[category];
+  const colors = categoryColors[category] || defaultColors;
 
   const handleViewTask = () => {
     onViewTask(taskId);

@@ -29,20 +29,20 @@ interface RecentActivity {
   product_id: number;
   product_name: string;
   delivery_date: string;
-  country_name: string;
-  workpackage_name: string;
+  organization_name: string;
+  output_name: string;
   pending_tasks: number;
 }
 
-interface WorkpackageDistribution {
-  workpackage_name: string;
+interface OutputDistribution {
+  output_name: string;
   product_count: number;
 }
 
 export default function Home() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-  const [workpackageDistribution, setWorkpackageDistribution] = useState<WorkpackageDistribution[]>([]);
+  const [outputDistribution, setOutputDistribution] = useState<OutputDistribution[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function Home() {
         if (data.success) {
           setStats(data.stats);
           setRecentActivity(data.recentActivity);
-          setWorkpackageDistribution(data.workpackageDistribution);
+          setOutputDistribution(data.outputDistribution);
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -250,26 +250,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Workpackage Distribution */}
-      {workpackageDistribution.length > 0 && (
+      {/* Output Distribution */}
+      {outputDistribution.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-4">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Products by Workpackage</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Products by Output</h2>
           <div className="space-y-3">
-            {workpackageDistribution.map((wp, index) => (
+            {outputDistribution.map((output, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1">
                   <div className="w-32 text-sm font-medium text-gray-700 truncate">
-                    {wp.workpackage_name}
+                    {output.output_name}
                   </div>
                   <div className="flex-1 h-8 bg-gray-100 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 flex items-center justify-end pr-2"
                       style={{ 
-                        width: `${Math.max((wp.product_count / Math.max(...workpackageDistribution.map(w => w.product_count))) * 100, 10)}%` 
+                        width: `${Math.max((output.product_count / Math.max(...outputDistribution.map(w => w.product_count))) * 100, 10)}%` 
                       }}
                     >
                       <span className="text-xs font-semibold text-white">
-                        {wp.product_count}
+                        {output.product_count}
                       </span>
                     </div>
                   </div>
@@ -303,9 +303,9 @@ export default function Home() {
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">{activity.product_name}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-gray-500">{activity.country_name}</span>
+                          <span className="text-xs text-gray-500">{activity.organization_name}</span>
                           <span className="text-xs text-gray-400">•</span>
-                          <span className="text-xs text-gray-500">{activity.workpackage_name}</span>
+                          <span className="text-xs text-gray-500">{activity.output_name}</span>
                         </div>
                       </div>
                       <div className="text-right">

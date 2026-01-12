@@ -7,16 +7,17 @@ import TaskDetailModal from '@/components/TaskDetailModal';
 
 interface Notification {
   id: string;
+  checkin_id: number;
   task_id: number;
   product_id: number;
-  category: 'Oro Verde' | 'User' | 'Communication' | 'Gender';
+  category: string;
   category_key: string;
   checkin_date: string;
+  checkin_description?: string;
   task_name: string;
   product_name: string;
-  country_name: string;
+  organization_name: string;
   product_owner_name: string;
-  responsable_name?: string;
 }
 
 interface NotificationsModalProps {
@@ -24,12 +25,10 @@ interface NotificationsModalProps {
   onClose: () => void;
 }
 
-const categories = ['All', 'Oro Verde', 'User', 'Communication', 'Gender'] as const;
-type Category = typeof categories[number];
-
 export default function NotificationsModal({ isOpen, onClose }: NotificationsModalProps) {
-  const [activeCategory, setActiveCategory] = useState<Category>('All');
+  const [activeCategory, setActiveCategory] = useState<string>('All');
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [categories, setCategories] = useState<string[]>(['All']);
   const [loading, setLoading] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
@@ -51,6 +50,10 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
       
       if (data.success) {
         setNotifications(data.notifications);
+        
+        // Extraer categorías únicas de las notificaciones
+        const uniqueCategories = ['All', ...new Set(data.notifications.map((n: Notification) => n.category))];
+        setCategories(uniqueCategories as string[]);
       } else {
         console.error('Error fetching notifications:', data.error);
       }
@@ -125,7 +128,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
     : notifications.filter(n => n.category === activeCategory);
 
   // Contar notificaciones por categoría
-  const getCategoryCount = (cat: Category) => {
+  const getCategoryCount = (cat: string) => {
     if (cat === 'All') return notifications.length;
     return notifications.filter(n => n.category === cat).length;
   };
@@ -214,7 +217,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
                   category={notification.category}
                   date={date}
                   time={time}
-                  country={notification.country_name || 'N/A'}
+                  country={notification.organization_name || 'N/A'}
                   productOwner={notification.product_owner_name || 'N/A'}
                   taskTitle={notification.task_name}
                   productTitle={notification.product_name}

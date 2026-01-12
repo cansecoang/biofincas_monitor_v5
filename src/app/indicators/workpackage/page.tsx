@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 interface Indicator {
   indicator_id: number;
   indicator_code: string;
-  indicator_name: string;
+  indicator_description: string;
   assigned_products_count: number;
   completion_percentage: number;
 }

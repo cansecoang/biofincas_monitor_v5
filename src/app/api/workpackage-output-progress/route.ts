@@ -20,18 +20,15 @@ export async function GET(request: NextRequest) {
         SELECT 
           i.indicator_id,
           i.indicator_code,
-          i.indicator_name,
-          i.workpackage_id,
+          i.indicator_description,
           CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) as output_number
         FROM indicators i
-        WHERE i.workpackage_id = $1
       ),
       indicator_stats AS (
         SELECT 
           ai.indicator_id,
           ai.indicator_code,
-          ai.indicator_name,
-          ai.workpackage_id,
+          ai.indicator_description,
           ai.output_number,
           p.product_id,
           p.product_name,
@@ -46,25 +43,24 @@ export async function GET(request: NextRequest) {
         LEFT JOIN products p ON pi.product_id = p.product_id
         LEFT JOIN tasks t ON p.product_id = t.product_id
         LEFT JOIN status s ON t.status_id = s.status_id
-        GROUP BY ai.indicator_id, ai.indicator_code, ai.indicator_name, ai.workpackage_id, ai.output_number, p.product_id, p.product_name
+        GROUP BY ai.indicator_id, ai.indicator_code, ai.indicator_description, ai.output_number, p.product_id, p.product_name
       ),
       indicator_performance AS (
         SELECT 
           indicator_id,
           indicator_code,
-          indicator_name,
-          workpackage_id,
+          indicator_description,
           output_number,
           COUNT(DISTINCT product_id) FILTER (WHERE product_id IS NOT NULL) as assigned_products_count,
           COALESCE(ROUND(AVG(product_completion_percentage) FILTER (WHERE product_id IS NOT NULL), 0), 0) as completion_percentage
         FROM indicator_stats
-        GROUP BY indicator_id, indicator_code, indicator_name, workpackage_id, output_number
+        GROUP BY indicator_id, indicator_code, indicator_description, output_number
       )
       SELECT 
         ip.*,
         o.output_name
       FROM indicator_performance ip
-      LEFT JOIN outputs o ON ip.output_number = CAST(o.output_number AS INTEGER)
+      LEFT JOIN outputs o ON ip.output_number = o.output_number
       ORDER BY 
         ip.output_number,
         CAST(SPLIT_PART(ip.indicator_code, '.', 1) AS INTEGER),
@@ -91,7 +87,7 @@ export async function GET(request: NextRequest) {
       outputs[outputKey].indicators.push({
         indicator_id: row.indicator_id,
         indicator_code: row.indicator_code,
-        indicator_name: row.indicator_name,
+        indicator_description: row.indicator_description,
         assigned_products_count: parseInt(row.assigned_products_count),
         completion_percentage: parseFloat(row.completion_percentage)
       });
@@ -102,7 +98,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      workpackage_id: workpackageId,
       outputs: outputArray,
       total_indicators: result.rows.length
     });
