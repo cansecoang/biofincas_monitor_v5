@@ -14,46 +14,22 @@ interface ProductStepWizardProps {
 }
 
 interface ProductFormData {
-  // Step 1: General Information
   productName: string;
   productObjective: string;
   deliverable: string;
   deliveryDate: string;
   methodologyDescription: string;
-  
-  // Step 2: Location and Context
   output: string;
   productOwner: string;
-
-  
-  // Step 3: Team
   responsable: string;
   otherOrganizations: number[];
-  
-  // Step 4: Indicators
   selectedIndicators: number[];
-  
 }
 
 interface Output {
   output_id: number;
-  output_number: string;
+  output_number: number;
   output_name: string;
-}
-
-interface Workpackage {
-  workpackage_id: number;
-  workpackage_name: string;
-}
-
-interface WorkingGroup {
-  workinggroup_id: number;
-  workinggroup_name: string;
-}
-
-interface Country {
-  country_id: number;
-  country_name: string;
 }
 
 interface Organization {
@@ -96,9 +72,6 @@ export default function ProductStepWizard({
   
   // Data from APIs
   const [outputs, setOutputs] = useState<Output[]>([]);
-  const [workpackages, setWorkpackages] = useState<Workpackage[]>([]);
-  const [workingGroups, setWorkingGroups] = useState<WorkingGroup[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [productOwnerOrgs, setProductOwnerOrgs] = useState<Organization[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -122,31 +95,21 @@ export default function ProductStepWizard({
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [outputsRes, workpackagesRes, workingGroupsRes, countriesRes, orgsRes, usersRes, indicatorsRes] = await Promise.all([
+        const [outputsRes, orgsRes, usersRes, indicatorsRes] = await Promise.all([
           fetch('/api/outputs'),
-          fetch('/api/work-packages'),
-          fetch('/api/working-groups'),
-          fetch('/api/countries'),
           fetch('/api/organizations'),
           fetch('/api/users'),
           fetch('/api/indicators')
         ]);
 
         const outputsData = await outputsRes.json();
-        const workpackagesData = await workpackagesRes.json();
-        const workingGroupsData = await workingGroupsRes.json();
-        const countriesData = await countriesRes.json();
         const orgsData = await orgsRes.json();
         const usersData = await usersRes.json();
         const indicatorsData = await indicatorsRes.json();
 
         if (outputsData.success) setOutputs(outputsData.outputs);
-        if (workpackagesData.success) setWorkpackages(workpackagesData.workpackages);
-        if (workingGroupsData.workingGroups) setWorkingGroups(workingGroupsData.workingGroups);
-        if (countriesData.success) setCountries(countriesData.countries);
         if (orgsData.organizations) {
           setOrganizations(orgsData.organizations);
-          // Filter organizations with type 'M' for Product Owner dropdown
           setProductOwnerOrgs(orgsData.organizations.filter((org: Organization) => org.organization_type === 'M'));
         }
         if (usersData.success) setUsers(usersData.users);
@@ -214,24 +177,6 @@ export default function ProductStepWizard({
         ? prev.otherOrganizations.filter(id => id !== orgId)
         : [...prev.otherOrganizations, orgId]
     }));
-  };
-
-  // Distributor Organizations functions
-  const toggleDistributorOrganization = (orgId: number) => {
-   
-  };
-
-  // Distributor Others functions
-  const addDistributorOther = () => {
-   
-  };
-
-  const removeDistributorOther = (index: number) => {
-  
-  };
-
-  const updateDistributorOther = (index: number, field: 'display_name' | 'contact', value: string) => {
-    
   };
 
   const handleCreateProduct = async () => {
@@ -460,29 +405,6 @@ export default function ProductStepWizard({
                 ))}
               </select>
             </div>
-          </div>
-        )}
-
-        {/* Step 3: Team */}
-        {currentStep === 3 && (
-          <div className="space-y-6 px-1">
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Responsible
-              </label>
-              <select
-                value={formData.responsable}
-                onChange={(e) => updateFormData('responsable', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border-0 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-              >
-                <option value="">Select responsible</option>
-                {users.map((user) => (
-                  <option key={user.user_id} value={user.user_id}>
-                    {user.user_name}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-3">
@@ -519,7 +441,7 @@ export default function ProductStepWizard({
                   
                   // Filter indicators by output_number
                   const filteredIndicators = indicators.filter(indicator => 
-                    outputNumber !== undefined && indicator.output_number.toString() === outputNumber
+                    outputNumber !== undefined && indicator.output_number === outputNumber
                   );
 
                   if (filteredIndicators.length === 0) {
