@@ -2,29 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import type { PoolClient } from 'pg';
 
-// Función helper para obtener el nombre correcto de la tabla working groups
-type TableRow = { table_name: string };
-
-async function getWorkingGroupTableName(client: PoolClient): Promise<string> {
-  const tableCheck = await client.query(`
-    SELECT table_name FROM information_schema.tables 
-    WHERE table_name IN ('workinggroup', 'working_groups', 'workinggroups')
-  `);
-  
-  if (tableCheck.rows.length === 0) {
-    throw new Error('No se encontró tabla workinggroup, working_groups ni workinggroups');
-  }
-  
-  // Prioridad: workinggroups > working_groups > workinggroup
-  if (tableCheck.rows.some((row: TableRow) => row.table_name === 'workinggroups')) {
-    return 'workinggroups';
-  }
-  if (tableCheck.rows.some((row: TableRow) => row.table_name === 'working_groups')) {
-    return 'working_groups';
-  }
-  return 'workinggroup';
-}
-
 // Función helper para validar que un ID existe en una tabla
 async function validateIdExists(client: any, table: string, idColumn: string, id: number): Promise<boolean> {
   try {
@@ -61,21 +38,16 @@ export async function POST(request: NextRequest) {
       product_objective,
       deliverable,
       delivery_date,
-      product_output,
+      product_output_id,
       methodology_description,
-      gender_specific_actions,
-      next_steps,
-      workpackage_id,
-      workinggroup_id,
       product_owner_id,
       country_id,
+      responsable_id,
       
       // Relaciones
       responsibles = [],
       organizations = [],
-      indicators = [],
-      distributor_orgs = [],
-      distributor_others = []
+      indicators = []
     } = body;
 
     // ✅ VALIDACIÓN DE CAMPOS REQUERIDOS
@@ -96,39 +68,13 @@ export async function POST(request: NextRequest) {
     }
 
     // ✅ VALIDACIÓN DE IDs FORÁNEOS (verificar que existan)
-    if (workpackage_id) {
-      const wpExists = await validateIdExists(client, 'workpackages', 'workpackage_id', workpackage_id);
-      if (!wpExists) {
+    if (product_output_id) {
+      const outputExists = await validateIdExists(client, 'outputs', 'output_id', product_output_id);
+      if (!outputExists) {
         await client.query('ROLLBACK');
         return NextResponse.json({
           success: false,
-          message: `Workpackage with ID ${workpackage_id} does not exist`
-        }, { status: 400 });
-      }
-    }
-
-    if (workinggroup_id) {
-      try {
-        const wgTableName = await getWorkingGroupTableName(client);
-        console.log('Working group table name:', wgTableName);
-        console.log('Working group ID to validate:', workinggroup_id);
-        
-        const wgExists = await validateIdExists(client, wgTableName, 'workinggroup_id', workinggroup_id);
-        console.log('Working group exists:', wgExists);
-        
-        if (!wgExists) {
-          await client.query('ROLLBACK');
-          return NextResponse.json({
-            success: false,
-            message: `Working group with ID ${workinggroup_id} does not exist in table ${wgTableName}`
-          }, { status: 400 });
-        }
-      } catch (error) {
-        console.error('Error validating working group:', error);
-        await client.query('ROLLBACK');
-        return NextResponse.json({
-          success: false,
-          message: `Error validating working group: ${error instanceof Error ? error.message : 'Unknown error'}`
+          message: `Output with ID ${product_output_id} does not exist`
         }, { status: 400 });
       }
     }
@@ -155,6 +101,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (responsable_id) {
+      const userExists = await validateIdExists(client, 'users', 'user_id', responsable_id);
+      if (!userExists) {
+        await client.query('ROLLBACK');
+        return NextResponse.json({
+          success: false,
+          message: `Responsible user with ID ${responsable_id} does not exist`
+        }, { status: 400 });
+      }
+    }
+
     // ✅ VALIDACIÓN DE FECHAS
     if (delivery_date) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -169,8 +126,7 @@ export async function POST(request: NextRequest) {
 
     // ✅ VALIDACIÓN DE ARRAYS
     if (!Array.isArray(responsibles) || !Array.isArray(organizations) || 
-        !Array.isArray(indicators) || !Array.isArray(distributor_orgs) || 
-        !Array.isArray(distributor_others)) {
+        !Array.isArray(indicators)) {
       await client.query('ROLLBACK');
       return NextResponse.json({
         success: false,
@@ -185,15 +141,12 @@ export async function POST(request: NextRequest) {
         product_objective,
         deliverable,
         delivery_date,
-        product_output,
+        product_output_id,
         methodology_description,
-        gender_specific_actions,
-        next_steps,
-        workpackage_id,
-        workinggroup_id,
         product_owner_id,
-        country_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+        country_id,
+        responsable_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
       RETURNING product_id;
     `;
 
@@ -202,14 +155,11 @@ export async function POST(request: NextRequest) {
       product_objective?.trim() || null,
       deliverable?.trim() || null,
       delivery_date || null,
-      product_output || null,
+      product_output_id || null,
       methodology_description?.trim() || null,
-      gender_specific_actions?.trim() || null,
-      next_steps?.trim() || null,
-      workpackage_id || null,
-      workinggroup_id || null,
       product_owner_id || null,
-      country_id || null
+      country_id || null,
+      responsable_id || null
     ]);
 
     const productId = productResult.rows[0].product_id;
@@ -311,65 +261,6 @@ export async function POST(request: NextRequest) {
           `INSERT INTO product_indicators (product_id, indicator_id)
            VALUES ($1, $2)`,
           [productId, indicatorId]
-        );
-      }
-    }
-
-    // 5. Insertar distribuidores organizaciones (con validación)
-    if (distributor_orgs && distributor_orgs.length > 0) {
-      for (let i = 0; i < distributor_orgs.length; i++) {
-        const orgId = distributor_orgs[i];
-        
-        // Validar que sea un número
-        if (typeof orgId !== 'number') {
-          await client.query('ROLLBACK');
-          return NextResponse.json({
-            success: false,
-            message: 'Each distributor organization must be a valid number'
-          }, { status: 400 });
-        }
-
-        // Validar que la organización existe
-        const orgExists = await validateIdExists(client, 'organizations', 'organization_id', orgId);
-        if (!orgExists) {
-          await client.query('ROLLBACK');
-          return NextResponse.json({
-            success: false,
-            message: `Distributor organization with ID ${orgId} does not exist`
-          }, { status: 400 });
-        }
-
-        await client.query(
-          `INSERT INTO product_distributor_orgs (product_id, organization_id, position)
-           VALUES ($1, $2, $3)`,
-          [productId, orgId, i + 1]
-        );
-      }
-    }
-
-    // 6. Insertar otros distribuidores (con validación)
-    if (distributor_others && distributor_others.length > 0) {
-      for (let i = 0; i < distributor_others.length; i++) {
-        const other = distributor_others[i];
-        
-        // Validar estructura del objeto
-        if (!other.display_name || typeof other.display_name !== 'string' || other.display_name.trim().length === 0) {
-          await client.query('ROLLBACK');
-          return NextResponse.json({
-            success: false,
-            message: 'Each distributor other must have a valid display_name'
-          }, { status: 400 });
-        }
-
-        await client.query(
-          `INSERT INTO product_distributor_others (product_id, display_name, contact, position)
-           VALUES ($1, $2, $3, $4)`,
-          [
-            productId, 
-            other.display_name.trim(), 
-            other.contact?.trim() || null, 
-            i + 1
-          ]
         );
       }
     }

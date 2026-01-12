@@ -245,8 +245,10 @@ export default function ProductStepWizard({
         deliverable: formData.deliverable,
         delivery_date: formData.deliveryDate || null,
         methodology_description: formData.methodologyDescription || null,
-        product_output: formData.output ? parseInt(formData.output) : null,
+        product_output_id: formData.output ? parseInt(formData.output) : null,
         product_owner_id: formData.productOwner ? parseInt(formData.productOwner) : null,
+        responsable_id: formData.responsable ? parseInt(formData.responsable) : null,
+        country_id: null, // Puede agregarse si se necesita
         responsibles: formData.responsable ? [{ 
           user_id: parseInt(formData.responsable), 
           is_primary: true,
