@@ -3,19 +3,18 @@ import { pool } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const outputId = searchParams.get('outputId');
-  const workpackageId = searchParams.get('workpackageId');
-  const countryId = searchParams.get('countryId');
+  const outputNumber = searchParams.get('outputId'); // Recibe output_number (mantener nombre del parámetro por compatibilidad)
+  const organizationId = searchParams.get('organizationId');
 
   try {
-    console.log('Building matrix for:', { outputId, workpackageId, countryId });
+    console.log('Building matrix for:', { outputNumber, organizationId });
 
     // Build indicators query - only filter by output if provided
     let indicatorsQuery = `
       SELECT 
         indicator_id as id,
         indicator_code as code,
-        indicator_name as name,
+        indicator_description as name,
         CAST(SPLIT_PART(indicator_code, '.', 1) AS INTEGER) as "outputNumber"
       FROM indicators
     `;
@@ -23,9 +22,9 @@ export async function GET(request: NextRequest) {
     const indicatorsParams: any[] = [];
     let indicatorParamIndex = 1;
     
-    if (outputId) {
+    if (outputNumber) {
       indicatorsQuery += ` WHERE CAST(SPLIT_PART(indicator_code, '.', 1) AS INTEGER) = $${indicatorParamIndex}`;
-      indicatorsParams.push(outputId);
+      indicatorsParams.push(outputNumber);
       indicatorParamIndex++;
     }
     
@@ -39,61 +38,56 @@ export async function GET(request: NextRequest) {
     const indicators = indicatorsResult.rows;
     console.log('Found indicators:', indicators.length);
 
-    // Build countries query with optional filters
-    let countriesQuery = `
+    // Build organizations query with optional filters
+    let organizationsQuery = `
       SELECT DISTINCT
-        c.country_id as id,
-        c.country_name as name
-      FROM countries c
-      INNER JOIN products p ON c.country_id = p.country_id
+        o.organization_id as id,
+        o.organization_name as name
+      FROM organizations o
+      INNER JOIN product_organizations po ON o.organization_id = po.organization_id
+      INNER JOIN products p ON po.product_id = p.product_id
       INNER JOIN product_indicators pi ON p.product_id = pi.product_id
       INNER JOIN indicators i ON pi.indicator_id = i.indicator_id
     `;
     
-    const countriesParams: any[] = [];
-    let countryParamIndex = 1;
-    const countryConditions: string[] = [];
+    const organizationsParams: any[] = [];
+    let orgParamIndex = 1;
+    const orgConditions: string[] = [];
     
-    if (outputId) {
-      countryConditions.push(`CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) = $${countryParamIndex}`);
-      countriesParams.push(outputId);
-      countryParamIndex++;
+    if (outputNumber) {
+      orgConditions.push(`CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) = $${orgParamIndex}`);
+      organizationsParams.push(outputNumber);
+      orgParamIndex++;
     }
     
-    if (workpackageId) {
-      countryConditions.push(`p.workpackage_id = $${countryParamIndex}`);
-      countriesParams.push(workpackageId);
-      countryParamIndex++;
+    if (organizationId) {
+      orgConditions.push(`o.organization_id = $${orgParamIndex}`);
+      organizationsParams.push(organizationId);
+      orgParamIndex++;
     }
     
-    if (countryId) {
-      countryConditions.push(`c.country_id = $${countryParamIndex}`);
-      countriesParams.push(countryId);
-      countryParamIndex++;
+    if (orgConditions.length > 0) {
+      organizationsQuery += ` WHERE ${orgConditions.join(' AND ')}`;
     }
     
-    if (countryConditions.length > 0) {
-      countriesQuery += ` WHERE ${countryConditions.join(' AND ')}`;
-    }
+    organizationsQuery += ` ORDER BY o.organization_name`;
     
-    countriesQuery += ` ORDER BY c.country_name`;
-    
-    const countriesResult = await pool.query(countriesQuery, countriesParams);
-    const countries = countriesResult.rows;
-    console.log('Found countries:', countries.length);
+    const organizationsResult = await pool.query(organizationsQuery, organizationsParams);
+    const organizations = organizationsResult.rows;
+    console.log('Found organizations:', organizations.length);
 
     // Build products query with optional filters
     let productsQuery = `
       SELECT 
         p.product_id as id,
         p.product_name as name,
-        p.workpackage_id as "workPackageId",
         p.delivery_date as "deliveryDate",
-        p.country_id as "countryId",
+        po.organization_id as "organizationId",
         pi.indicator_id as "indicatorId",
         CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) as "outputNumber",
         org.organization_name as "productOwnerName"
       FROM products p
+      INNER JOIN product_organizations po ON p.product_id = po.product_id
       INNER JOIN product_indicators pi ON p.product_id = pi.product_id
       INNER JOIN indicators i ON pi.indicator_id = i.indicator_id
       LEFT JOIN organizations org ON p.product_owner_id = org.organization_id
@@ -103,21 +97,15 @@ export async function GET(request: NextRequest) {
     let productParamIndex = 1;
     const productConditions: string[] = [];
     
-    if (outputId) {
+    if (outputNumber) {
       productConditions.push(`CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) = $${productParamIndex}`);
-      productsParams.push(outputId);
+      productsParams.push(outputNumber);
       productParamIndex++;
     }
     
-    if (workpackageId) {
-      productConditions.push(`p.workpackage_id = $${productParamIndex}`);
-      productsParams.push(workpackageId);
-      productParamIndex++;
-    }
-    
-    if (countryId) {
-      productConditions.push(`p.country_id = $${productParamIndex}`);
-      productsParams.push(countryId);
+    if (organizationId) {
+      productConditions.push(`po.organization_id = $${productParamIndex}`);
+      productsParams.push(organizationId);
       productParamIndex++;
     }
     
@@ -137,17 +125,17 @@ export async function GET(request: NextRequest) {
     );
     console.log('Indicators with products:', indicatorsWithProducts.length, 'out of', indicators.length);
 
-    const matrix = countries.map(country => {
-      const row: any[] = [country];
+    const matrix = organizations.map(organization => {
+      const row: any[] = [organization];
       
       indicatorsWithProducts.forEach(indicator => {
         const cellProducts = products.filter(
-          p => p.countryId === country.id && p.indicatorId === indicator.id
+          p => p.organizationId === organization.id && p.indicatorId === indicator.id
         );
         
         row.push({
           indicator,
-          country,
+          organization,
           products: cellProducts
         });
       });
@@ -159,7 +147,7 @@ export async function GET(request: NextRequest) {
     const uniqueProductIds = new Set(products.map(p => p.id));
     const totalProducts = uniqueProductIds.size;
 
-    console.log('Matrix built:', countries.length, 'x', indicatorsWithProducts.length);
+    console.log('Matrix built:', organizations.length, 'x', indicatorsWithProducts.length);
     console.log('Total product-indicator relations:', products.length);
     console.log('Unique products:', totalProducts);
 

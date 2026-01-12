@@ -17,28 +17,22 @@ const productTabs = [
   
 ];
 
-interface Workpackage {
-  workpackage_id: number;
-  workpackage_name: string;
-}
-
 interface Output {
   output_id: number;
   output_number: string;
   output_name: string;
 }
 
-interface Country {
-  country_id: number;
-  country_name: string;
+interface Organization {
+  organization_id: number;
+  organization_name: string;
 }
 
 interface Product {
   product_id: number;
   product_name: string;
-  workpackage_id: number;
-  product_output: number;
-  country_name?: string;
+  product_output_id: number;
+  organization_name?: string;
   product_owner_name?: string;
   delivery_date?: string;
 }
@@ -48,14 +42,12 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [workpackages, setWorkpackages] = useState<Workpackage[]>([]);
   const [outputs, setOutputs] = useState<Output[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   
-  const [selectedWorkpackage, setSelectedWorkpackage] = useState<string>('');
   const [selectedOutput, setSelectedOutput] = useState<string>('');
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedOrganization, setSelectedOrganization] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -68,19 +60,16 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchCatalogs = async () => {
       try {
-        const [workpackagesRes, outputsRes, countriesRes] = await Promise.all([
-          fetch('/api/work-packages'),
+        const [outputsRes, organizationsRes] = await Promise.all([
           fetch('/api/outputs'),
-          fetch('/api/countries')
+          fetch('/api/organizations')
         ]);
         
-        const workpackagesData = await workpackagesRes.json();
         const outputsData = await outputsRes.json();
-        const countriesData = await countriesRes.json();
+        const organizationsData = await organizationsRes.json();
         
-        if (workpackagesData.success) setWorkpackages(workpackagesData.workpackages);
         if (outputsData.success) setOutputs(outputsData.outputs);
-        if (countriesData.success) setCountries(countriesData.countries);
+        if (organizationsData.organizations) setOrganizations(organizationsData.organizations);
       } catch (error) {
         console.error('Error loading catalogs:', error);
       }
@@ -94,7 +83,6 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
     const fetchProducts = async () => {
       try {
         const params = new URLSearchParams();
-        if (selectedWorkpackage) params.append('workpackageId', selectedWorkpackage);
         if (selectedOutput) params.append('outputId', selectedOutput);
         
         const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
@@ -110,58 +98,48 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
     };
     
     fetchProducts();
-  }, [selectedWorkpackage, selectedOutput]);
+  }, [selectedOutput]);
 
   // Sincronizar con URL params al cargar
   useEffect(() => {
-    const workpackageId = searchParams.get('workpackageId') || '';
     const outputId = searchParams.get('outputId') || '';
-    const countryId = searchParams.get('countryId') || '';
+    const organizationId = searchParams.get('organizationId') || '';
     const productId = searchParams.get('productId') || '';
     
-    setSelectedWorkpackage(workpackageId);
     setSelectedOutput(outputId);
-    setSelectedCountry(countryId);
+    setSelectedOrganization(organizationId);
     setSelectedProduct(productId);
   }, [searchParams]);
 
   // Actualizar URL manteniendo la ruta actual
-  const updateURL = (workpackageId: string, outputId: string, countryId: string, productId: string) => {
+  const updateURL = (outputId: string, organizationId: string, productId: string) => {
     const params = new URLSearchParams();
-    if (workpackageId) params.set('workpackageId', workpackageId);
     if (outputId) params.set('outputId', outputId);
-    if (countryId) params.set('countryId', countryId);
+    if (organizationId) params.set('organizationId', organizationId);
     if (productId) params.set('productId', productId);
     
     const queryString = params.toString();
     router.push(`${pathname}${queryString ? `?${queryString}` : ''}`, { scroll: false });
   };
 
-  const handleWorkpackageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setSelectedWorkpackage(value);
-    setSelectedProduct(''); // Reset product
-    updateURL(value, selectedOutput, selectedCountry, '');
-  };
-
   const handleOutputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedOutput(value);
     setSelectedProduct(''); // Reset product
-    updateURL(selectedWorkpackage, value, selectedCountry, '');
+    updateURL(value, selectedOrganization, '');
   };
 
-  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleOrganizationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    setSelectedCountry(value);
+    setSelectedOrganization(value);
     setSelectedProduct(''); // Reset product
-    updateURL(selectedWorkpackage, selectedOutput, value, '');
+    updateURL(selectedOutput, value, '');
   };
 
   const handleProductChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedProduct(value);
-    updateURL(selectedWorkpackage, selectedOutput, selectedCountry, value);
+    updateURL(selectedOutput, selectedOrganization, value);
   };
 
   // Handle Edit Product
@@ -190,7 +168,6 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
       if (result.success) {
         // Refresh products list
         const params = new URLSearchParams();
-        if (selectedWorkpackage) params.append('workpackageId', selectedWorkpackage);
         if (selectedOutput) params.append('outputId', selectedOutput);
         
         const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
@@ -200,7 +177,7 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
         if (refreshData.success) {
           setProducts(refreshData.products);
           setSelectedProduct('');
-          updateURL(selectedWorkpackage, selectedOutput, selectedCountry, '');
+          updateURL(selectedOutput, selectedOrganization, '');
         }
 
         setIsDeleteModalOpen(false);
@@ -254,7 +231,7 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
               )
             ) : selectedProductData ? (
               <span className="flex items-center gap-1">
-                <span className="font-bold">Country:</span> {selectedProductData.country_name || 'N/A'} • 
+                <span className="font-bold">Organization:</span> {selectedProductData.organization_name || 'N/A'} • 
                 <span className="font-bold ml-2">Owner:</span> {selectedProductData.product_owner_name || 'N/A'} • 
                 <span className="font-bold ml-2">Delivery:</span> {formatDate(selectedProductData.delivery_date)}
                 {selectedProduct && pathname !== '/products/matrix' && (
@@ -306,27 +283,6 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
             
           )}
 
-          {/* Workpackage Dropdown - visible in matrix, list, gantt, metrics */}
-          <div className="relative w-36">
-            <select 
-              value={selectedWorkpackage}
-              onChange={handleWorkpackageChange}
-              className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer truncate"
-            >
-              <option value="">Workpackage</option>
-              {workpackages.map((wp) => (
-                <option key={wp.workpackage_id} value={wp.workpackage_id}>
-                  {wp.workpackage_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
           {/* Output Dropdown - always visible */}
           <div className="relative w-36">
             <select 
@@ -336,7 +292,7 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
             >
               <option value="">Output</option>
               {outputs.map((output) => (
-                <option key={output.output_id} value={output.output_id}>
+                <option key={output.output_id} value={output.output_number}>
                   {output.output_name}
                 </option>
               ))}
@@ -348,18 +304,18 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          {/* Country Dropdown - visible in matrix */}
+          {/* Organization Dropdown - visible in matrix */}
           {pathname === '/products/matrix' && (
             <div className="relative w-36">
               <select 
-                value={selectedCountry}
-                onChange={handleCountryChange}
+                value={selectedOrganization}
+                onChange={handleOrganizationChange}
                 className="appearance-none w-full bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer truncate"
               >
-                <option value="">Country</option>
-                {countries.map((country) => (
-                  <option key={country.country_id} value={country.country_id}>
-                    {country.country_name}
+                <option value="">Organization</option>
+                {organizations.map((org) => (
+                  <option key={org.organization_id} value={org.organization_id}>
+                    {org.organization_name}
                   </option>
                 ))}
               </select>

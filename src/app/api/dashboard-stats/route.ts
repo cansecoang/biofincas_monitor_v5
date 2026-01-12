@@ -56,27 +56,11 @@ export async function GET() {
     // Notificaciones de check-in próximas (30 días) - cuenta cada check-in individualmente
     const notificationsQuery = `
       SELECT 
-        (COUNT(CASE 
-          WHEN t.checkin_oro_verde >= CURRENT_DATE 
-               AND t.checkin_oro_verde <= CURRENT_DATE + INTERVAL '30 days' 
-          THEN 1 
-        END) +
-        COUNT(CASE 
-          WHEN t.checkin_user >= CURRENT_DATE 
-               AND t.checkin_user <= CURRENT_DATE + INTERVAL '30 days' 
-          THEN 1 
-        END) +
-        COUNT(CASE 
-          WHEN t.checkin_communication >= CURRENT_DATE 
-               AND t.checkin_communication <= CURRENT_DATE + INTERVAL '30 days' 
-          THEN 1 
-        END) +
-        COUNT(CASE 
-          WHEN t.checkin_gender >= CURRENT_DATE 
-               AND t.checkin_gender <= CURRENT_DATE + INTERVAL '30 days' 
-          THEN 1 
-        END)) as upcoming_checkins
-      FROM tasks t
+        COUNT(DISTINCT c.checkin_id) as upcoming_checkins
+      FROM checkins c
+      INNER JOIN tasks t ON c.task_id = t.task_id
+      WHERE c.checkin_date >= CURRENT_DATE 
+        AND c.checkin_date <= CURRENT_DATE + INTERVAL '30 days'
     `;
     const notificationsResult = await pool.query(notificationsQuery);
     const notificationsStats = notificationsResult.rows[0];

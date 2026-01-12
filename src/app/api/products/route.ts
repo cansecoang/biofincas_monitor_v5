@@ -4,7 +4,7 @@ import { query } from '@/lib/db';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const outputId = searchParams.get('outputId');
+    const outputNumber = searchParams.get('outputId'); // Mantener nombre del parámetro por compatibilidad
 
     let queryText = `
       SELECT 
@@ -27,9 +27,9 @@ export async function GET(request: Request) {
     const params: any[] = [];
     let paramCount = 1;
 
-    if (outputId) {
-      queryText += ` AND p.product_output_id = $${paramCount}`;
-      params.push(parseInt(outputId));
+    if (outputNumber) {
+      queryText += ` AND o.output_number = $${paramCount}`;
+      params.push(parseInt(outputNumber));
       paramCount++;
     }
 

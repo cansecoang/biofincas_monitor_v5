@@ -45,7 +45,7 @@ function MatrixSkeleton() {
   );
 }
 
-interface Country {
+interface Organization {
   id: number;
   name: string;
 }
@@ -53,7 +53,6 @@ interface Country {
 interface Product {
   id: number;
   name: string;
-  workPackageId: number;
   outputNumber: number;
   deliveryDate?: string;
   productOwnerName?: string;
@@ -68,13 +67,13 @@ interface Indicator {
 
 interface MatrixCell {
   indicator: Indicator;
-  country: Country;
+  organization: Organization;
   products: Product[];
 }
 
 interface MatrixData {
   indicators: Indicator[];
-  matrix: (Country | MatrixCell)[][];
+  matrix: (Organization | MatrixCell)[][];
   totalProducts: number;
 }
 
@@ -115,7 +114,7 @@ export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProp
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">
-                    Country
+                    Organization
                   </th>
                   {matrixData.indicators.map((indicator: Indicator) => {
                     console.log('📊 Rendering indicator header:', indicator.code);
@@ -132,23 +131,23 @@ export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProp
                 </tr>
               </thead>
               <tbody>
-                {matrixData.matrix.map((row: (Country | MatrixCell)[], rowIndex: number) => {
-                  const country = row[0] as Country;
+                {matrixData.matrix.map((row: (Organization | MatrixCell)[], rowIndex: number) => {
+                  const organization = row[0] as Organization;
                   const cells = row.slice(1) as MatrixCell[];
                   
-                  console.log(`🌍 Rendering row ${rowIndex}:`, country.name, 'with', cells.length, 'cells');
+                  console.log(`📋 Rendering row ${rowIndex}:`, organization.name, 'with', cells.length, 'cells');
                   return (
-                    <tr key={`country-${country.id}-${rowIndex}`} className="hover:bg-gray-50">
+                    <tr key={`organization-${organization.id}-${rowIndex}`} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium text-gray-900 border-b bg-gray-25">
-                        {country.name}
+                        {organization.name}
                       </td>
                       {cells.map((cell, cellIndex) => (
-                        <td key={`cell-${country.id}-${cell.indicator.id}-${cellIndex}`} className="px-4 py-3 border-b align-top">
+                        <td key={`cell-${organization.id}-${cell.indicator.id}-${cellIndex}`} className="px-4 py-3 border-b align-top">
                           {cell.products.length > 0 ? (
                             <div className="space-y-2">
                               {cell.products.map((product) => (
                                 <div 
-                                  key={`product-${product.id}-${country.id}-${cell.indicator.id}`} 
+                                  key={`product-${product.id}-${organization.id}-${cell.indicator.id}`} 
                                   className="p-3 bg-blue-50 rounded text-sm cursor-pointer hover:bg-blue-100 hover:shadow-sm transition-all duration-200 border-l-4 border-blue-400"
                                   onClick={() => handleProductClick(product.id)}
                                 >
@@ -157,8 +156,8 @@ export function ProductMatrix({ matrixData, isLoadingMatrix }: ProductMatrixProp
                                   </div>
                                   <div className="space-y-1">
                                     <div className="flex items-center text-xs text-gray-600">
-                                      <span className="font-bold mr-1">Country:</span>
-                                      <span>{country.name}</span>
+                                      <span className="font-bold mr-1">Organization:</span>
+                                      <span>{organization.name}</span>
                                     </div>
                                     {product.productOwnerName && (
                                       <div className="flex items-center text-xs text-gray-600">

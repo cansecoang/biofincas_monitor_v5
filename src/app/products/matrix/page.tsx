@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from 'next/navigation';
 import { ProductMatrix } from "@/components/product-matrix";
 
-interface Country {
+interface Organization {
   id: number;
   name: string;
 }
@@ -12,7 +12,6 @@ interface Country {
 interface Product {
   id: number;
   name: string;
-  workPackageId: number;
   outputNumber: number;
   deliveryDate?: string;
   productOwnerName?: string;
@@ -27,13 +26,13 @@ interface Indicator {
 
 interface MatrixCell {
   indicator: Indicator;
-  country: Country;
+  organization: Organization;
   products: Product[];
 }
 
 interface MatrixData {
   indicators: Indicator[];
-  matrix: (Country | MatrixCell)[][];
+  matrix: (Organization | MatrixCell)[][];
   totalProducts: number;
 }
 
@@ -48,8 +47,7 @@ export default function MatrixPage() {
 function MatrixContent() {
   const searchParams = useSearchParams();
   const [selectedOutput, setSelectedOutput] = useState<string | null>(null);
-  const [selectedWorkpackage, setSelectedWorkpackage] = useState<string | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null);
   const [matrixData, setMatrixData] = useState<MatrixData | null>(null);
   const [isLoadingMatrix, setIsLoadingMatrix] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,18 +55,16 @@ function MatrixContent() {
   // Read parameters from URL
   useEffect(() => {
     const urlOutput = searchParams.get('outputId');
-    const urlWorkpackage = searchParams.get('workpackageId');
-    const urlCountry = searchParams.get('countryId');
+    const urlOrganization = searchParams.get('organizationId');
     
     setSelectedOutput(urlOutput);
-    setSelectedWorkpackage(urlWorkpackage);
-    setSelectedCountry(urlCountry);
+    setSelectedOrganization(urlOrganization);
   }, [searchParams]);
 
   // Fetch matrix data when any filter changes
   useEffect(() => {
     // Only fetch if at least one filter is selected
-    if (!selectedOutput && !selectedWorkpackage && !selectedCountry) {
+    if (!selectedOutput && !selectedOrganization) {
       // Fetch all data when no filters are selected
       const fetchAllData = async () => {
         setIsLoadingMatrix(true);
@@ -106,12 +102,11 @@ function MatrixContent() {
         // Build URL with filters
         const params = new URLSearchParams();
         if (selectedOutput) params.set('outputId', selectedOutput);
-        if (selectedWorkpackage) params.set('workpackageId', selectedWorkpackage);
-        if (selectedCountry) params.set('countryId', selectedCountry);
+        if (selectedOrganization) params.set('organizationId', selectedOrganization);
         
         const url = `/api/product-matrix?${params.toString()}`;
         
-        console.log(`🔍 Fetching matrix:`, { selectedOutput, selectedWorkpackage, selectedCountry });
+        console.log(`🔍 Fetching matrix:`, { selectedOutput, selectedOrganization });
         const response = await fetch(url);
         
         console.log(`📡 Response status: ${response.status}`);
@@ -144,7 +139,7 @@ function MatrixContent() {
     };
 
     fetchMatrixData();
-  }, [selectedOutput, selectedWorkpackage, selectedCountry]);
+  }, [selectedOutput, selectedOrganization]);
 
   return (
     <div className="min-h-screen bg-gray-50">
