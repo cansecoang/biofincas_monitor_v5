@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  // LOGIN DESACTIVADO - Permitir acceso a todas las rutas
+  return NextResponse.next();
+  
+  /* CÓDIGO DE AUTENTICACIÓN COMENTADO
   const sessionToken = request.cookies.get('session_token')?.value;
   const { pathname } = request.nextUrl;
 
@@ -32,6 +36,7 @@ export function middleware(request: NextRequest) {
 
   // Si hay token, permitir acceso
   return NextResponse.next();
+  */
 }
 
 export const config = {

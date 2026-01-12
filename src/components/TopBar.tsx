@@ -157,14 +157,14 @@ function TopBarContent() {
           <Link href="/" className="flex items-center cursor-pointer hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 relative">
               <Image 
-                src="/biofincas.png" 
-                alt="Biofincas Logo" 
+                src="/DigiDeFree_FullColor.png" 
+                alt="DigiDeeFree Logo" 
                 width={30}
                 height={30}
                 className="object-contain"
               />
             </div>
-            <h1 className="text-s font-semibold text-gray-900">Biofincas</h1>
+            <h1 className="text-s font-semibold text-gray-900">DigiDeeFree</h1>
           </Link>
 
           {/* Tabs Section - Rendered dynamically */}

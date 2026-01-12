@@ -6,7 +6,7 @@ import { Toaster } from "sonner";
 import ConditionalLayout from "@/components/ConditionalLayout";
 
 export const metadata: Metadata = {
-  title: "Biofincas - Product Report",
+  title: "DigiDeeFree - Product Report",
   description: "Product Report MVP - Management System",
 };
 

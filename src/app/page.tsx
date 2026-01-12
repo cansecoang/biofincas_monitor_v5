@@ -143,7 +143,7 @@ export default function Home() {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome to Biofincas! | Project Dashboard
+            Welcome to DigiDeeFree! | Project Dashboard
           </h1>
           <p className="text-gray-600">
             Monitoring & Performance Overview
