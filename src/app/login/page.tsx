@@ -60,7 +60,7 @@ function LoginForm() {
           </svg>
         </div>
         <div className="z-10 flex flex-col items-start px-16">
-          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Biofincas</h1>
+          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">DigiDeeFree</h1>
           <p className="text-lg text-blue-100 mb-6">Monitoring & Performance Dashboard</p>
          
         </div>
