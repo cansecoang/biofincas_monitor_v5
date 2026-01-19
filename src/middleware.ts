@@ -2,15 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // LOGIN DESACTIVADO - Permitir acceso a todas las rutas
-  return NextResponse.next();
-  
-  /* CÓDIGO DE AUTENTICACIÓN COMENTADO
   const sessionToken = request.cookies.get('session_token')?.value;
   const { pathname } = request.nextUrl;
 
   // Rutas públicas que no requieren autenticación
-  const publicPaths = ['/login'];
+  const publicPaths = ['/login', '/api/auth/login'];
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
 
   // Si es una ruta pública, permitir acceso
@@ -36,7 +32,6 @@ export function middleware(request: NextRequest) {
 
   // Si hay token, permitir acceso
   return NextResponse.next();
-  */
 }
 
 export const config = {

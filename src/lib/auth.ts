@@ -31,17 +31,15 @@ export async function requireAuth(
       );
     }
     
-    // Verify session and get user with role
+    // Verify session and get user
     const sessionQuery = `
       SELECT 
         u.user_id,
         u.user_name,
         u.user_email,
-        r.role_name as role,
         s.expires_at
       FROM user_sessions s
       JOIN users u ON u.user_id = s.user_id
-      LEFT JOIN roles r ON r.role_id = u.role_id
       WHERE s.session_token = $1
         AND s.expires_at > CURRENT_TIMESTAMP
     `;
@@ -56,6 +54,9 @@ export async function requireAuth(
     }
     
     const user = result.rows[0] as UserWithRole;
+    
+    // Asignar rol por defecto sin sistema RBAC
+    user.role = 'user' as Role;
     
     // Update last accessed time
     await pool.query(
