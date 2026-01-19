@@ -29,8 +29,10 @@ function TopBarContent() {
   const [selectedIndicator, setSelectedIndicator] = useState<IndicatorPerformance | undefined>(undefined);
   const [isIndicatorModalOpen, setIsIndicatorModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const projectMenuRef = useRef<HTMLDivElement>(null);
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -45,6 +47,9 @@ function TopBarContent() {
       }
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false);
+      }
+      if (projectMenuRef.current && !projectMenuRef.current.contains(event.target as Node)) {
+        setIsProjectMenuOpen(false);
       }
     }
 
@@ -154,18 +159,65 @@ function TopBarContent() {
         {/* Site ID / Brand */}
         <div className="flex items-center gap-3">
 
-          <Link href="/" className="flex items-center cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 relative">
-              <Image 
-                src="/DigiDeFree_FullColor.png" 
-                alt="DigiDeeFree Logo" 
-                width={30}
-                height={30}
-                className="object-contain"
+          {/* Project Selector Dropdown */}
+          <div className="relative" ref={projectMenuRef}>
+            <button
+              onClick={() => setIsProjectMenuOpen(!isProjectMenuOpen)}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <div className="w-8 h-8 relative">
+                <Image 
+                  src="/DigiDeFree_FullColor.png" 
+                  alt="DigiDeeFree Logo" 
+                  width={30}
+                  height={30}
+                  className="object-contain"
+                />
+              </div>
+              <h1 className="text-sm font-semibold text-gray-900">DigiDeeFree</h1>
+              <ChevronDown 
+                size={14} 
+                className={`text-gray-500 transition-transform ${
+                  isProjectMenuOpen ? 'rotate-180' : ''
+                }`}
               />
-            </div>
-            <h1 className="text-s font-semibold text-gray-900">DigiDeeFree</h1>
-          </Link>
+            </button>
+
+            {/* Dropdown Menu */}
+            {isProjectMenuOpen && (
+              <div className="absolute left-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
+                <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Switch Project
+                </div>
+                
+                {/* Biofincas */}
+                <a
+                  href="https://biofincas-monitor-v5.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors"
+                  onClick={() => setIsProjectMenuOpen(false)}
+                >
+                  <div className="w-10 h-10 rounded-lg p-1.5 flex items-center justify-center flex-shrink-0">
+                    <Image 
+                      src="/biofincas.png" 
+                      alt="Biofincas Logo" 
+                      width={32}
+                      height={32}
+                      className="object-contain"
+                    />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-gray-900">Biofincas</p>
+                    <p className="text-xs text-gray-500">Monitoring Dashboard</p>
+                  </div>
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
+            )}
+          </div>
 
           {/* Tabs Section - Rendered dynamically */}
       {mounted && tabs.length > 0 && (
