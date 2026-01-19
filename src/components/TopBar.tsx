@@ -193,7 +193,6 @@ function TopBarContent() {
                 {/* Biofincas */}
                 <a
                   href="https://biofincas-monitor-v5.vercel.app/"
-                  
                   rel="noopener noreferrer"
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors"
                   onClick={() => setIsProjectMenuOpen(false)}
