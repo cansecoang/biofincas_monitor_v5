@@ -20,6 +20,7 @@ export async function GET() {
       const result = await client.query(query);
       
       return NextResponse.json({
+        success: true,
         organizations: result.rows
       });
       

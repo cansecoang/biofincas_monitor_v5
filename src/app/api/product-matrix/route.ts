@@ -6,9 +6,10 @@ export async function GET(request: NextRequest) {
   const outputId = searchParams.get('outputId');
   const workpackageId = searchParams.get('workpackageId');
   const countryId = searchParams.get('countryId');
+  const organizationId = searchParams.get('organizationId');
 
   try {
-    console.log('Building matrix for:', { outputId, workpackageId, countryId });
+    console.log('Building matrix for:', { outputId, workpackageId, countryId, organizationId });
 
     // Build indicators query - only filter by output if provided
     let indicatorsQuery = `
@@ -72,6 +73,12 @@ export async function GET(request: NextRequest) {
       countryParamIndex++;
     }
     
+    if (organizationId) {
+      countryConditions.push(`p.product_owner_id = $${countryParamIndex}`);
+      countriesParams.push(organizationId);
+      countryParamIndex++;
+    }
+    
     if (countryConditions.length > 0) {
       countriesQuery += ` WHERE ${countryConditions.join(' AND ')}`;
     }
@@ -118,6 +125,12 @@ export async function GET(request: NextRequest) {
     if (countryId) {
       productConditions.push(`p.country_id = $${productParamIndex}`);
       productsParams.push(countryId);
+      productParamIndex++;
+    }
+    
+    if (organizationId) {
+      productConditions.push(`p.product_owner_id = $${productParamIndex}`);
+      productsParams.push(organizationId);
       productParamIndex++;
     }
     

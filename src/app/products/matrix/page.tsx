@@ -50,6 +50,7 @@ function MatrixContent() {
   const [selectedOutput, setSelectedOutput] = useState<string | null>(null);
   const [selectedWorkpackage, setSelectedWorkpackage] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null);
   const [matrixData, setMatrixData] = useState<MatrixData | null>(null);
   const [isLoadingMatrix, setIsLoadingMatrix] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,16 +60,18 @@ function MatrixContent() {
     const urlOutput = searchParams.get('outputId');
     const urlWorkpackage = searchParams.get('workpackageId');
     const urlCountry = searchParams.get('countryId');
+    const urlOrganization = searchParams.get('organizationId');
     
     setSelectedOutput(urlOutput);
     setSelectedWorkpackage(urlWorkpackage);
     setSelectedCountry(urlCountry);
+    setSelectedOrganization(urlOrganization);
   }, [searchParams]);
 
   // Fetch matrix data when any filter changes
   useEffect(() => {
     // Only fetch if at least one filter is selected
-    if (!selectedOutput && !selectedWorkpackage && !selectedCountry) {
+    if (!selectedOutput && !selectedWorkpackage && !selectedCountry && !selectedOrganization) {
       // Fetch all data when no filters are selected
       const fetchAllData = async () => {
         setIsLoadingMatrix(true);
@@ -108,10 +111,11 @@ function MatrixContent() {
         if (selectedOutput) params.set('outputId', selectedOutput);
         if (selectedWorkpackage) params.set('workpackageId', selectedWorkpackage);
         if (selectedCountry) params.set('countryId', selectedCountry);
+        if (selectedOrganization) params.set('organizationId', selectedOrganization);
         
         const url = `/api/product-matrix?${params.toString()}`;
         
-        console.log(`🔍 Fetching matrix:`, { selectedOutput, selectedWorkpackage, selectedCountry });
+        console.log(`🔍 Fetching matrix:`, { selectedOutput, selectedWorkpackage, selectedCountry, selectedOrganization });
         const response = await fetch(url);
         
         console.log(`📡 Response status: ${response.status}`);
@@ -144,7 +148,7 @@ function MatrixContent() {
     };
 
     fetchMatrixData();
-  }, [selectedOutput, selectedWorkpackage, selectedCountry]);
+  }, [selectedOutput, selectedWorkpackage, selectedCountry, selectedOrganization]);
 
   return (
     <div className="min-h-screen bg-gray-50">
