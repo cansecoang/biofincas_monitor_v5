@@ -73,53 +73,12 @@ export async function GET(request: Request) {
       ORDER BY COALESCE(po.position, 32767), o.organization_name
     `;
 
-    // Get distributor organizations
-    const distributorOrgsQuery = `
-      SELECT 
-        o.organization_id,
-        o.organization_name,
-        o.organization_description,
-        d.position
-      FROM product_distributor_orgs d
-      JOIN organizations o ON o.organization_id = d.organization_id
-      WHERE d.product_id = $1
-      ORDER BY COALESCE(d.position, 32767), o.organization_name
-    `;
-
-    // Get distributor users
-    const distributorUsersQuery = `
-      SELECT 
-        u.user_id,
-        u.user_name,
-        u.user_last_name,
-        u.user_email,
-        d.position
-      FROM product_distributor_users d
-      JOIN users u ON u.user_id = d.user_id
-      WHERE d.product_id = $1
-      ORDER BY COALESCE(d.position, 32767), u.user_name
-    `;
-
-    // Get other distributors
-    const distributorOthersQuery = `
-      SELECT 
-        display_name,
-        contact,
-        position
-      FROM product_distributor_others
-      WHERE product_id = $1
-      ORDER BY COALESCE(position, 32767), display_name
-    `;
-
-    // Execute queries - handle them separately to avoid all failing if one fails
+    // Execute queries
     const productResult = await pool.query(productQuery, [productId]);
     
     let responsiblesResult = { rows: [] };
     let indicatorsResult = { rows: [] };
     let organizationsResult = { rows: [] };
-    let distributorOrgsResult = { rows: [] };
-    let distributorUsersResult = { rows: [] };
-    let distributorOthersResult = { rows: [] };
     
     try {
       responsiblesResult = await pool.query(responsiblesQuery, [productId]);
@@ -137,24 +96,6 @@ export async function GET(request: Request) {
       organizationsResult = await pool.query(organizationsQuery, [productId]);
     } catch (error) {
       console.warn('Could not fetch organizations:', error);
-    }
-
-    try {
-      distributorOrgsResult = await pool.query(distributorOrgsQuery, [productId]);
-    } catch (error) {
-      console.warn('Could not fetch distributor orgs:', error);
-    }
-
-    try {
-      distributorUsersResult = await pool.query(distributorUsersQuery, [productId]);
-    } catch (error) {
-      console.warn('Could not fetch distributor users:', error);
-    }
-
-    try {
-      distributorOthersResult = await pool.query(distributorOthersQuery, [productId]);
-    } catch (error) {
-      console.warn('Could not fetch distributor others:', error);
     }
 
     const product = productResult.rows[0];
@@ -187,11 +128,11 @@ export async function GET(request: Request) {
       responsibles: responsiblesResult.rows,
       // Related indicators
       indicators: indicatorsResult.rows,
-      // Distributors section
+      // Distributors section - keeping empty arrays for backward compatibility
       distributors: {
-        organizations: distributorOrgsResult.rows,
-        users: distributorUsersResult.rows,
-        others: distributorOthersResult.rows
+        organizations: [],
+        users: [],
+        others: []
       }
     });
 

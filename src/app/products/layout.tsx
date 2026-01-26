@@ -225,7 +225,7 @@ function ProductsLayoutContent({ children }: { children: ReactNode }) {
           <p className="text-gray-600 text-base">
             {pathname === '/products/matrix' ? (
               selectedOutput ? (
-                'Products organized by country and indicator'
+                'Products organized by organization and indicator'
               ) : (
                 'Select an output to view the product matrix'
               )

@@ -203,7 +203,7 @@ export default function ProductStepWizard({
           relation_type: 'collaborator',
           position: index + 1
         })),
-        indicators: formData.selectedIndicators,
+        indicators: formData.selectedIndicators
       };
 
       const endpoint = editMode ? '/api/update-product' : '/api/add-product';

@@ -15,29 +15,6 @@ async function validateIdExists(
   return result.rows.length > 0;
 }
 
-// Helper function to get working group table name
-async function getWorkingGroupTableName(client: any): Promise<string> {
-  const possibleNames = ['workinggroups', 'working_groups', 'workinggroup'];
-  
-  for (const tableName of possibleNames) {
-    try {
-      const result = await client.query(
-        `SELECT table_name FROM information_schema.tables 
-         WHERE table_schema = 'public' AND table_name = $1`,
-        [tableName]
-      );
-      if (result.rows.length > 0) {
-        console.log(`✓ Found working group table: ${tableName}`);
-        return tableName;
-      }
-    } catch (error) {
-      continue;
-    }
-  }
-  
-  throw new Error('Working group table not found');
-}
-
 export async function PUT(request: NextRequest) {
   const client = await pool.connect();
 
@@ -52,18 +29,12 @@ export async function PUT(request: NextRequest) {
       deliverable,
       delivery_date,
       methodology_description,
-      gender_specific_actions,
-      next_steps,
-      product_output,
-      workpackage_id,
-      workinggroup_id,
+      product_output_id,
       product_owner_id,
       country_id,
       responsibles = [],
       organizations = [],
-      indicators = [],
-      distributor_orgs = [],
-      distributor_others = []
+      indicators = []
     } = body;
 
     // Validación: product_id es requerido
@@ -96,22 +67,11 @@ export async function PUT(request: NextRequest) {
     }
 
     // Validaciones de foreign keys
-    if (workpackage_id) {
-      const wpExists = await validateIdExists(client, 'workpackages', 'workpackage_id', workpackage_id);
-      if (!wpExists) {
+    if (product_output_id) {
+      const outputExists = await validateIdExists(client, 'outputs', 'output_id', product_output_id);
+      if (!outputExists) {
         return NextResponse.json(
-          { error: `Workpackage with ID ${workpackage_id} does not exist` },
-          { status: 400 }
-        );
-      }
-    }
-
-    if (workinggroup_id) {
-      const wgTableName = await getWorkingGroupTableName(client);
-      const wgExists = await validateIdExists(client, wgTableName, 'workinggroup_id', workinggroup_id);
-      if (!wgExists) {
-        return NextResponse.json(
-          { error: `Working group with ID ${workinggroup_id} does not exist` },
+          { error: `Output with ID ${product_output_id} does not exist` },
           { status: 400 }
         );
       }
@@ -151,15 +111,11 @@ export async function PUT(request: NextRequest) {
         deliverable = $3,
         delivery_date = $4,
         methodology_description = $5,
-        gender_specific_actions = $6,
-        next_steps = $7,
-        product_output = $8,
-        workpackage_id = $9,
-        workinggroup_id = $10,
-        product_owner_id = $11,
-        country_id = $12,
+        product_output_id = $6,
+        product_owner_id = $7,
+        country_id = $8,
         updated_at = CURRENT_TIMESTAMP
-      WHERE product_id = $13
+      WHERE product_id = $9
       RETURNING product_id
     `;
 
@@ -169,11 +125,7 @@ export async function PUT(request: NextRequest) {
       deliverable || null,
       delivery_date || null,
       methodology_description || null,
-      gender_specific_actions || null,
-      next_steps || null,
-      product_output || null,
-      workpackage_id || null,
-      workinggroup_id || null,
+      product_output_id || null,
       product_owner_id || null,
       country_id || null,
       product_id
@@ -265,59 +217,6 @@ export async function PUT(request: NextRequest) {
         );
       }
       console.log(`   ✓ Updated ${indicators.length} indicators`);
-    }
-
-    // 5. Eliminar y recrear distributor organizations
-    await client.query('DELETE FROM product_distributor_orgs WHERE product_id = $1', [product_id]);
-    
-    if (distributor_orgs && distributor_orgs.length > 0) {
-      for (let i = 0; i < distributor_orgs.length; i++) {
-        const orgId = distributor_orgs[i];
-        
-        // Validar que sea un número
-        if (typeof orgId !== 'number') {
-          throw new Error('Each distributor organization must be a valid number');
-        }
-
-        // Validar que la organización existe
-        const orgExists = await validateIdExists(client, 'organizations', 'organization_id', orgId);
-        if (!orgExists) {
-          throw new Error(`Distributor organization with ID ${orgId} does not exist`);
-        }
-
-        await client.query(
-          `INSERT INTO product_distributor_orgs (product_id, organization_id, position)
-           VALUES ($1, $2, $3)`,
-          [product_id, orgId, i + 1]
-        );
-      }
-      console.log(`   ✓ Updated ${distributor_orgs.length} distributor organizations`);
-    }
-
-    // 6. Eliminar y recrear distributor others
-    await client.query('DELETE FROM product_distributor_others WHERE product_id = $1', [product_id]);
-    
-    if (distributor_others && distributor_others.length > 0) {
-      for (let i = 0; i < distributor_others.length; i++) {
-        const other = distributor_others[i];
-        
-        // Validar estructura del objeto
-        if (!other.display_name || typeof other.display_name !== 'string' || other.display_name.trim().length === 0) {
-          throw new Error('Each distributor other must have a valid display_name');
-        }
-
-        await client.query(
-          `INSERT INTO product_distributor_others (product_id, display_name, contact, position)
-           VALUES ($1, $2, $3, $4)`,
-          [
-            product_id, 
-            other.display_name.trim(), 
-            other.contact?.trim() || null, 
-            i + 1
-          ]
-        );
-      }
-      console.log(`   ✓ Updated ${distributor_others.length} other distributors`);
     }
 
     // Commit de la transacción

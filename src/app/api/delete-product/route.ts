@@ -69,28 +69,7 @@ export async function DELETE(request: NextRequest) {
     );
     console.log(`   ✓ Deleted ${indicatorsResult.rowCount} product_indicators`);
 
-    // 5. Borrar distribuidores - organizaciones
-    const distOrgsResult = await client.query(
-      'DELETE FROM product_distributor_orgs WHERE product_id = $1',
-      [productIdNum]
-    );
-    console.log(`   ✓ Deleted ${distOrgsResult.rowCount} product_distributor_orgs`);
-
-    // 6. Borrar distribuidores - usuarios
-    const distUsersResult = await client.query(
-      'DELETE FROM product_distributor_users WHERE product_id = $1',
-      [productIdNum]
-    );
-    console.log(`   ✓ Deleted ${distUsersResult.rowCount} product_distributor_users`);
-
-    // 7. Borrar distribuidores - otros
-    const distOthersResult = await client.query(
-      'DELETE FROM product_distributor_others WHERE product_id = $1',
-      [productIdNum]
-    );
-    console.log(`   ✓ Deleted ${distOthersResult.rowCount} product_distributor_others`);
-
-    // 8. Finalmente, borrar el producto
+    // 5. Finalmente, borrar el producto
     const productResult = await client.query(
       'DELETE FROM products WHERE product_id = $1',
       [productIdNum]
@@ -110,9 +89,6 @@ export async function DELETE(request: NextRequest) {
         responsibles: responsiblesResult.rowCount,
         organizations: orgsResult.rowCount,
         indicators: indicatorsResult.rowCount,
-        distributorOrgs: distOrgsResult.rowCount,
-        distributorUsers: distUsersResult.rowCount,
-        distributorOthers: distOthersResult.rowCount,
         product: productResult.rowCount
       }
     });
