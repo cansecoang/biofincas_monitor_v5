@@ -39,35 +39,32 @@ export async function GET(request: NextRequest) {
     console.log('Found indicators:', indicators.length);
 
     // Build organizations query with optional filters
+    // Use product_owner_id instead of product_organizations for getting organizations
     let organizationsQuery = `
       SELECT DISTINCT
         o.organization_id as id,
         o.organization_name as name
       FROM organizations o
-      INNER JOIN product_organizations po ON o.organization_id = po.organization_id
-      INNER JOIN products p ON po.product_id = p.product_id
-      INNER JOIN product_indicators pi ON p.product_id = pi.product_id
-      INNER JOIN indicators i ON pi.indicator_id = i.indicator_id
+      WHERE EXISTS (
+        SELECT 1 FROM products p
+        WHERE p.product_owner_id = o.organization_id
+        ${outputNumber ? `AND EXISTS (
+          SELECT 1 FROM product_indicators pi
+          INNER JOIN indicators i ON pi.indicator_id = i.indicator_id
+          WHERE pi.product_id = p.product_id
+          AND CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) = $1
+        )` : ''}
+      )
     `;
     
     const organizationsParams: any[] = [];
-    let orgParamIndex = 1;
-    const orgConditions: string[] = [];
-    
     if (outputNumber) {
-      orgConditions.push(`CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) = $${orgParamIndex}`);
       organizationsParams.push(outputNumber);
-      orgParamIndex++;
     }
     
     if (organizationId) {
-      orgConditions.push(`o.organization_id = $${orgParamIndex}`);
+      organizationsQuery += ` AND o.organization_id = $${organizationsParams.length + 1}`;
       organizationsParams.push(organizationId);
-      orgParamIndex++;
-    }
-    
-    if (orgConditions.length > 0) {
-      organizationsQuery += ` WHERE ${orgConditions.join(' AND ')}`;
     }
     
     organizationsQuery += ` ORDER BY o.organization_name`;
@@ -77,19 +74,19 @@ export async function GET(request: NextRequest) {
     console.log('Found organizations:', organizations.length);
 
     // Build products query with optional filters
+    // Use product_owner_id as the organization reference (not product_organizations)
     let productsQuery = `
       SELECT 
         p.product_id as id,
         p.product_name as name,
         p.delivery_date as "deliveryDate",
-        po.organization_id as "organizationId",
+        p.product_owner_id as "organizationId",
         pi.indicator_id as "indicatorId",
         CAST(SPLIT_PART(i.indicator_code, '.', 1) AS INTEGER) as "outputNumber",
         org.organization_name as "productOwnerName"
       FROM products p
-      INNER JOIN product_organizations po ON p.product_id = po.product_id
-      INNER JOIN product_indicators pi ON p.product_id = pi.product_id
-      INNER JOIN indicators i ON pi.indicator_id = i.indicator_id
+      LEFT JOIN product_indicators pi ON p.product_id = pi.product_id
+      LEFT JOIN indicators i ON pi.indicator_id = i.indicator_id
       LEFT JOIN organizations org ON p.product_owner_id = org.organization_id
     `;
     
@@ -104,7 +101,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (organizationId) {
-      productConditions.push(`po.organization_id = $${productParamIndex}`);
+      productConditions.push(`p.product_owner_id = $${productParamIndex}`);
       productsParams.push(organizationId);
       productParamIndex++;
     }
